@@ -184,11 +184,22 @@ final class PlayerController {
         currentToken = -1
         ticker?.cancel()
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+        app?.local.keepAccess(for: [])
+    }
+
+    /// Security-scoped Zugriff nur für die Ordner des laufenden und des nächsten Titels offen halten.
+    private func syncLocalAccess(next: Song? = nil) {
+        app?.local.keepAccess(for: [queue.current?.song, next].compactMap { $0 })
     }
 
     // MARK: Laden und Vorladen
 
     private func localFile(for song: Song) async throws -> URL {
+        // Musik auf diesem iPhone: Originaldatei über das Bookmark (Zugriff bleibt offen, solange gebraucht)
+        if song.isLocal {
+            guard let local = app?.local else { throw LocalError.missing }
+            return try local.fileURL(for: song)
+        }
         if let f = app?.downloads.localFile(song.id) { return f }
         guard let client else { throw URLError(.notConnectedToInternet) }
         return try await TrackCache.shared.file(for: song, client: client)
@@ -243,6 +254,7 @@ final class PlayerController {
 
     private func schedulePreload() {
         preloadTask?.cancel()
+        syncLocalAccess(next: queue.peekNext()?.song)
         guard currentToken >= 0, let next = queue.peekNext() else {
             engine.setNext(url: nil, token: -1)
             return
@@ -263,7 +275,7 @@ final class PlayerController {
         updateNowPlaying()
         schedulePreload()
         saveQueue()
-        if let song = queue.current?.song, let client {
+        if let song = queue.current?.song, !song.isLocal, let client {
             Task { try? await client.scrobble(id: song.id, submission: false) }
         }
     }
@@ -327,7 +339,7 @@ final class PlayerController {
         guard scrobbledToken != currentToken, let song = queue.current?.song, duration > 0 else { return }
         if position >= min(duration / 2, 240) {
             scrobbledToken = currentToken
-            if let client { Task { try? await client.scrobble(id: song.id, submission: true) } }
+            if !song.isLocal, let client { Task { try? await client.scrobble(id: song.id, submission: true) } }
         }
     }
 
@@ -350,11 +362,12 @@ final class PlayerController {
         ]
         if artworkFor == song.coverArt, let art = nowPlayingArtwork {
             info[MPMediaItemPropertyArtwork] = art
-        } else if let cover = song.coverArt, let client {
+        } else if let cover = song.coverArt, client != nil || cover.isLocalID {
             artworkFor = cover
             nowPlayingArtwork = nil
+            let client = client
             Task {
-                guard let img = await ArtworkCache.shared.image(id: cover, size: 600, client: client), artworkFor == cover else { return }
+                guard let img = await Artwork.image(id: cover, size: 600, client: client), artworkFor == cover else { return }
                 nowPlayingArtwork = Self.makeArtwork(img)
                 updateNowPlaying()
             }
@@ -404,7 +417,10 @@ final class PlayerController {
 
     // MARK: Warteliste merken (nach Neustart weiter, angehalten)
 
-    private var queueKey: String? { app?.client.map { "queue-\($0.account.id)" } }
+    private var queueKey: String? {
+        guard let app else { return nil }
+        return app.client.map { "queue-\($0.account.id)" } ?? (app.localMode ? "queue-local" : nil)
+    }
 
     func saveQueue() {
         guard let key = queueKey else { return }

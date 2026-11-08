@@ -11,6 +11,16 @@
         }
       }
     },
+    "%lld Titel hinzugefügt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Songs Added"
+          }
+        }
+      }
+    },
     "%lld Titel · %@": {
       "localizations": {
         "de": {
@@ -39,6 +49,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$lld Songs, %2$lld Minutes"
+          }
+        }
+      }
+    },
+    "%lld neu, %lld entfernt": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld neu, %2$lld entfernt"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld new, %2$lld removed"
           }
         }
       }
@@ -113,6 +139,16 @@
         }
       }
     },
+    "Alle neu einlesen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rescan All"
+          }
+        }
+      }
+    },
     "Alles zufällig": {
       "localizations": {
         "en": {
@@ -163,6 +199,16 @@
         }
       }
     },
+    "Auf diesem iPhone": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On This iPhone"
+          }
+        }
+      }
+    },
     "Aus": {
       "localizations": {
         "en": {
@@ -189,6 +235,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Removed from Playlist"
+          }
+        }
+      }
+    },
+    "Aus der Mediathek entfernen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from Library"
+          }
+        }
+      }
+    },
+    "Aus der Mediathek entfernen?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from library?"
+          }
+        }
+      }
+    },
+    "Aus der Mediathek entfernt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removed from Library"
           }
         }
       }
@@ -293,6 +369,36 @@
         }
       }
     },
+    "Datei nicht gefunden – wurde sie verschoben oder gelöscht?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File not found – was it moved or deleted?"
+          }
+        }
+      }
+    },
+    "Dateien": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files"
+          }
+        }
+      }
+    },
+    "Dateien hinzufügen …": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Files …"
+          }
+        }
+      }
+    },
     "Deine Musik vom eigenen Navidrome-Server – immer in 432 Hz.": {
       "localizations": {
         "en": {
@@ -309,6 +415,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Playback then starts over."
+          }
+        }
+      }
+    },
+    "Die an HomeTune geschickten Kopien werden gelöscht. Deine Originale bleiben, wo sie sind.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The copies sent to HomeTune will be deleted. Your originals stay where they are."
           }
         }
       }
@@ -359,6 +475,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Scanning …"
+          }
+        }
+      }
+    },
+    "Empfangene Dateien": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Received Files"
           }
         }
       }
@@ -513,6 +639,16 @@
         }
       }
     },
+    "HomeTune merkt sich nur, wo die Musik liegt. Entfernen nimmt sie aus der Mediathek – die Dateien selbst bleiben unverändert.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HomeTune only remembers where your music is. Removing takes it out of the library – the files themselves stay untouched."
+          }
+        }
+      }
+    },
     "HomeTune spielt jeden Titel um 31,77 Cent tiefer (A4 = 432 Hz statt 440 Hz). Das Tempo bleibt gleich, die Originaldatei wird verlustfrei geladen.": {
       "localizations": {
         "en": {
@@ -583,6 +719,16 @@
         }
       }
     },
+    "Kein Zugriff auf den Ordner. Bitte erneut hinzufügen.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No access to the folder. Please add it again."
+          }
+        }
+      }
+    },
     "Keine Alben": {
       "localizations": {
         "en": {
@@ -649,6 +795,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "No Songs"
+          }
+        }
+      }
+    },
+    "Keine abspielbaren Audiodateien gefunden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Playable Audio Files Found"
           }
         }
       }
@@ -953,12 +1109,52 @@
         }
       }
     },
+    "Mit einem Server verbinden …": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to a Server …"
+          }
+        }
+      }
+    },
+    "Musik aus der Dateien-App wird nur verknüpft, nicht kopiert, und läuft offline und ohne Server.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Music from the Files app is linked, not copied, and plays offline and without a server."
+          }
+        }
+      }
+    },
     "Musik hinzufügen": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Add Music"
+          }
+        }
+      }
+    },
+    "Musik vom iPhone hinzufügen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Music from iPhone"
+          }
+        }
+      }
+    },
+    "Neu einlesen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rescan"
           }
         }
       }
@@ -1003,6 +1199,16 @@
         }
       }
     },
+    "Nicht erreichbar – bitte erneut hinzufügen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not reachable – please add again"
+          }
+        }
+      }
+    },
     "Nicht verfügbar": {
       "localizations": {
         "en": {
@@ -1033,6 +1239,16 @@
         }
       }
     },
+    "Nur Musik auf diesem iPhone – ebenfalls in 432 Hz. Einen Server kannst du später in den Einstellungen hinzufügen.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only music on this iPhone – also in 432 Hz. You can add a server later in Settings."
+          }
+        }
+      }
+    },
     "Nächster Titel": {
       "localizations": {
         "en": {
@@ -1049,6 +1265,56 @@
           "stringUnit": {
             "state": "translated",
             "value": "Offline – only downloaded music is available."
+          }
+        }
+      }
+    },
+    "Ohne Server fortfahren": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue Without a Server"
+          }
+        }
+      }
+    },
+    "Ordner": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Folder"
+          }
+        }
+      }
+    },
+    "Ordner hinzufügen …": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Folder …"
+          }
+        }
+      }
+    },
+    "Ordner nicht erreichbar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Folder Not Reachable"
+          }
+        }
+      }
+    },
+    "Ordner und Dateien": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Folders and Files"
           }
         }
       }
@@ -1149,6 +1415,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Close"
+          }
+        }
+      }
+    },
+    "Schon in der Mediathek": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Already in Library"
           }
         }
       }
@@ -1323,6 +1599,16 @@
         }
       }
     },
+    "Verschiedene Interpret:innen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Various Artists"
+          }
+        }
+      }
+    },
     "Version": {
       "localizations": {
         "en": {
@@ -1433,12 +1719,58 @@
         }
       }
     },
+    "Wird aus iCloud geladen – später neu einlesen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloading from iCloud – rescan later"
+          }
+        }
+      }
+    },
+    "Wird eingelesen …": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanning …"
+          }
+        }
+      }
+    },
+    "Wird eingelesen … %lld von %lld": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird eingelesen … %1$lld von %2$lld"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanning … %1$lld of %2$lld"
+          }
+        }
+      }
+    },
     "Wird geladen": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Downloading"
+          }
+        }
+      }
+    },
+    "Wähle einen Ordner oder einzelne Dateien in der Dateien-App – FLAC, MP3, AAC, ALAC, WAV oder AIFF. HomeTune merkt sich nur, wo sie liegen, und spielt sie in 432 Hz.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a folder or individual files in the Files app – FLAC, MP3, AAC, ALAC, WAV or AIFF. HomeTune only remembers where they are and plays them in 432 Hz."
           }
         }
       }
@@ -1649,6 +1981,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Skip"
+          }
+        }
+      }
+    },
+    "„%@“ verschwindet aus HomeTune. Die Dateien bleiben unverändert in der Dateien-App.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” will be removed from HomeTune. The files stay untouched in the Files app."
           }
         }
       }

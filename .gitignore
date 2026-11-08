@@ -9,3 +9,4 @@ Payload/
 .test-account
 *.p12
 *.mobileprovision
+.sim-udid

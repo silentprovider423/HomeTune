@@ -158,7 +158,7 @@ struct LyricsView: View {
     private func load() async {
         lyrics = nil; plain = nil; loaded = false
         defer { loaded = true }
-        guard let song, let client = app.client else { return }
+        guard let song, !song.isLocal, let client = app.client else { return }
         if let list = try? await client.lyrics(songId: song.id), !list.isEmpty {
             lyrics = list.first { $0.synced == true } ?? list.first
             return

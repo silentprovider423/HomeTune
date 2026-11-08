@@ -11,8 +11,10 @@ struct SongMenu: View {
     var onRemoveFromPlaylist: (() -> Void)?
 
     var body: some View {
-        Section {
-            Button("Zur Playlist hinzufügen …", systemImage: "text.badge.plus") { app.addToPlaylist = [song] }
+        if !song.isLocal {
+            Section {
+                Button("Zur Playlist hinzufügen …", systemImage: "text.badge.plus") { app.addToPlaylist = [song] }
+            }
         }
         Section {
             Button("Als Nächstes wiedergeben", systemImage: "text.line.first.and.arrowtriangle.forward") { app.player.playNext([song]) }
@@ -23,7 +25,9 @@ struct SongMenu: View {
             Button(fav ? LocalizedStringKey("„Favorit“ widerrufen") : LocalizedStringKey("Als Favoriten markieren"), systemImage: fav ? "star.slash" : "star") {
                 app.toggleFavorite(song)
             }
-            if app.downloads.isDownloaded(song.id) {
+            if song.isLocal {
+                // Musik auf diesem iPhone: nichts zu laden; Entfernen löscht nie die Originaldatei
+            } else if app.downloads.isDownloaded(song.id) {
                 Button("Download entfernen", systemImage: "trash") { app.removeDownload([song]) }
             } else {
                 Button("Laden", systemImage: "arrow.down.circle") { app.download([song]) }
@@ -40,6 +44,11 @@ struct SongMenu: View {
         if let onRemoveFromPlaylist {
             Section {
                 Button("Aus Playlist entfernen", systemImage: "minus.circle", role: .destructive, action: onRemoveFromPlaylist)
+            }
+        }
+        if song.isLocal {
+            Section {
+                Button("Aus der Mediathek entfernen", systemImage: "minus.circle", role: .destructive) { app.removeLocal([song]) }
             }
         }
     }
@@ -59,20 +68,30 @@ struct AlbumMenu: View {
             Button("Als Nächstes wiedergeben", systemImage: "text.line.first.and.arrowtriangle.forward") { Task { app.player.playNext(await app.songs(of: album)) } }
             Button("Zuletzt wiedergeben", systemImage: "text.line.last.and.arrowtriangle.forward") { Task { app.player.playLast(await app.songs(of: album)) } }
         }
+        let isLocal = album.id.isLocalID
         Section {
-            Button("Zur Playlist hinzufügen …", systemImage: "text.badge.plus") { Task { app.addToPlaylist = await app.songs(of: album) } }
+            if !isLocal {
+                Button("Zur Playlist hinzufügen …", systemImage: "text.badge.plus") { Task { app.addToPlaylist = await app.songs(of: album) } }
+            }
             let fav = app.library.isStarred(album: album.id)
             Button(fav ? LocalizedStringKey("„Favorit“ widerrufen") : LocalizedStringKey("Als Favoriten markieren"), systemImage: fav ? "star.slash" : "star") { app.toggleFavorite(album) }
             let songs = app.library.songs(ofAlbum: album.id)
-            if app.downloads.anyDownloaded(songs) {
+            if !isLocal && app.downloads.anyDownloaded(songs) {
                 Button("Download entfernen", systemImage: "trash") { app.removeDownload(songs) }
             }
-            if !app.downloads.allDownloaded(songs) {
+            if !isLocal && !app.downloads.allDownloaded(songs) {
                 Button("Laden", systemImage: "arrow.down.circle") { Task { app.download(await app.songs(of: album)) } }
             }
         }
         if showGoToArtist, let id = album.artistId {
             Section { Button("Zu Künstler:in", systemImage: "music.microphone") { app.open(.artist(id)) } }
+        }
+        if isLocal {
+            Section {
+                Button("Aus der Mediathek entfernen", systemImage: "minus.circle", role: .destructive) {
+                    app.removeLocal(app.library.songs(ofAlbum: album.id))
+                }
+            }
         }
     }
 }
@@ -93,7 +112,9 @@ struct ArtistMenu: View {
         Section {
             let fav = app.library.isStarred(artist: artist.id)
             Button(fav ? LocalizedStringKey("„Favorit“ widerrufen") : LocalizedStringKey("Als Favoriten markieren"), systemImage: fav ? "star.slash" : "star") { app.toggleFavorite(artist) }
-            Button("Laden", systemImage: "arrow.down.circle") { Task { app.download(await app.songs(of: artist)) } }
+            if !artist.id.isLocalID {
+                Button("Laden", systemImage: "arrow.down.circle") { Task { app.download(await app.songs(of: artist)) } }
+            }
         }
     }
 }

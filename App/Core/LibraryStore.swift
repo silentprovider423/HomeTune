@@ -5,11 +5,12 @@ import Foundation
 /// und die Mediathek auch offline erscheint.
 @MainActor @Observable
 final class LibraryStore {
-    private(set) var albums: [Album] = []
-    private(set) var artists: [Artist] = []
-    private(set) var songs: [Song] = []
+    /// Nur vom Server (ohne „Auf diesem iPhone“)
+    private(set) var serverAlbums: [Album] = []
+    private(set) var serverArtists: [Artist] = []
+    private(set) var serverSongs: [Song] = []
     private(set) var playlists: [Playlist] = []
-    private(set) var genres: [Genre] = []
+    private(set) var serverGenres: [Genre] = []
     private(set) var starredSongs: Set<String> = []
     private(set) var starredAlbums: Set<String> = []
     private(set) var starredArtists: Set<String> = []
@@ -26,6 +27,8 @@ final class LibraryStore {
     private(set) var randomAlbums: [Album] = []
 
     private var client: SubsonicClient?
+    /// Musik auf diesem iPhone – wird in Alben, Künstler:innen, Titel und Genres eingemischt.
+    @ObservationIgnored var local: LocalLibrary?
     /// Läuft, solange nach einem Verbindungsfehler automatisch neu versucht wird.
     private var retryTask: Task<Void, Never>?
 
@@ -43,7 +46,7 @@ final class LibraryStore {
 
     func attach(_ client: SubsonicClient?) {
         self.client = client
-        albums = []; artists = []; songs = []; playlists = []; genres = []
+        serverAlbums = []; serverArtists = []; serverSongs = []; playlists = []; serverGenres = []
         starredSongs = []; starredAlbums = []; starredArtists = []
         recentlyAdded = []; recentlyPlayed = []; frequent = []; randomAlbums = []
         loadedOnce = false
@@ -55,14 +58,14 @@ final class LibraryStore {
     }
 
     private func apply(_ s: Snapshot) {
-        albums = s.albums; artists = s.artists; songs = s.songs; playlists = s.playlists; genres = s.genres
+        serverAlbums = s.albums; serverArtists = s.artists; serverSongs = s.songs; playlists = s.playlists; serverGenres = s.genres
         starredSongs = s.starredSongs; starredAlbums = s.starredAlbums; starredArtists = s.starredArtists
         recentlyAdded = s.recentlyAdded; recentlyPlayed = s.recentlyPlayed; frequent = s.frequent
     }
 
     private func persist() {
         guard let client else { return }
-        let s = Snapshot(albums: albums, artists: artists, songs: songs, playlists: playlists, genres: genres,
+        let s = Snapshot(albums: serverAlbums, artists: serverArtists, songs: serverSongs, playlists: playlists, genres: serverGenres,
                          starredSongs: starredSongs, starredAlbums: starredAlbums, starredArtists: starredArtists,
                          recentlyAdded: recentlyAdded, recentlyPlayed: recentlyPlayed, frequent: frequent)
         let url = cacheURL(client.account.id)
@@ -90,8 +93,8 @@ final class LibraryStore {
             async let fr = client.albumList(.frequent, size: 30)
             async let rnd = client.albumList(.random, size: 20)
             let (a, b, c, d, e, f) = try await (al, ar, so, pl, ge, st)
-            albums = a; artists = b; songs = c; playlists = d
-            genres = e.sorted { $0.value.localizedStandardCompare($1.value) == .orderedAscending }
+            serverAlbums = a; serverArtists = b; serverSongs = c; playlists = d
+            serverGenres = e.sorted { $0.value.localizedStandardCompare($1.value) == .orderedAscending }
             starredSongs = Set((f.song ?? []).map(\.id))
             starredAlbums = Set((f.album ?? []).map(\.id))
             starredArtists = Set((f.artist ?? []).map(\.id))
@@ -146,24 +149,40 @@ final class LibraryStore {
         if let r = try? await client.albumList(.random, size: 20) { randomAlbums = r }
     }
 
-    // MARK: Abfragen
+    // MARK: Abfragen (Server + „Auf diesem iPhone“)
 
-    func album(_ id: String) -> Album? { albums.first { $0.id == id } }
-    func artist(_ id: String) -> Artist? { artists.first { $0.id == id } }
+    var albums: [Album] { merged(serverAlbums, local?.albums) }
+    var artists: [Artist] { merged(serverArtists, local?.artists) }
+    var songs: [Song] { merged(serverSongs, local?.songs) }
+    var genres: [Genre] {
+        guard let l = local?.genres, !l.isEmpty else { return serverGenres }
+        let known = Set(serverGenres.map(\.value))
+        return (serverGenres + l.filter { !known.contains($0.value) })
+            .sorted { $0.value.localizedStandardCompare($1.value) == .orderedAscending }
+    }
+
+    private func merged<T>(_ server: [T], _ local: [T]?) -> [T] {
+        guard let local, !local.isEmpty else { return server }
+        return server.isEmpty ? local : server + local
+    }
+
+    func album(_ id: String) -> Album? { id.isLocalID ? local?.album(id) : serverAlbums.first { $0.id == id } }
+    func artist(_ id: String) -> Artist? { id.isLocalID ? local?.artist(id) : serverArtists.first { $0.id == id } }
 
     func songs(ofAlbum id: String) -> [Song] {
-        songs.filter { $0.albumId == id }.sorted {
+        if id.isLocalID { return local?.songs(ofAlbum: id) ?? [] }
+        return serverSongs.filter { $0.albumId == id }.sorted {
             ($0.discNumber ?? 1, $0.track ?? 0, $0.title) < ($1.discNumber ?? 1, $1.track ?? 0, $1.title)
         }
     }
 
     func albums(ofArtist id: String) -> [Album] {
-        albums.filter { $0.artistId == id }.sorted { ($0.year ?? 0) > ($1.year ?? 0) }
+        (id.isLocalID ? local?.albums ?? [] : serverAlbums).filter { $0.artistId == id }.sorted { ($0.year ?? 0) > ($1.year ?? 0) }
     }
 
     func songs(ofArtist id: String) -> [Song] {
         let albumIDs = Set(albums(ofArtist: id).map(\.id))
-        return songs.filter { $0.artistId == id || albumIDs.contains($0.albumId ?? "") }
+        return (id.isLocalID ? local?.songs ?? [] : serverSongs).filter { $0.artistId == id || albumIDs.contains($0.albumId ?? "") }
     }
 
     func songs(ofGenre g: String) -> [Song] { songs.filter { $0.genre == g } }
@@ -178,16 +197,17 @@ final class LibraryStore {
 
     func songs(ofComposer name: String) -> [Song] { songs.filter { $0.composers.contains(name) } }
 
-    var favoriteSongs: [Song] { songs.filter { starredSongs.contains($0.id) } }
+    var favoriteSongs: [Song] { songs.filter { isStarred(song: $0.id) } }
 
-    func isStarred(song id: String) -> Bool { starredSongs.contains(id) }
-    func isStarred(album id: String) -> Bool { starredAlbums.contains(id) }
-    func isStarred(artist id: String) -> Bool { starredArtists.contains(id) }
+    func isStarred(song id: String) -> Bool { id.isLocalID ? local?.isStarred(id) == true : starredSongs.contains(id) }
+    func isStarred(album id: String) -> Bool { id.isLocalID ? local?.isStarred(id) == true : starredAlbums.contains(id) }
+    func isStarred(artist id: String) -> Bool { id.isLocalID ? local?.isStarred(id) == true : starredArtists.contains(id) }
 
     // MARK: Favoriten (star/unstar)
 
-    /// Schaltet den Favoriten um und liefert den neuen Zustand.
+    /// Schaltet den Favoriten um und liefert den neuen Zustand (Musik auf diesem iPhone: nur auf dem Gerät).
     func toggleStar(song: Song) async -> Bool {
+        if song.isLocal { return local?.toggleStar(song.id) ?? false }
         let on = !starredSongs.contains(song.id)
         guard await setStar(.song(song.id), on: on) else { return !on }
         if on { starredSongs.insert(song.id) } else { starredSongs.remove(song.id) }
@@ -196,6 +216,7 @@ final class LibraryStore {
     }
 
     func toggleStar(album: Album) async -> Bool {
+        if album.id.isLocalID { return local?.toggleStar(album.id) ?? false }
         let on = !starredAlbums.contains(album.id)
         guard await setStar(.album(album.id), on: on) else { return !on }
         if on { starredAlbums.insert(album.id) } else { starredAlbums.remove(album.id) }
@@ -204,6 +225,7 @@ final class LibraryStore {
     }
 
     func toggleStar(artist: Artist) async -> Bool {
+        if artist.id.isLocalID { return local?.toggleStar(artist.id) ?? false }
         let on = !starredArtists.contains(artist.id)
         guard await setStar(.artist(artist.id), on: on) else { return !on }
         if on { starredArtists.insert(artist.id) } else { starredArtists.remove(artist.id) }

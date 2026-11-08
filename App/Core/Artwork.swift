@@ -37,6 +37,15 @@ actor ArtworkCache {
     }
 }
 
+/// Cover vom Server oder von Musik auf diesem iPhone (dann ohne Server, auch offline).
+enum Artwork {
+    static func image(id: String, size: Int, client: SubsonicClient?) async -> UIImage? {
+        if id.isLocalID { return await LocalCovers.shared.image(id: id, size: size) }
+        guard let client else { return nil }
+        return await ArtworkCache.shared.image(id: id, size: size, client: client)
+    }
+}
+
 /// Coverbild mit Platzhalter (Note auf grauem Grund wie bei Apple).
 struct CoverArt: View {
     @Environment(AppModel.self) private var app
@@ -66,8 +75,8 @@ struct CoverArt: View {
         }
         .task(id: id) {
             image = nil
-            guard let id, let client = app.client else { return }
-            image = await ArtworkCache.shared.image(id: id, size: Int(size * 2), client: client)
+            guard let id else { return }
+            image = await Artwork.image(id: id, size: Int(size * 2), client: app.client)
         }
     }
 }

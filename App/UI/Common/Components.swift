@@ -75,11 +75,13 @@ struct DownloadBadge: View {
 
 /// Albumkachel (Raster) wie in der Mediathek.
 struct AlbumTile: View {
+    @Environment(AppModel.self) private var app
     let album: Album
     var subtitle: String?
 
     var body: some View {
-        NavigationLink(value: Route.album(album.id)) {
+        // Knopf statt NavigationLink: in Listen-Zeilen sonst mit Pfeil rechts neben jeder Kachel
+        Button { app.open(.album(album.id)) } label: {
             VStack(alignment: .leading, spacing: 4) {
                 CoverArt(id: album.coverArt, size: 180, corner: 8)
                 Text(album.name).font(.subheadline).lineLimit(1).foregroundStyle(.primary)

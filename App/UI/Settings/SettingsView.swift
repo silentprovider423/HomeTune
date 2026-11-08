@@ -32,22 +32,35 @@ struct SettingsView: View {
                     }
                     Button("Konto hinzufügen …", systemImage: "plus") { addAccount = true }
                 }
-                Section {
-                    LabeledContent("Server", value: app.library.serverVersion ?? "–")
-                    LabeledContent("Titel", value: "\(app.library.songs.count)")
-                    LabeledContent("Alben", value: "\(app.library.albums.count)")
-                    Button("Mediathek aktualisieren", systemImage: "arrow.clockwise") { Task { await app.library.refresh() } }
-                    Button("Server-Mediathek neu einlesen", systemImage: "arrow.triangle.2.circlepath") {
-                        Task {
-                            do {
-                                let s = try await app.client?.startScan()
-                                scanText = s?.scanning == true ? String(localized: "Einlesen läuft …") : String(localized: "Fertig")
-                            } catch { scanText = error.localizedDescription }
+                if app.client != nil {
+                    Section {
+                        LabeledContent("Server", value: app.library.serverVersion ?? "–")
+                        LabeledContent("Titel", value: "\(app.library.serverSongs.count)")
+                        LabeledContent("Alben", value: "\(app.library.serverAlbums.count)")
+                        Button("Mediathek aktualisieren", systemImage: "arrow.clockwise") { Task { await app.library.refresh() } }
+                        Button("Server-Mediathek neu einlesen", systemImage: "arrow.triangle.2.circlepath") {
+                            Task {
+                                do {
+                                    let s = try await app.client?.startScan()
+                                    scanText = s?.scanning == true ? String(localized: "Einlesen läuft …") : String(localized: "Fertig")
+                                } catch { scanText = error.localizedDescription }
+                            }
                         }
+                        if let scanText { Text(scanText).font(.footnote).foregroundStyle(.secondary) }
+                    } header: { Text("Mediathek") } footer: {
+                        Text("Neu einlesen braucht ein Administrator-Konto in Navidrome.")
                     }
-                    if let scanText { Text(scanText).font(.footnote).foregroundStyle(.secondary) }
-                } header: { Text("Mediathek") } footer: {
-                    Text("Neu einlesen braucht ein Administrator-Konto in Navidrome.")
+                }
+                Section {
+                    LabeledContent("Titel", value: "\(app.local.songs.count)")
+                    LabeledContent("Alben", value: "\(app.local.albums.count)")
+                    if app.local.importedBytes > 0 {
+                        LabeledContent("Empfangene Dateien", value: Fmt.bytes(app.local.importedBytes))
+                    }
+                    Button("Alle neu einlesen", systemImage: "arrow.triangle.2.circlepath") { app.rescanLocal() }
+                        .disabled(app.local.roots.isEmpty)
+                } header: { Text("Auf diesem iPhone") } footer: {
+                    Text("Musik aus der Dateien-App wird nur verknüpft, nicht kopiert, und läuft offline und ohne Server.")
                 }
                 Section {
                     LabeledContent("Geladen", value: Fmt.bytes(app.downloads.totalBytes))
@@ -78,8 +91,10 @@ struct SettingsView: View {
                                 titleVisibility: .visible, presenting: confirmRemove) { a in
                 Button("Konto entfernen", role: .destructive) {
                     app.accounts.remove(a.id)
+                    // Ohne Konto, aber mit Musik auf diesem iPhone: in der Mediathek bleiben
+                    if app.accounts.accounts.isEmpty && !app.local.isEmpty { app.localMode = true }
                     app.connect()
-                    if app.client == nil { dismiss() }
+                    if app.showsLogin { dismiss() }
                 }
             } message: { a in Text("Das Konto „\(a.username)“ wird von diesem iPhone entfernt. Auf dem Server bleibt alles erhalten.") }
         }

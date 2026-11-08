@@ -14,6 +14,10 @@ struct LibraryView: View {
     private var hidden: Set<LibrarySection> {
         Set(hiddenRaw.split(separator: ",").compactMap { LibrarySection(rawValue: String($0)) })
     }
+    /// Ohne Server-Konto ergeben Playlists und „Geladen“ keinen Sinn
+    private var available: [LibrarySection] { app.client == nil ? order.filter { !$0.needsServer } : order }
+    /// Noch gar keine Musik: weder Server noch etwas auf diesem iPhone
+    private var nothingYet: Bool { app.client == nil && app.local.isEmpty && !app.local.isScanning }
 
     var body: some View {
         List {
@@ -26,7 +30,7 @@ struct LibraryView: View {
             }
             if editing {
                 Section {
-                    ForEach(order) { s in
+                    ForEach(available) { s in
                         Button {
                             toggle(s)
                         } label: {
@@ -40,21 +44,24 @@ struct LibraryView: View {
                         }
                     }
                     .onMove { from, to in
-                        var o = order
+                        var o = available
                         o.move(fromOffsets: from, toOffset: to)
-                        orderRaw = o.map(\.rawValue).joined(separator: ",")
+                        orderRaw = (o + order.filter { !o.contains($0) }).map(\.rawValue).joined(separator: ",")
                     }
                 }
                 .environment(\.editMode, .constant(.active))
             } else {
                 Section {
-                    ForEach(order.filter { !hidden.contains($0) }) { s in
+                    ForEach(available.filter { !hidden.contains($0) }) { s in
                         NavigationLink(value: Route.section(s)) {
                             Label { Text(s.title).font(.title3) } icon: { Image(systemName: s.icon).foregroundStyle(.accent) }
                                 .padding(.vertical, 4)
                         }
                         .accessibilityIdentifier("section.\(s.rawValue)")
                     }
+                }
+                if nothingYet {
+                    Section { AddLocalMusicHint().listRowSeparator(.hidden) }
                 }
                 if !app.library.recentlyAdded.isEmpty {
                     Section {
@@ -73,8 +80,17 @@ struct LibraryView: View {
         .navigationTitle("Mediathek")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button(editing ? LocalizedStringKey("Fertig") : LocalizedStringKey("Bearbeiten")) {
-                    withAnimation { editing.toggle() }
+                if editing {
+                    Button("Fertig") { withAnimation { editing = false } }
+                } else {
+                    Menu {
+                        AddLocalMusicMenu()
+                        Section {
+                            Button("Bearbeiten", systemImage: "pencil") { withAnimation { editing = true } }
+                        }
+                    } label: { Image(systemName: "ellipsis") }
+                    .accessibilityLabel(Text("Mehr"))
+                    .accessibilityIdentifier("library.more")
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
@@ -82,7 +98,10 @@ struct LibraryView: View {
                     .accessibilityLabel(Text("Konto und Einstellungen"))
             }
         }
-        .refreshable { await app.library.refresh() }
+        .refreshable {
+            await app.library.refresh()
+            await app.local.rescanAll()
+        }
         .overlay {
             if app.library.isLoading && !app.library.loadedOnce { ProgressView() }
         }

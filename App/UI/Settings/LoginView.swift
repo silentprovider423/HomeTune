@@ -52,6 +52,22 @@ struct LoginView: View {
                 } footer: {
                     Text("Das Passwort bleibt im Schlüsselbund dieses iPhones. Die App spricht nur mit deinem Server.")
                 }
+                if !isSheet {
+                    Section {
+                        Button {
+                            app.localMode = true
+                        } label: {
+                            Label {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Ohne Server fortfahren").foregroundStyle(.primary)
+                                    Text("Nur Musik auf diesem iPhone – ebenfalls in 432 Hz. Einen Server kannst du später in den Einstellungen hinzufügen.")
+                                        .font(.footnote).foregroundStyle(.secondary)
+                                }
+                            } icon: { Image(systemName: "iphone").foregroundStyle(.accent) }
+                        }
+                        .accessibilityIdentifier("login.localOnly")
+                    }
+                }
             }
             .navigationTitle(isSheet ? Text("Konto hinzufügen") : Text(""))
             .navigationBarTitleDisplayMode(.inline)

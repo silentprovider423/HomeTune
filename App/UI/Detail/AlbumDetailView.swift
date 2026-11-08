@@ -41,7 +41,7 @@ struct AlbumDetailView: View {
         .overlay { if base == nil && !failed { ProgressView() } }
         .overlay { if base == nil && failed { EmptyHint(title: "Nicht verfügbar", icon: "wifi.slash") } }
         .toolbar {
-            if let a = base {
+            if base != nil, !albumID.isLocalID {
                 ToolbarItem(placement: .topBarTrailing) {
                     let all = app.downloads.allDownloaded(songs)
                     Button {
@@ -51,6 +51,8 @@ struct AlbumDetailView: View {
                     }
                     .accessibilityLabel(all ? Text("Download entfernen") : Text("Laden"))
                 }
+            }
+            if let a = base {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu { AlbumMenu(album: a) } label: { Image(systemName: "ellipsis") }
                         .accessibilityLabel(Text("Mehr"))
@@ -59,6 +61,8 @@ struct AlbumDetailView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .task {
+            // Musik auf diesem iPhone kommt nie vom Server
+            guard !albumID.isLocalID else { failed = base == nil; return }
             do { album = try await app.client?.album(id: albumID) } catch { failed = true }
         }
     }
@@ -193,6 +197,7 @@ struct ArtistDetailView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .task {
+            guard !artistID.isLocalID else { return }
             artist = try? await app.client?.artist(id: artistID)
             if let name = base?.name, let t = try? await app.client?.topSongs(artist: name, count: 5), !t.isEmpty { top = t }
         }

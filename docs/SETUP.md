@@ -85,6 +85,18 @@ With a free Apple ID the app has to be **refreshed every 7 days**. SideStore and
 
 Every song plays in **432 Hz** – there is nothing to switch on. The small badge under the time line in *Now Playing* shows it together with the file format.
 
+## Music on this iPhone (no server needed)
+
+You can also play files that are already on the iPhone – in *On My iPhone*, iCloud Drive or any other location of the Files app. A server is optional for this.
+
+1. On the sign-in screen tap **Continue Without a Server** (or, with a server, go to *Library → … → Add Folder … / Add Files …*).
+2. Pick a folder (all subfolders are included) or several files. Supported: FLAC, MP3, AAC/M4A, ALAC, WAV, AIFF, CAF – whatever iOS can decode.
+3. The music appears under **Library → On This iPhone** and also in Albums, Artists, Songs and Search.
+
+HomeTune does **not copy** these files. It keeps a security-scoped bookmark per folder and reads the original file when you play it, so your music only exists once on the phone. Pull to refresh (or *Rescan*) picks up new and deleted files. *Remove from Library* never deletes the original file. Files sent to HomeTune via **Open in / Share** from another app are the exception: iOS hands over a copy, which HomeTune keeps in its own storage (shown as *Received Files*).
+
+Files that are only in iCloud (cloud icon in Files) are downloaded first; rescan once they are on the phone.
+
 ## Troubleshooting
 
 | Problem | Fix |
@@ -94,4 +106,5 @@ Every song plays in **432 Hz** – there is nothing to switch on. The small badg
 | Works at home, not on mobile data | Your address is a home IP. Use a VPN or HTTPS (step 3). |
 | New music doesn't show up | Wait for the next scan or start one (*Account → Rescan Server Library*, admins only), then pull to refresh. |
 | No lyrics | The file has no embedded lyrics and no `.lrc` next to it. |
+| Folder "not reachable" (On This iPhone) | The folder was deleted, or a re-signed app (new bundle ID or certificate) lost access. Remove it and add it again. |
 | A song is skipped | iOS can't decode that format and the server couldn't convert it. Check the Navidrome log (ffmpeg must be available – it is in the Docker image). |

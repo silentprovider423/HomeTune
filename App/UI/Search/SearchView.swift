@@ -137,16 +137,23 @@ struct SearchView: View {
         guard !Task.isCancelled else { return }
         searching = true
         defer { searching = false }
-        if let client = app.client, !app.library.isOffline, let r = try? await client.search(q) {
+        var r: SubsonicClient.SearchResult
+        if let client = app.client, !app.library.isOffline, let found = try? await client.search(q) {
             guard !Task.isCancelled else { return }
-            result = r
+            r = found
         } else {
-            // Offline: im lokalen Index suchen
+            // Offline: im zwischengespeicherten Server-Index suchen
             let lib = app.library
-            result = .init(artists: lib.artists.filter { $0.name.localizedStandardContains(q) },
-                           albums: lib.albums.filter { $0.name.localizedStandardContains(q) },
-                           songs: (lib.songs.isEmpty ? app.downloads.downloadedSongs : lib.songs).filter { $0.title.localizedStandardContains(q) })
+            r = .init(artists: lib.serverArtists.filter { $0.name.localizedStandardContains(q) },
+                      albums: lib.serverAlbums.filter { $0.name.localizedStandardContains(q) },
+                      songs: (lib.serverSongs.isEmpty ? app.downloads.downloadedSongs : lib.serverSongs).filter { $0.title.localizedStandardContains(q) })
         }
+        // Musik auf diesem iPhone immer mit durchsuchen
+        let mine = app.local.search(q)
+        r.artists += mine.artists
+        r.albums += mine.albums
+        r.songs += mine.songs
+        result = r
     }
 
     private func remember() {

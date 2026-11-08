@@ -25,8 +25,9 @@ HomeTune is an independent iPhone client for self-hosted Navidrome (or any Subso
   <img src="docs/screenshots/2-albums.png" width="160" alt="Albums">
   <img src="docs/screenshots/6-search.png" width="160" alt="Search">
   <img src="docs/screenshots/7-home.png" width="160" alt="Home">
+  <img src="docs/screenshots/9-on-this-iphone.png" width="160" alt="Music on this iPhone">
 </p>
-<p align="center"><sub>Screenshots with generated demo albums and made-up demo lyrics (no real music).</sub></p>
+<p align="center"><sub>Screenshots with generated demo albums, made-up artists and demo lyrics (no real music).</sub></p>
 
 ## Features
 
@@ -54,6 +55,22 @@ HomeTune is an independent iPhone client for self-hosted Navidrome (or any Subso
 - Downloads for offline listening (original files), per account; offline mode falls back to downloaded music
 - Several servers/accounts, switchable; password in the Keychain
 
+**Music on this iPhone**
+- *Add Folder …* / *Add Files …* (Library menu, empty state, *On This iPhone*): pick folders and files in the Files app, multiple selection, folders are searched recursively
+- Files are **referenced, not copied** – a security-scoped bookmark per folder plus the relative path; stale bookmarks are renewed, rescanning finds new and deleted files
+- Tags are read on the device (title, artist, album, album artist, track/disc, year, genre, composer, duration, cover – FLAC Vorbis comments and pictures included, file name as fallback)
+- Own *On This iPhone* section with albums, artists and songs; the music also appears in the normal lists and in Search, with the same rows and album pages
+- Same playback path: 432 Hz, gapless queue, lock screen with cover – offline and **without a server account** (*Continue Without a Server*)
+- *Open in HomeTune* / *Share* for audio files (stored as a copy, since there is no bookmark for those)
+
+### Music on this iPhone
+
+HomeTune also works without a server. On the sign-in screen tap **Continue Without a Server**, then *Add Folder …* or *Add Files …*. You can add a Navidrome account later in *Account*. Details and limits: [docs/SETUP.md](docs/SETUP.md#music-on-this-iphone-no-server-needed).
+
+- Supported: FLAC, MP3, AAC/M4A, ALAC, WAV, AIFF, CAF (everything `AVAudioFile` can read). Ogg/Opus depend on the iOS version.
+- *Remove from Library* never touches the original file. Only files received via *Open in* are copies owned by the app.
+- Favorites of local songs stay on the device; local songs can't be added to server playlists and are not scrobbled.
+
 ### How good is the 432 Hz conversion?
 
 The test suite renders sine tones through exactly the same audio chain and measures them with an FFT:
@@ -69,7 +86,7 @@ That is why Apple's built-in `AVAudioUnitTimePitch` is used; no third-party DSP 
 
 ## Requirements
 
-- A Navidrome server (tested with **0.64**) reachable from the iPhone – at home or via VPN. Other OpenSubsonic servers should work for the basics.
+- A Navidrome server (tested with **0.64**) reachable from the iPhone – at home or via VPN. Other OpenSubsonic servers should work for the basics. Optional if you only want to play music that is already on the iPhone.
 - Xcode 26, [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
 - iPhone with iOS 26
 
@@ -110,13 +127,18 @@ HOMETUNE_DEMO_PASSWORD=...
 SIM=<simulator-udid> ./test.sh      # unit tests (API, queue, 432 Hz FFT, engine) + UI tests
 TEST_RUNNER_UI_LANG=en TEST_RUNNER_SHOT_DIR=/tmp/shots SIM=<udid> ./test.sh -only-testing:HomeTuneUITests   # English screenshots
 SIM=<simulator-udid> ./sim-run.sh   # start the app signed in (debug builds only)
+./tools/make-test-audio.sh          # regenerate Tests/Fixtures (sine tones/silence with made-up tags, needs ffmpeg)
+SIM=<udid> ./tools/sim-files.sh && TEST_RUNNER_PICKER=1 SIM=<udid> ./test.sh -only-testing:HomeTuneUITests/LocalMusicFlowTests   # also drive the real Files dialog
 ```
+
+Debug builds can import local music without the Files dialog: `HOMETUNE_LOCAL_IMPORT=<folder>|<folder>`, `HOMETUNE_SIGNED_OUT=1`, `HOMETUNE_LOCAL_RESET=1` (launch environment).
 
 Regenerate the English strings after adding texts: build once, then `python3 tools/make-strings.py`. App icon: `swift tools/make-icon.swift Resources/Assets.xcassets/AppIcon.appiconset`.
 
 ## Privacy
 
 - The app talks **only** to your Navidrome server. No analytics, no third-party SDKs.
+- Music on this iPhone never leaves the device: tags and covers are read locally, only bookmarks, tags and small cover thumbnails are stored in the app.
 - All API calls are sent as POST forms with token authentication (`t`/`s`), so the password never appears in URLs or server logs; the password itself stays in the iPhone Keychain.
 - Pitch shifting happens on the device; the server only delivers the original files.
 
@@ -128,8 +150,10 @@ App/Audio      432 Hz chain, decoder, gapless engine, track cache
 App/Player     queue (Apple's model) and player controller (lock screen, remote commands, scrobbling)
 App/Core       accounts, library index, actions, artwork
 App/Downloads  offline downloads
+App/Local      music on this iPhone: bookmarks, folder scan, tag reader (incl. FLAC), local library
 App/UI         SwiftUI views (library, details, player, search, home, settings)
-Tests          unit tests (API against a test server, queue, FFT measurement, live engine)
+Tests          unit tests (API against a test server, queue, FFT measurement, live engine, local music)
+Tests/Fixtures generated test audio (tools/make-test-audio.sh)
 UITests        UI flow tests and screenshots
 tools          icon and strings generators
 ```
@@ -143,3 +167,5 @@ tools          icon and strings generators
 ## Deutsch
 
 **HomeTune** ist eine eigene iPhone-Musik-App für deinen selbst betriebenen Navidrome-Server. Sie sieht aus und bedient sich wie die Mediathek von Apples Musik-App unter iOS 26 – und spielt jeden Titel in 432 Hz (−31,77 Cent, Tempo unverändert, verlustfrei vom Original). Die Oberfläche gibt es auf Deutsch und Englisch, je nach Sprache des iPhones. Funktionen, Voraussetzungen und Installation stehen oben.
+
+**Musik auf diesem iPhone:** Auch ohne Server nutzbar („Ohne Server fortfahren“). Über *Ordner hinzufügen …* / *Dateien hinzufügen …* wählst du Musik in der Dateien-App (FLAC, MP3, AAC, ALAC, WAV, AIFF). HomeTune kopiert nichts, sondern merkt sich per Bookmark, wo die Dateien liegen, liest die Tags auf dem Gerät und spielt sie ebenfalls in 432 Hz – offline, mit Warteliste und Sperrbildschirm. „Aus der Mediathek entfernen“ löscht nie die Originaldatei.

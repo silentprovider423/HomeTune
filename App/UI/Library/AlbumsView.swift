@@ -29,6 +29,8 @@ enum LibraryFilter: String, CaseIterable, Identifiable {
 
 struct AlbumsView: View {
     @Environment(AppModel.self) private var app
+    /// Nur „Auf diesem iPhone“
+    var localOnly = false
     @AppStorage("albums.sort") private var sort = AlbumSort.title
     @AppStorage("albums.ascending") private var ascending = true
     @AppStorage("albums.grid") private var grid = true
@@ -36,13 +38,19 @@ struct AlbumsView: View {
     @State private var query = ""
 
     private var albums: [Album] {
-        var a = app.library.albums
-        if app.library.isOffline || a.isEmpty { a = downloadedAlbums }
+        var a: [Album]
+        if localOnly {
+            a = app.local.albums
+        } else {
+            a = app.library.serverAlbums
+            if app.library.isOffline || a.isEmpty { a = downloadedAlbums }
+            a += app.local.albums
+        }
         switch filter {
         case .favorites: a = a.filter { app.library.isStarred(album: $0.id) }
         case .downloaded:
             let ids = Set(app.downloads.downloadedSongs.compactMap(\.albumId))
-            a = a.filter { ids.contains($0.id) }
+            a = a.filter { ids.contains($0.id) || $0.id.isLocalID }
         case .none: break
         }
         if !query.isEmpty {
@@ -103,7 +111,7 @@ struct AlbumsView: View {
         .navigationTitle("Alben")
         .searchable(text: $query, prompt: Text("In Alben suchen"))
         .toolbar { sortMenu }
-        .refreshable { await app.library.refresh() }
+        .refreshable { if localOnly { await app.local.rescanAll() } else { await app.library.refresh() } }
     }
 
     private var sortMenu: some ToolbarContent {
@@ -137,11 +145,12 @@ struct AlbumsView: View {
 
 struct ArtistsView: View {
     @Environment(AppModel.self) private var app
+    var localOnly = false
     @State private var query = ""
     @State private var onlyFavorites = false
 
     private var artists: [Artist] {
-        var a = app.library.artists
+        var a = localOnly ? app.local.artists : app.library.artists
         if onlyFavorites { a = a.filter { app.library.isStarred(artist: $0.id) } }
         if !query.isEmpty { a = a.filter { $0.name.localizedStandardContains(query) } }
         return a.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
@@ -168,6 +177,6 @@ struct ArtistsView: View {
                 } label: { Image(systemName: onlyFavorites ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease") }
             }
         }
-        .refreshable { await app.library.refresh() }
+        .refreshable { if localOnly { await app.local.rescanAll() } else { await app.library.refresh() } }
     }
 }

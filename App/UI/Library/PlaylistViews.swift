@@ -215,7 +215,8 @@ struct AddMusicSheet: View {
     @State private var picked: [Song] = []
 
     private var results: [Song] {
-        let all = app.library.songs
+        // Server-Playlists können nur Server-Titel enthalten
+        let all = app.library.serverSongs
         guard !query.isEmpty else { return Array(all.sorted { ($0.created ?? "") > ($1.created ?? "") }.prefix(100)) }
         return all.filter { $0.title.localizedStandardContains(query) || ($0.artist ?? "").localizedStandardContains(query) || ($0.album ?? "").localizedStandardContains(query) }
     }

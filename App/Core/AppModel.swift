@@ -8,12 +8,17 @@ enum Route: Hashable {
     case genre(String)
     case composer(String)
     case section(LibrarySection)
+    /// „Auf diesem iPhone“: nur lokale Alben, Künstler:innen, Titel
+    case localAlbums, localArtists, localSongs
 }
 
 /// Abschnitte der Mediathek (Apple: „Abschnitte bearbeiten“ – ein-/ausblenden und ordnen).
 enum LibrarySection: String, CaseIterable, Codable, Identifiable, Hashable {
-    case playlists, artists, albums, songs, genres, composers, favorites, downloaded
+    case playlists, artists, albums, songs, genres, composers, favorites, downloaded, onThisIPhone
     var id: String { rawValue }
+
+    /// Abschnitte, die nur mit Server-Konto Sinn ergeben
+    var needsServer: Bool { self == .playlists || self == .downloaded }
 
     var title: LocalizedStringKey {
         switch self {
@@ -25,6 +30,7 @@ enum LibrarySection: String, CaseIterable, Codable, Identifiable, Hashable {
         case .composers: "Komponist:innen"
         case .favorites: "Lieblingstitel"
         case .downloaded: "Geladen"
+        case .onThisIPhone: "Auf diesem iPhone"
         }
     }
 
@@ -38,11 +44,18 @@ enum LibrarySection: String, CaseIterable, Codable, Identifiable, Hashable {
         case .composers: "music.quarternote.3"
         case .favorites: "star"
         case .downloaded: "arrow.down.circle"
+        case .onThisIPhone: "iphone"
         }
     }
 }
 
 enum AppTab: Hashable { case home, library, search }
+
+/// Was der Dateien-Dialog auswählen soll.
+enum LocalImportKind: Identifiable {
+    case folder, files
+    var id: Self { self }
+}
 
 /// Kurze Rückmeldung nach Aktionen (Apple: `MusicNotice` – „Als Nächstes“, „Favorit“ …).
 @MainActor @Observable
@@ -66,6 +79,7 @@ final class NoticeCenter {
 final class AppModel {
     let accounts = AccountStore()
     let library = LibraryStore()
+    let local = LocalLibrary()
     let downloads = DownloadManager()
     let notice = NoticeCenter()
     let player: PlayerController
@@ -79,20 +93,35 @@ final class AppModel {
     var showSettings = false
     /// Blatt „Zur Playlist hinzufügen“ für diese Titel
     var addToPlaylist: [Song]?
+    /// Dateien-Dialog für „Musik hinzufügen“
+    var importRequest: LocalImportKind?
+    /// „Ohne Server fortfahren“: Mediathek nur mit Musik auf diesem iPhone (Server kann später dazukommen)
+    var localMode: Bool {
+        didSet { UserDefaults.standard.set(localMode, forKey: "localMode") }
+    }
+    @ObservationIgnored private var signedOut = false
 
     init() {
+        localMode = UserDefaults.standard.bool(forKey: "localMode")
         player = PlayerController()
         player.app = self
+        library.local = local
         #if DEBUG
         DebugLogin.apply(to: accounts)
+        DebugLocal.apply(to: self)
         #endif
         connect()
+        // Ordner beim Start einmal abgleichen (neue/gelöschte Dateien), im Hintergrund
+        if !local.roots.isEmpty { Task { await local.rescanAll() } }
     }
+
+    /// Ohne Konto, aber mit lokaler Musik oder „Ohne Server fortfahren“ → Mediathek statt Anmeldung.
+    var showsLogin: Bool { client == nil && !localMode }
 
     /// Mit dem aktuellen Konto verbinden (nach Anmelden oder Umschalten).
     func connect() {
         player.stopAndClear()
-        client = accounts.current.flatMap { accounts.client(for: $0) }
+        client = signedOut ? nil : accounts.current.flatMap { accounts.client(for: $0) }
         library.attach(client)
         downloads.attach(client)
         player.restoreQueue()
@@ -114,9 +143,79 @@ final class AppModel {
 
     func openAlbum(of song: Song) { if let id = song.albumId { open(.album(id)) } }
     func openArtist(of song: Song) { if let id = song.artistId { open(.artist(id)) } }
+
+    // MARK: Musik auf diesem iPhone
+
+    /// Ergebnis des Dateien-Dialogs übernehmen (Ordner/Dateien werden referenziert, nicht kopiert).
+    func importLocal(_ result: Result<[URL], Error>) {
+        guard case .success(let urls) = result, !urls.isEmpty else { return }
+        Task {
+            let s = await local.add(urls)
+            report(s)
+        }
+    }
+
+    /// „Öffnen in HomeTune“ / „Teilen“: Audiodateien als Kopie aufnehmen.
+    func receive(_ urls: [URL]) {
+        let files = urls.filter(\.isFileURL)
+        guard !files.isEmpty else { return }
+        if client == nil { localMode = true }
+        Task {
+            let s = await local.receive(files)
+            report(s)
+        }
+    }
+
+    func rescanLocal(_ rootID: String? = nil) {
+        Task {
+            let s = if let rootID { await local.rescan(rootID) } else { await local.rescanAll() }
+            report(s, rescan: true)
+        }
+    }
+
+    func removeLocal(_ songs: [Song]) {
+        local.remove(songs: songs)
+        notice.show(String(localized: "Aus der Mediathek entfernt"), icon: "minus.circle")
+    }
+
+    private func report(_ s: LocalScanSummary, rescan: Bool = false) {
+        if s.unreachable > 0 {
+            notice.show(String(localized: "Ordner nicht erreichbar"), icon: "exclamationmark.triangle")
+        } else if s.added == 0 && s.removed == 0 && s.inCloud > 0 {
+            notice.show(String(localized: "Wird aus iCloud geladen – später neu einlesen"), icon: "icloud.and.arrow.down")
+        } else if rescan || s.removed > 0 {
+            notice.show(String(localized: "\(s.added) neu, \(s.removed) entfernt"), icon: "arrow.triangle.2.circlepath")
+        } else if s.added > 0 {
+            notice.show(String(localized: "\(s.added) Titel hinzugefügt"), icon: "iphone")
+        } else if s.skipped > 0 {
+            notice.show(String(localized: "Keine abspielbaren Audiodateien gefunden"), icon: "exclamationmark.triangle")
+        } else {
+            notice.show(String(localized: "Schon in der Mediathek"), icon: "checkmark")
+        }
+    }
+
+    #if DEBUG
+    fileprivate func debugSignOut() { signedOut = true }
+    #endif
 }
 
 #if DEBUG
+/// Nur Debug: Musik auf diesem iPhone ohne Dateien-Dialog (Simulator-/UI-Tests).
+/// HOMETUNE_SIGNED_OUT=1 (gespeichertes Konto ignorieren), HOMETUNE_LOCAL_ONLY=1 (gleich „Ohne Server fortfahren“),
+/// HOMETUNE_LOCAL_RESET=1 (lokale Mediathek leeren), HOMETUNE_LOCAL_IMPORT=<Ordner>|<Ordner> (per Bookmark hinzufügen)
+enum DebugLocal {
+    @MainActor static func apply(to app: AppModel) {
+        let env = ProcessInfo.processInfo.environment
+        if env["HOMETUNE_SIGNED_OUT"] == "1" { app.debugSignOut(); app.localMode = false }
+        if env["HOMETUNE_LOCAL_ONLY"] == "1" { app.localMode = true }
+        if env["HOMETUNE_LOCAL_RESET"] == "1" { app.local.removeAll() }
+        if let paths = env["HOMETUNE_LOCAL_IMPORT"], !paths.isEmpty {
+            let urls = paths.split(separator: "|").map { URL(fileURLWithPath: String($0), isDirectory: true) }
+            Task { await app.local.add(urls) }
+        }
+    }
+}
+
 /// Nur Debug: Anmeldung über die Startumgebung (Simulator-Tests ohne Passwort-Tippen).
 /// HOMETUNE_SERVER, HOMETUNE_USER, HOMETUNE_PASSWORD
 enum DebugLogin {

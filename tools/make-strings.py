@@ -7,6 +7,43 @@ Fehlt eine Übersetzung, wird der Schlüssel gemeldet (bitte unten in EN ergänz
 import glob, json, os, re, sys
 
 EN = {
+    "%lld Titel hinzugefügt": "%lld Songs Added",
+    "%lld neu, %lld entfernt": "%1$lld new, %2$lld removed",
+    "Alle neu einlesen": "Rescan All",
+    "Auf diesem iPhone": "On This iPhone",
+    "Aus der Mediathek entfernen": "Remove from Library",
+    "Aus der Mediathek entfernen?": "Remove from library?",
+    "Aus der Mediathek entfernt": "Removed from Library",
+    "Datei nicht gefunden – wurde sie verschoben oder gelöscht?": "File not found – was it moved or deleted?",
+    "Dateien": "Files",
+    "Dateien hinzufügen …": "Add Files …",
+    "Die an HomeTune geschickten Kopien werden gelöscht. Deine Originale bleiben, wo sie sind.": "The copies sent to HomeTune will be deleted. Your originals stay where they are.",
+    "Empfangene Dateien": "Received Files",
+    "HomeTune merkt sich nur, wo die Musik liegt. Entfernen nimmt sie aus der Mediathek – die Dateien selbst bleiben unverändert.":
+        "HomeTune only remembers where your music is. Removing takes it out of the library – the files themselves stay untouched.",
+    "Kein Zugriff auf den Ordner. Bitte erneut hinzufügen.": "No access to the folder. Please add it again.",
+    "Keine abspielbaren Audiodateien gefunden": "No Playable Audio Files Found",
+    "Mit einem Server verbinden …": "Connect to a Server …",
+    "Musik aus der Dateien-App wird nur verknüpft, nicht kopiert, und läuft offline und ohne Server.":
+        "Music from the Files app is linked, not copied, and plays offline and without a server.",
+    "Musik vom iPhone hinzufügen": "Add Music from iPhone",
+    "Neu einlesen": "Rescan",
+    "Nicht erreichbar – bitte erneut hinzufügen": "Not reachable – please add again",
+    "Nur Musik auf diesem iPhone – ebenfalls in 432 Hz. Einen Server kannst du später in den Einstellungen hinzufügen.":
+        "Only music on this iPhone – also in 432 Hz. You can add a server later in Settings.",
+    "Ohne Server fortfahren": "Continue Without a Server",
+    "Ordner": "Folder",
+    "Ordner hinzufügen …": "Add Folder …",
+    "Ordner nicht erreichbar": "Folder Not Reachable",
+    "Ordner und Dateien": "Folders and Files",
+    "Schon in der Mediathek": "Already in Library",
+    "Verschiedene Interpret:innen": "Various Artists",
+    "Wird aus iCloud geladen – später neu einlesen": "Downloading from iCloud – rescan later",
+    "Wird eingelesen …": "Scanning …",
+    "Wird eingelesen … %lld von %lld": "Scanning … %1$lld of %2$lld",
+    "Wähle einen Ordner oder einzelne Dateien in der Dateien-App – FLAC, MP3, AAC, ALAC, WAV oder AIFF. HomeTune merkt sich nur, wo sie liegen, und spielt sie in 432 Hz.":
+        "Choose a folder or individual files in the Files app – FLAC, MP3, AAC, ALAC, WAV or AIFF. HomeTune only remembers where they are and plays them in 432 Hz.",
+    "„%@“ verschwindet aus HomeTune. Die Dateien bleiben unverändert in der Dateien-App.": "“%@” will be removed from HomeTune. The files stay untouched in the Files app.",
     "%lld Titel": "%lld Songs",
     "%lld Titel · %@": "%1$lld Songs · %2$@",
     "%lld Titel, %lld Minuten": "%1$lld Songs, %2$lld Minutes",

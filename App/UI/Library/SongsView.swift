@@ -39,16 +39,24 @@ struct SongList: View {
 
 struct SongsView: View {
     @Environment(AppModel.self) private var app
+    /// Nur „Auf diesem iPhone“
+    var localOnly = false
     @AppStorage("songs.sort") private var sort = SongSort.title
     @State private var filter = LibraryFilter.none
     @State private var query = ""
 
     private var songs: [Song] {
-        var s = app.library.songs
-        if app.library.isOffline || s.isEmpty { s = app.downloads.downloadedSongs }
+        var s: [Song]
+        if localOnly {
+            s = app.local.songs
+        } else {
+            s = app.library.serverSongs
+            if app.library.isOffline || s.isEmpty { s = app.downloads.downloadedSongs }
+            s += app.local.songs
+        }
         switch filter {
         case .favorites: s = s.filter { app.library.isStarred(song: $0.id) }
-        case .downloaded: s = s.filter { app.downloads.isDownloaded($0.id) }
+        case .downloaded: s = s.filter { $0.isLocal || app.downloads.isDownloaded($0.id) }
         case .none: break
         }
         if !query.isEmpty {
@@ -76,7 +84,7 @@ struct SongsView: View {
                     .accessibilityLabel(Text("Sortieren und Filtern"))
                 }
             }
-            .refreshable { await app.library.refresh() }
+            .refreshable { if localOnly { await app.local.rescanAll() } else { await app.library.refresh() } }
     }
 }
 

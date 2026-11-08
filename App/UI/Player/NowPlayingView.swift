@@ -212,8 +212,7 @@ struct NowPlayingView: View {
     }
 
     private func loadColors(_ cover: String?) async {
-        guard let cover, let client = app.client,
-              let img = await ArtworkCache.shared.image(id: cover, size: 120, client: client) else { return }
+        guard let cover, let img = await Artwork.image(id: cover, size: 120, client: app.client) else { return }
         colors = img.dominantColors()
     }
 }

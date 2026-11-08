@@ -14,8 +14,12 @@ struct HomeView: View {
                 .buttonBorderShape(.roundedRectangle(radius: 12))
                 .accessibilityIdentifier("home.shuffleAll")
 
+                if app.client == nil && app.local.isEmpty && !app.local.isScanning {
+                    AddLocalMusicHint().padding(.horizontal)
+                }
                 shelf("Zuletzt gespielt", app.library.recentlyPlayed)
                 shelf("Zuletzt hinzugefügt", app.library.recentlyAdded)
+                shelf("Auf diesem iPhone", app.local.recentAlbums)
                 shelf("Häufig gespielt", app.library.frequent)
                 shelf("Favoriten", app.library.albums.filter { app.library.isStarred(album: $0.id) })
                 shelf("Zufällige Alben", app.library.randomAlbums)

@@ -5,11 +5,21 @@ struct RootView: View {
     @Namespace private var playerNS
 
     var body: some View {
-        if app.client == nil {
-            LoginView()
-        } else {
-            tabs
+        Group {
+            if app.showsLogin {
+                LoginView()
+            } else {
+                tabs
+            }
         }
+        // „Musik hinzufügen“: Ordner oder Dateien werden referenziert (Bookmark), nicht kopiert
+        .fileImporter(isPresented: Binding(get: { app.importRequest != nil }, set: { if !$0 { app.importRequest = nil } }),
+                      allowedContentTypes: app.importRequest == .folder ? [.folder] : TagReader.contentTypes,
+                      allowsMultipleSelection: true) { result in
+            app.importLocal(result)
+        }
+        // „Öffnen in HomeTune“ / „Teilen“ aus der Dateien-App
+        .onOpenURL { url in app.receive([url]) }
     }
 
     private var tabs: some View {
@@ -54,6 +64,9 @@ extension View {
             case .genre(let g): GenreDetailView(genre: g)
             case .composer(let c): ComposerDetailView(name: c)
             case .section(let s): s.destination
+            case .localAlbums: AlbumsView(localOnly: true)
+            case .localArtists: ArtistsView(localOnly: true)
+            case .localSongs: SongsView(localOnly: true)
             }
         }
     }
@@ -70,6 +83,7 @@ extension LibrarySection {
         case .composers: ComposersView()
         case .favorites: FavoriteSongsView()
         case .downloaded: DownloadedView()
+        case .onThisIPhone: LocalMusicView()
         }
     }
 }
