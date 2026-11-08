@@ -9,11 +9,11 @@ final class AppFlowTests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
         let env = ProcessInfo.processInfo.environment
-        guard let server = env["HOMESPIN_SERVER"], let user = env["HOMESPIN_DEMO_USER"], let pw = env["HOMESPIN_DEMO_PASSWORD"] else {
+        guard let server = env["HOMETUNE_SERVER"], let user = env["HOMETUNE_DEMO_USER"], let pw = env["HOMETUNE_DEMO_PASSWORD"] else {
             throw XCTSkip("Kein Testserver in der Umgebung")
         }
         app = XCUIApplication()
-        app.launchEnvironment = ["HOMESPIN_SERVER": server, "HOMESPIN_USER": user, "HOMESPIN_PASSWORD": pw]
+        app.launchEnvironment = ["HOMETUNE_SERVER": server, "HOMETUNE_USER": user, "HOMETUNE_PASSWORD": pw]
         if english { app.launchArguments += ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"] }
         app.launch()
     }

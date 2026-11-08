@@ -1,4 +1,4 @@
-// Erzeugt das App-Symbol von HomeSpin (Schallplatte mit Haus-Etikett und Stimmgabel-Akzent):
+// Erzeugt das App-Symbol von HomeTune (Schallplatte mit Haus-Etikett und Stimmgabel-Akzent):
 //   swift tools/make-icon.swift Resources/Assets.xcassets/AppIcon.appiconset
 import AppKit
 

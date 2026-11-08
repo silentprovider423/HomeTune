@@ -1,5 +1,5 @@
 import XCTest
-@testable import HomeSpin
+@testable import HomeTune
 
 @MainActor
 final class DownloadAndLyricsTests: XCTestCase {

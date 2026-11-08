@@ -1,8 +1,8 @@
-# HomeSpin
+# HomeTune
 
 **A native iOS music app for your own [Navidrome](https://www.navidrome.org) server – the look and feel of the Library in Apple's Music app, and every song plays in 432 Hz.**
 
-HomeSpin is an independent iPhone client for self-hosted Navidrome (or any Subsonic/OpenSubsonic server). It aims to feel like the Music app on iOS 26 (library sections, album and artist pages, mini player, full-screen player, "Playing Next" queue, lyrics …) while your music stays on hardware you own.
+HomeTune is an independent iPhone client for self-hosted Navidrome (or any Subsonic/OpenSubsonic server). It aims to feel like the Music app on iOS 26 (library sections, album and artist pages, mini player, full-screen player, "Playing Next" queue, lyrics …) while your music stays on hardware you own.
 
 > **432 Hz is the core feature, not a setting.** Every track is pitched down by 1200·log2(432/440) ≈ **−31.77 cents** (A4 = 432 Hz instead of 440 Hz) on the device, with the tempo unchanged. A small "432 Hz" badge in the player shows it.
 >
@@ -77,20 +77,20 @@ That is why Apple's built-in `AVAudioUnitTimePitch` is used; no third-party DSP 
 
 You need your own Navidrome server for this. **Step-by-step guide (server with Docker, access from outside, install): [docs/SETUP.md](docs/SETUP.md).**
 
-1. Download `HomeSpin-<version>.ipa` from the Releases page of this repository.
+1. Download `HomeTune-<version>.ipa` from the Releases page of this repository.
 2. Install it with [SideStore](https://sidestore.io) or [AltStore](https://altstore.io). A free Apple ID is enough, the app then has to be refreshed every 7 days (SideStore does that on the phone).
 3. Open the app and sign in with your Navidrome address and account.
 
 ## Build & install
 
 ```bash
-git clone https://github.com/<you>/homespin.git
-cd homespin
+git clone https://github.com/<you>/hometune.git
+cd hometune
 xcodegen generate
-open HomeSpin.xcodeproj
+open HomeTune.xcodeproj
 ```
 
-1. Set your own **bundle identifier** in `project.yml` (default: `org.homeroll.homespin`) and select your team in Xcode.
+1. Set your own **bundle identifier** in `project.yml` (default: `org.homeroll.hometune`) and select your team in Xcode.
 2. Run on your iPhone. Sign in with your server address (e.g. `https://music.example.com` or `http://192.168.x.y:4533`) and your Navidrome account.
 3. Unsigned IPA for sideloading (AltStore/SideStore): `./build-ipa.sh`.
 
@@ -99,16 +99,16 @@ open HomeSpin.xcodeproj
 Put the test server into the git-ignored file `.test-account` (never commit it):
 
 ```bash
-HOMESPIN_SERVER=http://<server>:4533
-HOMESPIN_USER=<account that sees all libraries>
-HOMESPIN_PASSWORD=...
-HOMESPIN_DEMO_USER=<account with demo music only>
-HOMESPIN_DEMO_PASSWORD=...
+HOMETUNE_SERVER=http://<server>:4533
+HOMETUNE_USER=<account that sees all libraries>
+HOMETUNE_PASSWORD=...
+HOMETUNE_DEMO_USER=<account with demo music only>
+HOMETUNE_DEMO_PASSWORD=...
 ```
 
 ```bash
 SIM=<simulator-udid> ./test.sh      # unit tests (API, queue, 432 Hz FFT, engine) + UI tests
-TEST_RUNNER_UI_LANG=en TEST_RUNNER_SHOT_DIR=/tmp/shots SIM=<udid> ./test.sh -only-testing:HomeSpinUITests   # English screenshots
+TEST_RUNNER_UI_LANG=en TEST_RUNNER_SHOT_DIR=/tmp/shots SIM=<udid> ./test.sh -only-testing:HomeTuneUITests   # English screenshots
 SIM=<simulator-udid> ./sim-run.sh   # start the app signed in (debug builds only)
 ```
 
@@ -136,10 +136,10 @@ tools          icon and strings generators
 
 ## License
 
-[MIT](LICENSE). Third-party: Navidrome (GPL-3.0) is not included – HomeSpin only talks to its HTTP API.
+[MIT](LICENSE). Third-party: Navidrome (GPL-3.0) is not included – HomeTune only talks to its HTTP API.
 
 ---
 
 ## Deutsch
 
-**HomeSpin** ist eine eigene iPhone-Musik-App für deinen selbst betriebenen Navidrome-Server. Sie sieht aus und bedient sich wie die Mediathek von Apples Musik-App unter iOS 26 – und spielt jeden Titel in 432 Hz (−31,77 Cent, Tempo unverändert, verlustfrei vom Original). Die Oberfläche gibt es auf Deutsch und Englisch, je nach Sprache des iPhones. Funktionen, Voraussetzungen und Installation stehen oben.
+**HomeTune** ist eine eigene iPhone-Musik-App für deinen selbst betriebenen Navidrome-Server. Sie sieht aus und bedient sich wie die Mediathek von Apples Musik-App unter iOS 26 – und spielt jeden Titel in 432 Hz (−31,77 Cent, Tempo unverändert, verlustfrei vom Original). Die Oberfläche gibt es auf Deutsch und Englisch, je nach Sprache des iPhones. Funktionen, Voraussetzungen und Installation stehen oben.

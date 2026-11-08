@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct HomeSpinApp: App {
+struct HomeTuneApp: App {
     @State private var app = AppModel()
     @Environment(\.scenePhase) private var phase
 
@@ -19,7 +19,7 @@ struct HomeSpinApp: App {
 }
 
 extension Color {
-    /// Akzentfarbe von HomeSpin (warmes Rot wie die Musik-App, eigener Ton)
+    /// Akzentfarbe von HomeTune (warmes Rot wie die Musik-App, eigener Ton)
     static let accent = Color(red: 0.98, green: 0.24, blue: 0.33)
 }
 

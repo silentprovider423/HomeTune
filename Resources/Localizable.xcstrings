@@ -503,22 +503,22 @@
         }
       }
     },
-    "HomeSpin": {
+    "HomeTune": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "HomeSpin"
+            "value": "HomeTune"
           }
         }
       }
     },
-    "HomeSpin spielt jeden Titel um 31,77 Cent tiefer (A4 = 432 Hz statt 440 Hz). Das Tempo bleibt gleich, die Originaldatei wird verlustfrei geladen.": {
+    "HomeTune spielt jeden Titel um 31,77 Cent tiefer (A4 = 432 Hz statt 440 Hz). Das Tempo bleibt gleich, die Originaldatei wird verlustfrei geladen.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "HomeSpin plays every song 31.77 cents lower (A4 = 432 Hz instead of 440 Hz). The tempo stays the same and the original file is loaded losslessly."
+            "value": "HomeTune plays every song 31.77 cents lower (A4 = 432 Hz instead of 440 Hz). The tempo stays the same and the original file is loaded losslessly."
           }
         }
       }

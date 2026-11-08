@@ -37,7 +37,7 @@ final class SubsonicClient: Sendable {
     let account: ServerAccount
     private let password: String
     let session: URLSession
-    static let clientName = "HomeSpin"
+    static let clientName = "HomeTune"
     static let apiVersion = "1.16.1"
 
     init(account: ServerAccount, password: String, session: URLSession = .shared) {

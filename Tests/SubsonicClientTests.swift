@@ -1,16 +1,16 @@
 import XCTest
 import AVFoundation
-@testable import HomeSpin
+@testable import HomeTune
 
 /// Tests gegen ein Test-Navidrome. Zugang nur über die Umgebung (nie im Repo):
-/// HOMESPIN_SERVER, HOMESPIN_USER, HOMESPIN_PASSWORD (sieht alle Bibliotheken),
-/// HOMESPIN_DEMO_USER, HOMESPIN_DEMO_PASSWORD (sieht nur die Demo-Bibliothek). Siehe `test.sh`.
+/// HOMETUNE_SERVER, HOMETUNE_USER, HOMETUNE_PASSWORD (sieht alle Bibliotheken),
+/// HOMETUNE_DEMO_USER, HOMETUNE_DEMO_PASSWORD (sieht nur die Demo-Bibliothek). Siehe `test.sh`.
 final class SubsonicClientTests: XCTestCase {
     static func client(demo: Bool = false) throws -> SubsonicClient {
         let env = ProcessInfo.processInfo.environment
-        guard let s = env["HOMESPIN_SERVER"], let url = AccountStore.normalize(s),
-              let u = env[demo ? "HOMESPIN_DEMO_USER" : "HOMESPIN_USER"],
-              let p = env[demo ? "HOMESPIN_DEMO_PASSWORD" : "HOMESPIN_PASSWORD"] else {
+        guard let s = env["HOMETUNE_SERVER"], let url = AccountStore.normalize(s),
+              let u = env[demo ? "HOMETUNE_DEMO_USER" : "HOMETUNE_USER"],
+              let p = env[demo ? "HOMETUNE_DEMO_PASSWORD" : "HOMETUNE_PASSWORD"] else {
             throw XCTSkip("Kein Testserver in der Umgebung")
         }
         return SubsonicClient(account: ServerAccount(id: demo ? "test-demo" : "test-main", server: url, username: u), password: p)

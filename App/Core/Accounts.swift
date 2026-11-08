@@ -3,7 +3,7 @@ import Security
 
 /// Passwörter liegen nur im Schlüsselbund (je Konto-ID).
 enum Keychain {
-    private static let service = "org.homeroll.homespin.password"
+    private static let service = "org.homeroll.hometune.password"
 
     static func set(_ value: String, for account: String) {
         let base: [String: Any] = [kSecClass as String: kSecClassGenericPassword,

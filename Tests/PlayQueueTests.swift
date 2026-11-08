@@ -1,5 +1,5 @@
 import XCTest
-@testable import HomeSpin
+@testable import HomeTune
 
 /// Warteliste nach Apples Modell: Als Nächstes / Zuletzt / Quelle / Verlauf / Zufall / Wiederholen.
 final class PlayQueueTests: XCTestCase {

@@ -1,7 +1,7 @@
 import XCTest
 import AVFoundation
 import Accelerate
-@testable import HomeSpin
+@testable import HomeTune
 
 /// Klangprüfung der 432-Hz-Kette: Sinus durch genau dieselbe Kette (TimePitch + Limiter) rendern
 /// und per FFT messen. 440 Hz muss 432 Hz ergeben, das Tempo muss gleich bleiben.

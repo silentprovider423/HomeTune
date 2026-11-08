@@ -19,7 +19,7 @@ struct LoginView: View {
                         Image(systemName: "dot.radiowaves.left.and.right")
                             .font(.system(size: 44, weight: .semibold))
                             .foregroundStyle(.accent)
-                        Text("HomeSpin").font(.largeTitle.bold())
+                        Text("HomeTune").font(.largeTitle.bold())
                         Text("Deine Musik vom eigenen Navidrome-Server – immer in 432 Hz.")
                             .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
                     }

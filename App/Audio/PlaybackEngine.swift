@@ -19,7 +19,7 @@ final class PlaybackEngine: @unchecked Sendable {
     /// Datei ließ sich nicht öffnen.
     var onError: (@MainActor (Int, Error) -> Void)?
 
-    private let q = DispatchQueue(label: "homespin.audio.feeder", qos: .userInitiated)
+    private let q = DispatchQueue(label: "hometune.audio.feeder", qos: .userInitiated)
     private let chunkFrames: AVAudioFrameCount = 16384
     private let maxInFlight = 4
 

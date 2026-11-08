@@ -1,6 +1,6 @@
 # Setup guide: from IPA to your music
 
-HomeSpin is only the app. Your music lives on your own **Navidrome server**, so you need one of those first. If you already run Navidrome, skip to step 3.
+HomeTune is only the app. Your music lives on your own **Navidrome server**, so you need one of those first. If you already run Navidrome, skip to step 3.
 
 ## What you need
 
@@ -34,7 +34,7 @@ services:
 docker compose up -d
 ```
 
-HomeSpin is tested with Navidrome **0.64**. Navidrome only reads your files (`:ro`); it never changes tags or deletes music.
+HomeTune is tested with Navidrome **0.64**. Navidrome only reads your files (`:ro`); it never changes tags or deletes music.
 
 ### Optional: several libraries
 
@@ -44,7 +44,7 @@ Since Navidrome 0.58 you can add more music folders as separate libraries (e.g. 
 2. In the Navidrome web UI: **Settings → Libraries → +**, name it and enter the path `/other`.
 3. **Settings → Users**: choose which libraries each user may see. Admins see all libraries.
 
-HomeSpin shows everything the signed-in account is allowed to see.
+HomeTune shows everything the signed-in account is allowed to see.
 
 ## 2. Create your account
 
@@ -66,12 +66,12 @@ Tips:
 
 - Use HTTPS for anything that leaves your home network.
 - Type `http://` in front of IP addresses if you don't use HTTPS. Without a scheme the app assumes `http://`.
-- HomeSpin loads the original files (lossless). On mobile data a FLAC album can be several hundred MB – download albums at home (*Download*) to listen offline.
+- HomeTune loads the original files (lossless). On mobile data a FLAC album can be several hundred MB – download albums at home (*Download*) to listen offline.
 
 ## 4. Install the IPA
 
 1. Install [SideStore](https://sidestore.io) (no computer needed later) or [AltStore](https://altstore.io) (needs AltServer on your computer) and sign in with your Apple ID.
-2. Download `HomeSpin-<version>.ipa` from the Releases page on the iPhone.
+2. Download `HomeTune-<version>.ipa` from the Releases page on the iPhone.
 3. Open it with SideStore/AltStore ("Share" → SideStore, or the **+** button in My Apps).
 4. If iOS asks: Settings → Privacy & Security → **Developer Mode** on, iPhone restarts.
 
@@ -79,7 +79,7 @@ With a free Apple ID the app has to be **refreshed every 7 days**. SideStore and
 
 ## 5. First start
 
-1. Open HomeSpin, enter the server address from step 3, your Navidrome username and password, tap **Sign In**.
+1. Open HomeTune, enter the server address from step 3, your Navidrome username and password, tap **Sign In**.
 2. Allow **local network** access when asked (needed for servers at home).
 3. Your library loads and is stored on the iPhone, so the next start is instant (and works offline with downloaded music).
 

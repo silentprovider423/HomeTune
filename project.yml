@@ -1,4 +1,4 @@
-name: HomeSpin
+name: HomeTune
 options:
   bundleIdPrefix: org.homeroll
   deploymentTarget:
@@ -15,7 +15,7 @@ settings:
     SWIFT_EMIT_LOC_STRINGS: YES
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
 targets:
-  HomeSpin:
+  HomeTune:
     type: application
     platform: iOS
     sources:
@@ -27,7 +27,7 @@ targets:
       properties:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        CFBundleDisplayName: HomeSpin
+        CFBundleDisplayName: HomeTune
         CFBundleDevelopmentRegion: en
         CFBundleLocalizations: [en, de]
         UILaunchScreen: {}
@@ -39,39 +39,39 @@ targets:
           NSAllowsLocalNetworking: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: org.homeroll.homespin
+        PRODUCT_BUNDLE_IDENTIFIER: org.homeroll.hometune
         TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-  HomeSpinTests:
+  HomeTuneTests:
     type: bundle.unit-test
     platform: iOS
     sources: [Tests]
     dependencies:
-      - target: HomeSpin
+      - target: HomeTune
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: org.homeroll.homespin.tests
+        PRODUCT_BUNDLE_IDENTIFIER: org.homeroll.hometune.tests
         GENERATE_INFOPLIST_FILE: YES
-        TEST_HOST: $(BUILT_PRODUCTS_DIR)/HomeSpin.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/HomeSpin
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/HomeTune.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/HomeTune
         BUNDLE_LOADER: $(TEST_HOST)
-  HomeSpinUITests:
+  HomeTuneUITests:
     type: bundle.ui-testing
     platform: iOS
     sources: [UITests]
     dependencies:
-      - target: HomeSpin
+      - target: HomeTune
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: org.homeroll.homespin.uitests
+        PRODUCT_BUNDLE_IDENTIFIER: org.homeroll.hometune.uitests
         GENERATE_INFOPLIST_FILE: YES
-        TEST_TARGET_NAME: HomeSpin
+        TEST_TARGET_NAME: HomeTune
 schemes:
-  HomeSpin:
+  HomeTune:
     build:
       targets:
-        HomeSpin: all
-        HomeSpinTests: [test]
-        HomeSpinUITests: [test]
+        HomeTune: all
+        HomeTuneTests: [test]
+        HomeTuneUITests: [test]
     test:
-      targets: [HomeSpinTests, HomeSpinUITests]
+      targets: [HomeTuneTests, HomeTuneUITests]

@@ -1,6 +1,6 @@
 import XCTest
 import AVFoundation
-@testable import HomeSpin
+@testable import HomeTune
 
 /// Live-Wiedergabe im Simulator: lückenloser Übergang zum vorgeladenen Titel, Ende der Warteliste,
 /// Position, Springen – und eine echte FLAC-Datei vom Testserver.

@@ -1,7 +1,7 @@
 import AVFoundation
 import AudioToolbox
 
-/// Die feste 432-Hz-Stimmung von HomeSpin (kein Schalter – Kernmerkmal).
+/// Die feste 432-Hz-Stimmung von HomeTune (kein Schalter – Kernmerkmal).
 /// Musik ist (fast immer) auf A4 = 440 Hz gestimmt. Um auf A4 = 432 Hz zu kommen, wird die
 /// Tonhöhe um 1200·log2(432/440) ≈ −31,77 Cent verschoben; das Tempo bleibt exakt gleich (rate = 1).
 enum Tuning432 {

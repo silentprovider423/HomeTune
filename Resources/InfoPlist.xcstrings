@@ -3,7 +3,7 @@
   "strings" : {
     "CFBundleDisplayName" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "HomeSpin" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "HomeTune" } }
       }
     },
     "NSLocalNetworkUsageDescription" : {

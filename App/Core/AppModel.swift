@@ -118,12 +118,12 @@ final class AppModel {
 
 #if DEBUG
 /// Nur Debug: Anmeldung über die Startumgebung (Simulator-Tests ohne Passwort-Tippen).
-/// HOMESPIN_SERVER, HOMESPIN_USER, HOMESPIN_PASSWORD
+/// HOMETUNE_SERVER, HOMETUNE_USER, HOMETUNE_PASSWORD
 enum DebugLogin {
     @MainActor static func apply(to store: AccountStore) {
         let env = ProcessInfo.processInfo.environment
-        guard let s = env["HOMESPIN_SERVER"], let url = AccountStore.normalize(s),
-              let user = env["HOMESPIN_USER"], let pw = env["HOMESPIN_PASSWORD"] else { return }
+        guard let s = env["HOMETUNE_SERVER"], let url = AccountStore.normalize(s),
+              let user = env["HOMETUNE_USER"], let pw = env["HOMETUNE_PASSWORD"] else { return }
         if let existing = store.accounts.first(where: { $0.server == url && $0.username == user }) {
             Keychain.set(pw, for: existing.id)
             store.select(existing.id)

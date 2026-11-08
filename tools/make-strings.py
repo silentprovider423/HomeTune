@@ -56,9 +56,9 @@ EN = {
     "HTTP-Fehler %lld": "HTTP error %lld",
     "Hinzufügen": "Add",
     "Hinzugefügt am %@": "Added %@",
-    "HomeSpin": "HomeSpin",
-    "HomeSpin spielt jeden Titel um 31,77 Cent tiefer (A4 = 432 Hz statt 440 Hz). Das Tempo bleibt gleich, die Originaldatei wird verlustfrei geladen.":
-        "HomeSpin plays every song 31.77 cents lower (A4 = 432 Hz instead of 440 Hz). The tempo stays the same and the original file is loaded losslessly.",
+    "HomeTune": "HomeTune",
+    "HomeTune spielt jeden Titel um 31,77 Cent tiefer (A4 = 432 Hz statt 440 Hz). Das Tempo bleibt gleich, die Originaldatei wird verlustfrei geladen.":
+        "HomeTune plays every song 31.77 cents lower (A4 = 432 Hz instead of 440 Hz). The tempo stays the same and the original file is loaded losslessly.",
     "Häufig gespielt": "Heavy Rotation",
     "Immer in 432 Hz": "Always in 432 Hz",
     "In Alben suchen": "Find in Albums",
@@ -178,7 +178,7 @@ EN = {
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 keys = set()
-for f in glob.glob(os.path.join(root, "build/Build/Intermediates.noindex/HomeSpin.build/*/HomeSpin.build/**/*.stringsdata"), recursive=True):
+for f in glob.glob(os.path.join(root, "build/Build/Intermediates.noindex/HomeTune.build/*/HomeTune.build/**/*.stringsdata"), recursive=True):
     for table in json.load(open(f)).get("tables", {}).values():
         keys.update(e["key"] for e in table)
 keys.discard("")

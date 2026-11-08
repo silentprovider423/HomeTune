@@ -60,7 +60,7 @@ struct SettingsView: View {
                     Label {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Immer in 432 Hz").font(.headline)
-                            Text("HomeSpin spielt jeden Titel um 31,77 Cent tiefer (A4 = 432 Hz statt 440 Hz). Das Tempo bleibt gleich, die Originaldatei wird verlustfrei geladen.")
+                            Text("HomeTune spielt jeden Titel um 31,77 Cent tiefer (A4 = 432 Hz statt 440 Hz). Das Tempo bleibt gleich, die Originaldatei wird verlustfrei geladen.")
                                 .font(.footnote).foregroundStyle(.secondary)
                         }
                     } icon: { Image(systemName: "tuningfork").foregroundStyle(.accent) }
