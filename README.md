@@ -173,7 +173,7 @@ Vendor         signalsmith-stretch + signalsmith-linear (headers, MIT)
 
 ## License
 
-[MIT](LICENSE).
+[GPL-3.0](LICENSE) (GNU General Public License v3.0; releases up to this change were published under MIT).
 
 **Third-party:**
 - [signalsmith-stretch](https://github.com/Signalsmith-Audio/signalsmith-stretch) (time-stretching) and [signalsmith-linear](https://github.com/Signalsmith-Audio/linear) (FFT/STFT) by Signalsmith Audio – MIT, vendored in `Vendor/` with their license files ([Vendor/README.md](Vendor/README.md)).
