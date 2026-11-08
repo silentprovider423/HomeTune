@@ -289,7 +289,7 @@ final class SubsonicClient: Sendable {
         try await perform("scrobble", p)
     }
 
-    /// Originaldatei (keine Transkodierung) – Grundlage für verlustfreie 432-Hz-Wiedergabe.
+    /// Originaldatei (keine Transkodierung) – Grundlage für die verlustfreie Wiedergabe (auch umgestimmt).
     func streamRequest(id: String, format: String = "raw") -> URLRequest {
         var r = request("stream", [("id", id), ("format", format)])
         r.timeoutInterval = 120

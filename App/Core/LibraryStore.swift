@@ -244,9 +244,36 @@ final class LibraryStore {
         }
     }
 
-    // MARK: Playlists
+    // MARK: Playlists (Server + „Auf diesem iPhone“)
 
-    func createPlaylist(name: String, comment: String, songs ids: [String]) async throws -> Playlist {
+    /// Server-Playlists und eigene Playlists auf diesem iPhone gemischt, nach Name sortiert.
+    var allPlaylists: [Playlist] {
+        let own = (local?.playlists ?? []).map { localModel($0, withSongs: false) }
+        guard !own.isEmpty else { return playlists }
+        return (playlists + own).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+
+    /// Titel einer Playlist auf diesem iPhone auflösen (lokale Titel und, falls bekannt, Server-Titel).
+    private func resolve(_ ids: [String]) -> [Song] {
+        let server = serverSongs.isEmpty ? [:] : Dictionary(serverSongs.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+        let own = Dictionary((local?.songs ?? []).map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+        return ids.compactMap { own[$0] ?? server[$0] }
+    }
+
+    private func localModel(_ p: LocalPlaylist, withSongs: Bool) -> Playlist {
+        let songs = resolve(p.songIDs)
+        let iso = ISO8601DateFormatter()
+        return Playlist(id: p.id, name: p.name, comment: p.comment, owner: nil, public: false, songCount: songs.count,
+                        duration: songs.reduce(0) { $0 + ($1.duration ?? 0) }, created: iso.string(from: p.created),
+                        changed: iso.string(from: p.changed), coverArt: songs.lazy.compactMap(\.coverArt).first,
+                        readonly: false, entry: withSongs ? songs : nil)
+    }
+
+    func createPlaylist(name: String, comment: String, songs ids: [String], onDevice: Bool = false) async throws -> Playlist {
+        if onDevice || client == nil {
+            guard let local else { throw SubsonicError.badResponse }
+            return localModel(local.createPlaylist(name: name, comment: comment, songIDs: ids), withSongs: false)
+        }
         guard let client else { throw SubsonicError.badResponse }
         var p = try await client.createPlaylist(name: name, songIds: ids)
         if !comment.isEmpty {
@@ -258,6 +285,7 @@ final class LibraryStore {
     }
 
     func add(_ ids: [String], to playlist: Playlist) async throws {
+        if playlist.id.isLocalPlaylistID { local?.addToPlaylist(playlist.id, songIDs: ids); return }
         guard let client else { return }
         try await client.updatePlaylist(id: playlist.id, add: ids)
         await refreshPlaylists()
@@ -265,6 +293,7 @@ final class LibraryStore {
 
     /// Speichert Name, Beschreibung und die komplette Titelreihenfolge.
     func save(playlist: Playlist, name: String, comment: String, songs ids: [String]) async throws {
+        if playlist.id.isLocalPlaylistID { local?.updatePlaylist(playlist.id, name: name, comment: comment, songIDs: ids); return }
         guard let client else { return }
         try await client.updatePlaylist(id: playlist.id, name: name, comment: comment)
         try await client.replacePlaylistSongs(id: playlist.id, songIds: ids)
@@ -272,12 +301,14 @@ final class LibraryStore {
     }
 
     func remove(indexes: [Int], from playlist: Playlist) async throws {
+        if playlist.id.isLocalPlaylistID { local?.removeFromPlaylist(playlist.id, at: IndexSet(indexes)); return }
         guard let client else { return }
         try await client.updatePlaylist(id: playlist.id, removeIndexes: indexes)
         await refreshPlaylists()
     }
 
     func delete(playlist: Playlist) async throws {
+        if playlist.id.isLocalPlaylistID { local?.deletePlaylist(playlist.id); return }
         guard let client else { return }
         try await client.deletePlaylist(id: playlist.id)
         playlists.removeAll { $0.id == playlist.id }
@@ -285,6 +316,10 @@ final class LibraryStore {
     }
 
     func playlistSongs(_ id: String) async throws -> Playlist {
+        if id.isLocalPlaylistID {
+            guard let p = local?.playlist(id) else { throw LocalError.missing }
+            return localModel(p, withSongs: true)
+        }
         guard let client else { throw SubsonicError.badResponse }
         return try await client.playlist(id: id)
     }

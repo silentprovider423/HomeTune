@@ -15,6 +15,8 @@ final class AppFlowTests: XCTestCase {
         app = XCUIApplication()
         app.launchEnvironment = ["HOMETUNE_SERVER": server, "HOMETUNE_USER": user, "HOMETUNE_PASSWORD": pw]
         if english { app.launchArguments += ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"] }
+        // Jeder Test startet in der Standard-Stimmung (Argument-Domäne geht der gespeicherten Auswahl vor)
+        app.launchArguments += ["-tuning", "432"]
         app.launch()
     }
 
@@ -76,8 +78,9 @@ final class AppFlowTests: XCTestCase {
 
         // Jetzt läuft
         mini.tap()
-        let badge = app.descendants(matching: .any)["badge432"].firstMatch
-        XCTAssertTrue(badge.waitForExistence(timeout: 10), "432-Hz-Kennzeichen sichtbar")
+        let queueButton = app.buttons["nowPlaying.queue"].firstMatch
+        XCTAssertTrue(queueButton.waitForExistence(timeout: 10), "„Jetzt läuft“ offen")
+        assertNoHzHint()
         sleep(3)
         shot("4-now-playing")
 
@@ -99,8 +102,59 @@ final class AppFlowTests: XCTestCase {
         app.buttons["nowPlaying.lyrics"].firstMatch.tap()
         app.buttons["nowPlaying.playPause"].firstMatch.tap()
         app.swipeDown(velocity: .fast)
-        XCTAssertTrue(badge.waitForNonExistence(timeout: 5), "Nach unten wischen schließt „Jetzt läuft“")
+        XCTAssertTrue(queueButton.waitForNonExistence(timeout: 5), "Nach unten wischen schließt „Jetzt läuft“")
         XCTAssertTrue(mini.waitForExistence(timeout: 5))
+    }
+
+    /// Kein „… Hz“ in der Oberfläche außerhalb der Einstellungen (die Stimmung steht nur dort).
+    private func assertNoHzHint(file: StaticString = #filePath, line: UInt = #line) {
+        let hz = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", " Hz"))
+        XCTAssertEqual(hz.count, 0, "kein Hz-Hinweis: \(hz.allElementsBoundByIndex.map { $0.label })", file: file, line: line)
+    }
+
+    /// Einstellungen → Stimmung: zwischen 432/528/440 Hz umschalten, Player und Albumkopf zeigen keinen Hz-Hinweis.
+    func testTuningSettingAndNoHzInPlayer() throws {
+        tapTab(t("Mediathek", "Library"))
+        let account = app.buttons[t("Konto und Einstellungen", "Account and Settings")].firstMatch
+        XCTAssertTrue(account.waitForExistence(timeout: 15))
+        account.tap()
+        let t432 = app.buttons["tuning.432"].firstMatch, t528 = app.buttons["tuning.528"].firstMatch, t440 = app.buttons["tuning.440"].firstMatch
+        _ = app.navigationBars.firstMatch.waitForExistence(timeout: 10)
+        for _ in 0..<8 where !(t528.exists && t528.isHittable) { app.swipeUp() }
+        XCTAssertTrue(t528.isHittable, "Abschnitt „Stimmung“")
+        XCTAssertTrue(t440.exists && t432.exists)
+        XCTAssertTrue(app.staticTexts[t("Stimmung", "Tuning")].exists || app.staticTexts[t("STIMMUNG", "TUNING")].exists)
+        // Standard 432 Hz für das Bildschirmfoto
+        t432.tap()
+        XCTAssertTrue(t432.isSelected)
+        sleep(1)
+        shot("10-settings-tuning")
+        t528.tap()
+        XCTAssertTrue(t528.isSelected, "528 Hz gewählt")
+        XCTAssertFalse(t432.isSelected)
+        t432.tap()
+        XCTAssertTrue(t432.isSelected)
+        t440.tap()
+        XCTAssertTrue(t440.isSelected)
+        app.buttons[t("Fertig", "Done")].firstMatch.tap()
+
+        // Album öffnen: Kopfzeile ohne Hz, abspielen, Player ohne Hz
+        app.buttons["section.albums"].firstMatch.tap()
+        let album = app.buttons.containing(NSPredicate(format: "label CONTAINS %@", "Harbor Lights")).firstMatch
+        XCTAssertTrue(album.waitForExistence(timeout: 10))
+        album.tap()
+        let play = app.buttons["play.button"].firstMatch
+        XCTAssertTrue(play.waitForExistence(timeout: 10))
+        assertNoHzHint()
+        play.tap()
+        let mini = app.otherElements["miniPlayer"].firstMatch
+        XCTAssertTrue(mini.waitForExistence(timeout: 10))
+        mini.tap()
+        XCTAssertTrue(app.buttons["nowPlaying.queue"].firstMatch.waitForExistence(timeout: 10))
+        sleep(2)
+        assertNoHzHint()
+        app.buttons["nowPlaying.playPause"].firstMatch.tap()
+        app.swipeDown(velocity: .fast)
     }
 
     func testSearchAndHome() throws {

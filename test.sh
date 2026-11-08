@@ -3,7 +3,7 @@
 # Zugang aus der gitignorten Datei .test-account (HOMETUNE_SERVER, HOMETUNE_USER, HOMETUNE_PASSWORD,
 # HOMETUNE_DEMO_USER, HOMETUNE_DEMO_PASSWORD) – nie committen.
 #   SIM=<UDID> ./test.sh            alle Tests
-#   SIM=<UDID> ./test.sh -only-testing:HomeTuneTests/Tuning432Tests
+#   SIM=<UDID> ./test.sh -only-testing:HomeTuneTests/TuningTests
 set -euo pipefail
 cd "$(dirname "$0")"
 : "${SIM:?SIM=<Simulator-UDID> setzen}"

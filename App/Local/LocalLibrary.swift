@@ -13,10 +13,11 @@ extension Song {
 
 /// Ein im Dateien-Dialog gewählter Ordner oder eine einzelne Datei. Gemerkt wird nur ein security-scoped
 /// Bookmark – die Musik bleibt, wo sie ist (wie in der Frequenz-App: referenzieren statt kopieren).
-/// `copied` = über „Öffnen in“/„Teilen“ empfangene Dateien; dafür gibt es kein Bookmark, sie liegen als
-/// Kopie im App-Speicher.
+/// `copied` = über „Öffnen in“/„Teilen“ empfangene Dateien (Mail, AirDrop …); dafür gibt es kein Bookmark, sie
+/// liegen als Kopie im App-Speicher. `appFolder` = der eigene Ordner „HomeTune“ in der Dateien-App
+/// (Documents/ der App, kein Bookmark nötig).
 struct LocalRoot: Codable, Hashable, Identifiable, Sendable {
-    enum Kind: String, Codable, Sendable { case folder, file, copied }
+    enum Kind: String, Codable, Sendable { case folder, file, copied, appFolder }
     var id: String
     var name: String
     var kind: Kind
@@ -51,10 +52,13 @@ struct LocalScanSummary: Sendable, Equatable {
     var skipped = 0
     var inCloud = 0
     var unreachable = 0
+    /// Neu importierte Playlists („x von y Titeln gefunden“)
+    var playlists: [PlaylistImportResult] = []
 
     static func + (a: Self, b: Self) -> Self {
         Self(added: a.added + b.added, removed: a.removed + b.removed, unchanged: a.unchanged + b.unchanged,
-             skipped: a.skipped + b.skipped, inCloud: a.inCloud + b.inCloud, unreachable: a.unreachable + b.unreachable)
+             skipped: a.skipped + b.skipped, inCloud: a.inCloud + b.inCloud, unreachable: a.unreachable + b.unreachable,
+             playlists: a.playlists + b.playlists)
     }
 }
 
@@ -69,12 +73,20 @@ enum LocalError: LocalizedError {
     }
 }
 
-/// „Auf diesem iPhone“: Musik aus dem Dateien-Dialog (Ordner/Dateien per Bookmark) und über „Öffnen in“
-/// empfangene Dateien. Liest Tags lokal, bildet Alben/Künstler:innen wie die Server-Mediathek und liefert der
-/// PlaybackEngine die Originaldatei – also ebenfalls in 432 Hz, offline und ohne Server-Anmeldung.
+/// „Auf diesem iPhone“: der HomeTune-Ordner in der Dateien-App, Musik aus dem Dateien-Dialog (Ordner/Dateien
+/// per Bookmark) und über „Öffnen in“ empfangene Dateien, dazu eigene Playlists. Liest Tags lokal, bildet
+/// Alben/Künstler:innen wie die Server-Mediathek und liefert der PlaybackEngine die Originaldatei – also in der
+/// gewählten Stimmung, offline und ohne Server-Anmeldung.
 @MainActor @Observable
 final class LocalLibrary {
+    /// Gemerkte Ordner/Dateien und empfangene Dateien (ohne den HomeTune-Ordner)
     private(set) var roots: [LocalRoot] = []
+    /// Fester Eintrag „HomeTune-Ordner“ (Documents/ der App, in der Dateien-App unter „Auf meinem iPhone“)
+    private(set) var appFolder = LocalRoot(id: LocalLibrary.appFolderRootID, name: "HomeTune", kind: .appFolder,
+                                           bookmark: nil, path: "", added: Date())
+    private(set) var playlists: [LocalPlaylist] = []
+    /// Gelöschte Playlists aus Ordner-Dateien – beim Neu-Einlesen nicht wieder anlegen
+    @ObservationIgnored private var dismissedSources: Set<String> = []
     private(set) var tracks: [String: LocalTrack] = [:]
     private(set) var songs: [Song] = []
     private(set) var albums: [Album] = []
@@ -87,19 +99,42 @@ final class LocalLibrary {
     private(set) var scanDone = 0
     private(set) var scanTotal = 0
 
+    /// Interne Daten (nicht in der Dateien-App sichtbar): Application Support/Local
     let directory: URL
+    /// Der HomeTune-Ordner (Documents/ der App, per Dateifreigabe sichtbar)
+    let documentsDirectory: URL
     var coversDirectory: URL { directory.appending(path: "Covers", directoryHint: .isDirectory) }
     var importedDirectory: URL { directory.appending(path: "Imported", directoryHint: .isDirectory) }
+    /// Posteingang von iOS für „Öffnen in“-Kopien – zählt nicht als Musikordner
+    var inboxDirectory: URL { documentsDirectory.appending(path: "Inbox", directoryHint: .isDirectory) }
     static let importedRootID = "imported"
+    static let appFolderRootID = "documents"
 
     /// Offene security-scoped Zugriffe (Ordner des laufenden und des vorgeladenen Titels)
     @ObservationIgnored private var open: [String: (url: URL, scoped: Bool)] = [:]
 
-    init(directory: URL = URL.applicationSupportDirectory.appending(path: "Local", directoryHint: .isDirectory)) {
+    init(directory: URL = URL.applicationSupportDirectory.appending(path: "Local", directoryHint: .isDirectory),
+         documents: URL = URL.documentsDirectory) {
         self.directory = directory
+        documentsDirectory = documents
         try? FileManager.default.createDirectory(at: coversDirectory, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: documents, withIntermediateDirectories: true)
+        appFolder.path = documents.standardizedFileURL.path
         load()
     }
+
+    /// Alle Einträge für „Auf diesem iPhone“: HomeTune-Ordner zuerst
+    var allRoots: [LocalRoot] { [appFolder] + roots }
+
+    func root(_ id: String) -> LocalRoot? { id == Self.appFolderRootID ? appFolder : roots.first { $0.id == id } }
+
+    private func updateRoot(_ id: String, _ body: (inout LocalRoot) -> Void) {
+        if id == Self.appFolderRootID { body(&appFolder) }
+        else if let i = roots.firstIndex(where: { $0.id == id }) { body(&roots[i]) }
+    }
+
+    /// Liegt der Titel im HomeTune-Ordner (Datei gehört der App, Löschen möglich)?
+    func isInAppFolder(_ song: Song) -> Bool { tracks[song.id]?.root == Self.appFolderRootID }
 
     var isEmpty: Bool { tracks.isEmpty }
     var isScanning: Bool { scanning > 0 }
@@ -111,20 +146,27 @@ final class LocalLibrary {
         var roots: [LocalRoot]
         var tracks: [LocalTrack]
         var starred: Set<String>
+        var playlists: [LocalPlaylist]?
+        var appFolder: LocalRoot?
+        var dismissedPlaylistSources: Set<String>?
     }
 
     private var storeURL: URL { directory.appending(path: "library.json") }
 
     private func load() {
         guard let d = try? Data(contentsOf: storeURL), let s = try? JSONDecoder().decode(Stored.self, from: d) else { return }
-        roots = s.roots
+        roots = s.roots.filter { $0.kind != .appFolder }
+        if let a = s.appFolder { appFolder.excluded = a.excluded; appFolder.lastScan = a.lastScan; appFolder.added = a.added }
         tracks = Dictionary(s.tracks.map { ($0.song.id, $0) }, uniquingKeysWith: { a, _ in a })
         starred = s.starred
+        playlists = s.playlists ?? []
+        dismissedSources = s.dismissedPlaylistSources ?? []
         rebuild()
     }
 
     private func save() {
-        let s = Stored(roots: roots, tracks: Array(tracks.values), starred: starred)
+        let s = Stored(roots: roots, tracks: Array(tracks.values), starred: starred, playlists: playlists, appFolder: appFolder,
+                       dismissedPlaylistSources: dismissedSources)
         if let d = try? JSONEncoder().encode(s) { try? d.write(to: storeURL, options: .atomic) }
     }
 
@@ -135,7 +177,18 @@ final class LocalLibrary {
     @discardableResult
     func add(_ urls: [URL]) async -> LocalScanSummary {
         var total = LocalScanSummary()
-        for url in urls {
+        // Playlists zuletzt, damit sie die gleichzeitig gewählten Titel schon finden
+        let audioFirst = urls.filter { !PlaylistFile.isPlaylist($0) } + urls.filter(PlaylistFile.isPlaylist)
+        for url in audioFirst {
+            if PlaylistFile.isPlaylist(url) {
+                if let r = importPlaylist(at: url) { total.playlists.append(r) } else { total.skipped += 1 }
+                continue
+            }
+            // Datei/Ordner im HomeTune-Ordner: gehört schon dazu → nur neu einlesen
+            if isInsideAppFolder(url) {
+                total = total + (await rescan(Self.appFolderRootID))
+                continue
+            }
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
             var isDir: ObjCBool = false
@@ -171,6 +224,38 @@ final class LocalLibrary {
 
     // MARK: Empfangen („Öffnen in“ / „Teilen“)
 
+    /// Muss die eingehende Datei kopiert werden? Nur echte Posteingangs-Kopien (Mail, AirDrop, „Teilen“ aus
+    /// anderen Apps → Documents/Inbox bzw. tmp der App). Dateien aus der Dateien-App kommen dank
+    /// LSSupportsOpeningDocumentsInPlace als Original (security-scoped) und werden wie im Dialog referenziert.
+    func needsCopy(_ url: URL) -> Bool {
+        let path = url.standardizedFileURL.path
+        if path.hasPrefix(inboxDirectory.standardizedFileURL.path + "/") { return true }
+        if path.contains("/Inbox/") || path.contains("-Inbox/") { return true }
+        let home = URL(fileURLWithPath: NSHomeDirectory()).standardizedFileURL.path
+        return path.hasPrefix(home + "/") && !isInsideAppFolder(url)
+    }
+
+    func isInsideAppFolder(_ url: URL) -> Bool {
+        let path = url.standardizedFileURL.resolvingSymlinksInPath().path
+        let docs = documentsDirectory.standardizedFileURL.resolvingSymlinksInPath().path
+        let inbox = inboxDirectory.standardizedFileURL.resolvingSymlinksInPath().path
+        return (path == docs || path.hasPrefix(docs + "/")) && !path.hasPrefix(inbox + "/") && path != inbox
+    }
+
+    /// „Öffnen in“ / „Teilen“: Playlists importieren, Dateien aus der Dateien-App per Bookmark referenzieren,
+    /// nur Posteingangs-Dateien kopieren.
+    @discardableResult
+    func open(_ urls: [URL]) async -> LocalScanSummary {
+        var total = LocalScanSummary()
+        let copies = urls.filter { needsCopy($0) && !PlaylistFile.isPlaylist($0) }
+        if !copies.isEmpty { total = total + (await receive(copies)) }
+        let inPlace = urls.filter { !copies.contains($0) }
+        if !inPlace.isEmpty { total = total + (await add(inPlace)) }
+        // Playlists aus dem Posteingang wurden gelesen – Kopie wegräumen
+        for u in urls where PlaylistFile.isPlaylist(u) && needsCopy(u) { try? FileManager.default.removeItem(at: u) }
+        return total
+    }
+
     /// Eingehende Dateien in den App-Speicher übernehmen (kein Bookmark möglich → Kopie, aus dem Posteingang
     /// verschoben). Gleiche Datei (Name + Größe) wird nicht doppelt abgelegt.
     @discardableResult
@@ -183,7 +268,7 @@ final class LocalLibrary {
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
             guard TagReader.isAudio(url) else { skipped += 1; continue }
             // iOS legt „Öffnen in“-Dateien als Kopie in Documents/Inbox ab → verschieben statt nochmal kopieren
-            let inbox = url.path.contains("/Inbox/")
+            let inbox = url.path.contains("/Inbox/") || url.path.contains("-Inbox/")
             let size = (try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize
             let ext = url.pathExtension
             let base = url.deletingPathExtension().lastPathComponent
@@ -215,13 +300,65 @@ final class LocalLibrary {
         return s
     }
 
+    // MARK: Umzug beim Update (Documents/ ist jetzt sichtbar)
+
+    static let migrationKey = "migration.documents.v1"
+
+    /// Einmalig: Documents/ ist ab 1.1 der sichtbare HomeTune-Ordner. Interne Dateien, die dort aus älteren
+    /// Fassungen oder Debug-Importen liegen könnten (Cover, Kopien, Datenbank), nach Application Support
+    /// verschieben; liegengebliebene „Öffnen in“-Kopien aus Documents/Inbox als empfangene Dateien übernehmen.
+    @discardableResult
+    func migrateDocuments(defaults: UserDefaults = .standard) async -> Int {
+        guard !defaults.bool(forKey: Self.migrationKey) else { return 0 }
+        let fm = FileManager.default
+        var moved = 0
+        let internalItems: [(name: String, to: URL)] = [("Covers", coversDirectory), ("Imported", importedDirectory),
+                                                   ("library.json", storeURL), ("Local", directory)]
+        for item in internalItems {
+            let src = documentsDirectory.appending(path: item.name)
+            guard fm.fileExists(atPath: src.path) else { continue }
+            if item.name == "Local" || !fm.fileExists(atPath: item.to.path) {
+                if item.name == "Local" {
+                    // Inhalt einzeln übernehmen, Vorhandenes nicht überschreiben
+                    for f in (try? fm.contentsOfDirectory(at: src, includingPropertiesForKeys: nil)) ?? [] {
+                        let dst = directory.appending(path: f.lastPathComponent)
+                        if !fm.fileExists(atPath: dst.path) { try? fm.moveItem(at: f, to: dst) }
+                    }
+                    try? fm.removeItem(at: src)
+                } else {
+                    try? fm.createDirectory(at: item.to.deletingLastPathComponent(), withIntermediateDirectories: true)
+                    try? fm.moveItem(at: src, to: item.to)
+                }
+                moved += 1
+            } else if let files = try? fm.contentsOfDirectory(at: src, includingPropertiesForKeys: nil) {
+                for f in files where !fm.fileExists(atPath: item.to.appending(path: f.lastPathComponent).path) {
+                    try? fm.moveItem(at: f, to: item.to.appending(path: f.lastPathComponent))
+                }
+                try? fm.removeItem(at: src)
+                moved += 1
+            }
+        }
+        if moved > 0 { load() }
+        let inbox = (try? fm.contentsOfDirectory(at: inboxDirectory, includingPropertiesForKeys: nil)) ?? []
+        let audio = inbox.filter(TagReader.isAudio)
+        if !audio.isEmpty { await receive(audio); moved += audio.count }
+        for f in inbox where PlaylistFile.isPlaylist(f) {
+            _ = importPlaylist(at: f)
+            try? fm.removeItem(at: f)
+            moved += 1
+        }
+        defaults.set(true, forKey: Self.migrationKey)
+        return moved
+    }
+
     // MARK: Neu einlesen
 
     /// Ordner erneut durchsuchen: neue Dateien aufnehmen, gelöschte entfernen, Unverändertes behalten.
     @discardableResult
     func rescan(_ rootID: String) async -> LocalScanSummary {
-        guard let root = roots.first(where: { $0.id == rootID }) else { return .init() }
+        guard let root = root(rootID) else { return .init() }
         if root.kind == .copied { return await scan(rootID: rootID, url: importedDirectory) }
+        if root.kind == .appFolder { return await scan(rootID: rootID, url: documentsDirectory) }
         guard let url = resolve(root) else {
             unreachable.insert(rootID)
             return LocalScanSummary(unreachable: 1)
@@ -234,23 +371,55 @@ final class LocalLibrary {
     @discardableResult
     func rescanAll() async -> LocalScanSummary {
         var total = LocalScanSummary()
-        for r in roots { total = total + (await rescan(r.id)) }
+        for r in allRoots { total = total + (await rescan(r.id)) }
         return total
+    }
+
+    // MARK: HomeTune-Ordner beobachten
+
+    @ObservationIgnored private var appFolderStamp: String?
+
+    /// Kurzer Fingerabdruck (Namen, Größen, Änderungszeiten der Musik- und Playlist-Dateien) – billig genug für
+    /// Abfragen alle paar Sekunden, solange die App offen ist.
+    nonisolated static func fingerprint(of dir: URL, skipping inbox: URL) -> String {
+        let keys: [URLResourceKey] = [.fileSizeKey, .contentModificationDateKey]
+        guard let en = FileManager.default.enumerator(at: dir, includingPropertiesForKeys: keys, options: [.skipsHiddenFiles, .skipsPackageDescendants]) else { return "" }
+        var parts: [String] = []
+        let inboxPath = inbox.standardizedFileURL.path
+        for case let f as URL in en {
+            if f.standardizedFileURL.path == inboxPath { en.skipDescendants(); continue }
+            guard TagReader.isAudio(f) || PlaylistFile.isPlaylist(f) else { continue }
+            let v = try? f.resourceValues(forKeys: Set(keys))
+            parts.append("\(f.path)|\(v?.fileSize ?? 0)|\(v?.contentModificationDate?.timeIntervalSince1970 ?? 0)")
+        }
+        return parts.sorted().joined(separator: "\n")
+    }
+
+    /// HomeTune-Ordner neu einlesen, wenn sich dort etwas geändert hat (beim Start, im Vordergrund, Beobachter).
+    @discardableResult
+    func refreshAppFolderIfChanged() async -> LocalScanSummary? {
+        let dir = documentsDirectory, inbox = inboxDirectory
+        let stamp = await Task.detached(priority: .utility) { Self.fingerprint(of: dir, skipping: inbox) }.value
+        guard stamp != appFolderStamp else { return nil }
+        let s = await rescan(Self.appFolderRootID)
+        appFolderStamp = stamp
+        return s
     }
 
     /// Durchsucht einen Ordner (bzw. eine Datei) im Hintergrund und übernimmt das Ergebnis.
     private func scan(rootID: String, url: URL) async -> LocalScanSummary {
-        guard let root = roots.first(where: { $0.id == rootID }) else { return .init() }
+        guard let root = root(rootID) else { return .init() }
         scanning += 1
         defer { scanning -= 1 }
         let existing = Dictionary(tracks.values.filter { $0.root == rootID }.map { ($0.rel, $0) }, uniquingKeysWith: { a, _ in a })
         let coversDir = coversDirectory
+        let skip = root.kind == .appFolder ? inboxDirectory : nil
         let progress: @Sendable (Int, Int) -> Void = { [weak self] done, total in
             Task { @MainActor in self?.scanDone = done; self?.scanTotal = total }
         }
         let result = await Task.detached(priority: .userInitiated) {
             await Self.scanFiles(rootID: root.id, kind: root.kind, url: url, excluded: root.excluded,
-                                 existing: existing, coversDir: coversDir, progress: progress)
+                                 existing: existing, coversDir: coversDir, skip: skip, progress: progress)
         }.value
         guard result.reachable else {
             // Ordner nicht lesbar (Zugriff verweigert/verschoben): Titel behalten, nichts löschen
@@ -260,27 +429,32 @@ final class LocalLibrary {
         unreachable.remove(rootID)
         tracks = tracks.filter { $0.value.root != rootID }
         for t in result.tracks { tracks[t.song.id] = t }
-        if let i = roots.firstIndex(where: { $0.id == rootID }) { roots[i].lastScan = Date() }
+        updateRoot(rootID) { $0.lastScan = Date() }
         starred = starred.filter { tracks[$0] != nil || !$0.hasPrefix("local:") }
         rebuild()
+        var summary = result.summary
+        summary.playlists = syncPlaylists(rootID: rootID, files: result.playlists)
         cleanupCovers()
         save()
-        return result.summary
+        return summary
     }
 
     private struct ScanResult: Sendable {
         var tracks: [LocalTrack]
         var summary: LocalScanSummary
         var reachable: Bool
+        /// Playlist-Dateien im Ordner (relativer Pfad, Inhalt)
+        var playlists: [(rel: String, data: Data)] = []
     }
 
     nonisolated private static func scanFiles(rootID: String, kind: LocalRoot.Kind, url: URL, excluded: Set<String>,
-                                              existing: [String: LocalTrack], coversDir: URL,
+                                              existing: [String: LocalTrack], coversDir: URL, skip: URL?,
                                               progress: @Sendable (Int, Int) -> Void) async -> ScanResult {
         let fm = FileManager.default
         let keys: Set<URLResourceKey> = [.isRegularFileKey, .fileSizeKey, .contentModificationDateKey,
                                          .isUbiquitousItemKey, .ubiquitousItemDownloadingStatusKey]
         var files: [(url: URL, rel: String)] = []
+        var playlistFiles: [(rel: String, data: Data)] = []
         var isDir: ObjCBool = false
         guard fm.fileExists(atPath: url.path, isDirectory: &isDir) else { return ScanResult(tracks: [], summary: .init(), reachable: false) }
         if isDir.boolValue {
@@ -289,9 +463,16 @@ final class LocalLibrary {
                 return ScanResult(tracks: [], summary: .init(), reachable: false)
             }
             let base = url.standardizedFileURL.path.hasSuffix("/") ? url.standardizedFileURL.path : url.standardizedFileURL.path + "/"
-            for case let f as URL in en.allObjects where TagReader.isAudio(f) {
+            let skipPath = skip?.standardizedFileURL.path
+            while let f = en.nextObject() as? URL {
+                if let skipPath, f.standardizedFileURL.path == skipPath { en.skipDescendants(); continue }
                 var rel = f.standardizedFileURL.path
                 if rel.hasPrefix(base) { rel = String(rel.dropFirst(base.count)) }
+                if PlaylistFile.isPlaylist(f) {
+                    if let d = try? Data(contentsOf: f), d.count < 4_000_000 { playlistFiles.append((rel, d)) }
+                    continue
+                }
+                guard TagReader.isAudio(f) else { continue }
                 if !excluded.contains(rel) { files.append((f, rel)) }
             }
             files.sort { $0.rel.localizedStandardCompare($1.rel) == .orderedAscending }
@@ -335,7 +516,7 @@ final class LocalLibrary {
                 }
             }
             let dir: String = switch kind {
-            case .folder: rootID + "/" + (f.rel as NSString).deletingLastPathComponent
+            case .folder, .appFolder: rootID + "/" + (f.rel as NSString).deletingLastPathComponent
             case .file: parentDir.standardizedFileURL.path
             case .copied: rootID
             }
@@ -347,7 +528,7 @@ final class LocalLibrary {
         progress(files.count, files.count)
         let found = Set(files.map(\.rel))
         summary.removed = existing.keys.filter { !found.contains($0) }.count
-        return ScanResult(tracks: out, summary: summary, reachable: true)
+        return ScanResult(tracks: out, summary: summary, reachable: true, playlists: playlistFiles)
     }
 
     nonisolated private static func makeTrack(tags: LocalTags, file: URL, rootID: String, rel: String, kind: LocalRoot.Kind,
@@ -355,7 +536,7 @@ final class LocalLibrary {
         let name = TagReader.fromFilename(file.lastPathComponent)
         var album = tags.album
         // Ganz ungetaggte Datei im Ordner → Ordnername als Album (getaggte Einzeltitel ohne Album bleiben „Single“)
-        if album == nil, tags.title == nil, tags.artist == nil, kind == .folder {
+        if album == nil, tags.title == nil, tags.artist == nil, kind == .folder || (kind == .appFolder && rel.contains("/")) {
             album = TagReader.clean(file.deletingLastPathComponent().lastPathComponent)
         }
         var song = Song(id: "local:" + hash(rootID + "\n" + rel), title: tags.title ?? name.title, album: album,
@@ -416,6 +597,7 @@ final class LocalLibrary {
     /// Bookmark auflösen; ist es veraltet („stale“, z. B. Ordner verschoben/umbenannt), wird es erneuert.
     func resolve(_ root: LocalRoot) -> URL? {
         if root.kind == .copied { return importedDirectory }
+        if root.kind == .appFolder { return documentsDirectory }
         guard let bm = root.bookmark else { return nil }
         var stale = false
         guard let url = try? URL(resolvingBookmarkData: bm, options: [], relativeTo: nil, bookmarkDataIsStale: &stale) else { return nil }
@@ -436,10 +618,12 @@ final class LocalLibrary {
     /// Originaldatei eines Titels zum Abspielen. Öffnet den security-scoped Zugriff auf den Ordner; er bleibt
     /// offen, bis `keepAccess(for:)` ihn nicht mehr braucht (Engine öffnet die Datei beim Springen neu).
     func fileURL(for song: Song) throws -> URL {
-        guard let t = tracks[song.id], let root = roots.first(where: { $0.id == t.root }) else { throw LocalError.missing }
+        guard let t = tracks[song.id], let root = root(t.root) else { throw LocalError.missing }
         let base: URL
         if root.kind == .copied {
             base = importedDirectory
+        } else if root.kind == .appFolder {
+            base = documentsDirectory
         } else if let o = open[root.id] {
             base = o.url
         } else {
@@ -465,14 +649,21 @@ final class LocalLibrary {
     // MARK: Entfernen (Originaldateien bleiben immer unangetastet)
 
     /// Titel aus der Mediathek nehmen. Bei Ordnern wird die Datei gemerkt, damit sie beim Neu-Einlesen nicht
-    /// zurückkommt; nur bei empfangenen Kopien wird die App-eigene Kopie gelöscht.
-    func remove(songs: [Song]) {
+    /// zurückkommt; nur bei empfangenen Kopien wird die App-eigene Kopie gelöscht. Im HomeTune-Ordner auf
+    /// Wunsch (`deleteAppFolderFiles`) auch die Datei selbst – sie gehört der App.
+    func remove(songs: [Song], deleteAppFolderFiles: Bool = false) {
         for s in songs {
-            guard let t = tracks[s.id], let i = roots.firstIndex(where: { $0.id == t.root }) else { continue }
-            switch roots[i].kind {
-            case .folder: roots[i].excluded.insert(t.rel)
-            case .file: closeAccess(roots[i].id); roots.remove(at: i)
+            guard let t = tracks[s.id], let root = root(t.root) else { continue }
+            switch root.kind {
+            case .folder: updateRoot(root.id) { $0.excluded.insert(t.rel) }
+            case .file: closeAccess(root.id); roots.removeAll { $0.id == root.id }
             case .copied: try? FileManager.default.removeItem(at: importedDirectory.appending(path: t.rel))
+            case .appFolder:
+                if deleteAppFolderFiles {
+                    try? FileManager.default.removeItem(at: documentsDirectory.appending(path: t.rel))
+                } else {
+                    appFolder.excluded.insert(t.rel)
+                }
             }
             tracks[s.id] = nil
             starred.remove(s.id)
@@ -484,13 +675,15 @@ final class LocalLibrary {
 
     /// Ordner/Datei-Eintrag samt Titeln entfernen.
     func removeRoot(_ id: String) {
-        guard let root = roots.first(where: { $0.id == id }) else { return }
+        // Der HomeTune-Ordner ist ein fester Eintrag
+        guard id != Self.appFolderRootID, let root = roots.first(where: { $0.id == id }) else { return }
         closeAccess(id)
         if root.kind == .copied { try? FileManager.default.removeItem(at: importedDirectory) }
         let gone = Set(tracks.values.filter { $0.root == id }.map(\.song.id))
         tracks = tracks.filter { !gone.contains($0.key) }
         starred.subtract(gone)
         roots.removeAll { $0.id == id }
+        playlists.removeAll { $0.source?.hasPrefix(id + "/") == true && !$0.edited }
         unreachable.remove(id)
         rebuild()
         cleanupCovers()
@@ -500,12 +693,135 @@ final class LocalLibrary {
     func removeAll() {
         for r in roots { removeRoot(r.id) }
         tracks = [:]
+        playlists = []
+        appFolder.excluded = []
         rebuild()
         save()
     }
 
     private func closeAccess(_ id: String) {
         if let o = open.removeValue(forKey: id), o.scoped { o.url.stopAccessingSecurityScopedResource() }
+    }
+
+    // MARK: Playlists (nur auf dem Gerät)
+
+    func playlist(_ id: String) -> LocalPlaylist? { playlists.first { $0.id == id } }
+
+    @discardableResult
+    func createPlaylist(name: String, comment: String? = nil, songIDs: [String] = []) -> LocalPlaylist {
+        let p = LocalPlaylist(name: name, comment: TagReader.clean(comment), songIDs: songIDs)
+        playlists.append(p)
+        save()
+        return p
+    }
+
+    /// Name, Beschreibung und komplette Reihenfolge speichern. Eine aus einer Datei importierte Playlist folgt der
+    /// Datei danach nicht mehr (die Änderung soll bleiben).
+    func updatePlaylist(_ id: String, name: String? = nil, comment: String? = nil, songIDs: [String]? = nil) {
+        guard let i = playlists.firstIndex(where: { $0.id == id }) else { return }
+        if let name { playlists[i].name = name }
+        if let comment { playlists[i].comment = TagReader.clean(comment) }
+        if let songIDs { playlists[i].songIDs = songIDs }
+        playlists[i].changed = Date()
+        playlists[i].edited = true
+        save()
+    }
+
+    func addToPlaylist(_ id: String, songIDs: [String]) {
+        guard let p = playlist(id) else { return }
+        updatePlaylist(id, songIDs: p.songIDs + songIDs)
+    }
+
+    func removeFromPlaylist(_ id: String, at indexes: IndexSet) {
+        guard var ids = playlist(id)?.songIDs else { return }
+        ids.remove(atOffsets: IndexSet(indexes.filter { $0 < ids.count }))
+        updatePlaylist(id, songIDs: ids)
+    }
+
+    func deletePlaylist(_ id: String) {
+        if let src = playlist(id)?.source { dismissedSources.insert(src) }
+        playlists.removeAll { $0.id == id }
+        save()
+    }
+
+    /// Zuordnung über alle Titel auf diesem iPhone (Dateiname, Ordnernamen, Tags).
+    private func matcher() -> PlaylistMatcher {
+        PlaylistMatcher(tracks.values.map { t in
+            let r = root(t.root)
+            let path: String = switch r?.kind {
+            case .file: r?.path ?? t.song.title
+            case .folder, .appFolder: (r?.name ?? "") + "/" + t.rel
+            default: t.rel
+            }
+            return PlaylistMatcher.Candidate(songID: t.song.id, components: PlaylistMatcher.components(of: path),
+                                             title: t.song.title, artist: t.song.artist)
+        })
+    }
+
+    /// .m3u/.m3u8/.pls (Dateien-Dialog, „Öffnen in“) einlesen und als Playlist anlegen bzw. aktualisieren.
+    func importPlaylist(at url: URL) -> PlaylistImportResult? {
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        let parsed = PlaylistFile.parse(data, ext: url.pathExtension)
+        guard !parsed.entries.isEmpty else { return nil }
+        let name = parsed.name ?? TagReader.clean(url.deletingPathExtension().lastPathComponent) ?? url.lastPathComponent
+        let ids = matcher().match(parsed).ids
+        let source = "file:" + url.standardizedFileURL.path
+        if let i = playlists.firstIndex(where: { $0.source == source && !$0.edited }) {
+            playlists[i].songIDs = ids
+            playlists[i].entries = parsed.entries
+            playlists[i].changed = Date()
+        } else {
+            var p = LocalPlaylist(name: name, songIDs: ids, source: source)
+            p.entries = parsed.entries
+            playlists.append(p)
+        }
+        save()
+        return PlaylistImportResult(name: name, found: ids.count, total: parsed.entries.count)
+    }
+
+    /// Playlist-Dateien eines Ordners übernehmen: neue anlegen, geänderte neu zuordnen, verschwundene entfernen
+    /// (außer hier bearbeitete). Liefert die neu angelegten.
+    private func syncPlaylists(rootID: String, files: [(rel: String, data: Data)]) -> [PlaylistImportResult] {
+        var created: [String] = []
+        let prefix = rootID + "/"
+        var seen = Set<String>()
+        for f in files {
+            let source = prefix + f.rel
+            seen.insert(source)
+            guard !dismissedSources.contains(source) else { continue }
+            let parsed = PlaylistFile.parse(f.data, ext: (f.rel as NSString).pathExtension)
+            guard !parsed.entries.isEmpty else { continue }
+            if let i = playlists.firstIndex(where: { $0.source == source }) {
+                if !playlists[i].edited { playlists[i].entries = parsed.entries }
+            } else {
+                let base = ((f.rel as NSString).lastPathComponent as NSString).deletingPathExtension
+                var p = LocalPlaylist(name: parsed.name ?? base, source: source)
+                p.entries = parsed.entries
+                playlists.append(p)
+                created.append(p.id)
+            }
+        }
+        playlists.removeAll { p in
+            guard let src = p.source, src.hasPrefix(prefix), !p.edited else { return false }
+            return !seen.contains(src)
+        }
+        rematchPlaylists()
+        return created.compactMap { id in
+            playlist(id).map { PlaylistImportResult(name: $0.name, found: $0.songIDs.count, total: $0.entries?.count ?? 0) }
+        }
+    }
+
+    /// Importierte (nicht bearbeitete) Playlists neu zuordnen – z. B. wenn inzwischen mehr Titel da sind.
+    private func rematchPlaylists() {
+        guard playlists.contains(where: { $0.entries != nil && !$0.edited }) else { return }
+        let m = matcher()
+        for i in playlists.indices where !playlists[i].edited {
+            guard let entries = playlists[i].entries else { continue }
+            let ids = m.match(PlaylistFile.Parsed(name: nil, entries: entries)).ids
+            if ids != playlists[i].songIDs { playlists[i].songIDs = ids; playlists[i].changed = Date() }
+        }
     }
 
     // MARK: Favoriten (nur auf dem Gerät)

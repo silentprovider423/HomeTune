@@ -2,7 +2,7 @@ import AVFoundation
 import MediaPlayer
 import SwiftUI
 
-/// Verbindet Warteliste, 432-Hz-Engine, Cache/Downloads und das System (Sperrbildschirm, Fernbedienung, AirPlay).
+/// Verbindet Warteliste, Engine (Stimmung 432/440/528 Hz), Cache/Downloads und das System (Sperrbildschirm, Fernbedienung, AirPlay).
 @MainActor @Observable
 final class PlayerController {
     private(set) var queue = PlayQueue()
@@ -14,6 +14,13 @@ final class PlayerController {
 
     @ObservationIgnored weak var app: AppModel?
     @ObservationIgnored let engine = PlaybackEngine()
+    /// Stimmung (Einstellungen → Stimmung): gespeichert und sofort wirksam, auch mitten im Titel
+    var tuning: Tuning = .saved {
+        didSet {
+            Tuning.saved = tuning
+            engine.tuning = tuning
+        }
+    }
     @ObservationIgnored private var tokenCounter = 0
     @ObservationIgnored private var currentToken = -1
     @ObservationIgnored private var preloaded: [Int: UUID] = [:]
@@ -31,6 +38,7 @@ final class PlayerController {
     var shuffle: Bool { queue.shuffle }
 
     init() {
+        engine.tuning = tuning
         engine.onTrackStarted = { [weak self] token in self?.engineAdvanced(to: token) }
         engine.onQueueEnded = { [weak self] token in self?.engineEnded(token) }
         engine.onError = { [weak self] token, error in self?.engineFailed(token, error) }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Konten (umschalten, hinzufügen, entfernen), Server, Speicher und Erklärung zur 432-Hz-Stimmung.
+/// Konten (umschalten, hinzufügen, entfernen), Server, Speicher, Stimmung (432/440/528 Hz) und Version.
 struct SettingsView: View {
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
@@ -58,7 +58,6 @@ struct SettingsView: View {
                         LabeledContent("Empfangene Dateien", value: Fmt.bytes(app.local.importedBytes))
                     }
                     Button("Alle neu einlesen", systemImage: "arrow.triangle.2.circlepath") { app.rescanLocal() }
-                        .disabled(app.local.roots.isEmpty)
                 } header: { Text("Auf diesem iPhone") } footer: {
                     Text("Musik aus der Dateien-App wird nur verknüpft, nicht kopiert, und läuft offline und ohne Server.")
                 }
@@ -70,14 +69,27 @@ struct SettingsView: View {
                     }
                 } header: { Text("Speicher") }
                 Section {
-                    Label {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Immer in 432 Hz").font(.headline)
-                            Text("HomeTune spielt jeden Titel um 31,77 Cent tiefer (A4 = 432 Hz statt 440 Hz). Das Tempo bleibt gleich, die Originaldatei wird verlustfrei geladen.")
-                                .font(.footnote).foregroundStyle(.secondary)
+                    ForEach(Tuning.allCases) { t in
+                        Button {
+                            app.player.tuning = t
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(verbatim: "\(t.hz) Hz").foregroundStyle(.primary)
+                                    Text(t.subtitle).font(.footnote).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                if app.player.tuning == t { Image(systemName: "checkmark").foregroundStyle(.accent).fontWeight(.semibold) }
+                            }
+                            .contentShape(.rect)
                         }
-                    } icon: { Image(systemName: "tuningfork").foregroundStyle(.accent) }
-                } header: { Text("Klang") }
+                        .tint(.primary)
+                        .accessibilityAddTraits(app.player.tuning == t ? .isSelected : [])
+                        .accessibilityIdentifier("tuning.\(t.rawValue)")
+                    }
+                } header: { Text("Stimmung") } footer: {
+                    Text("Musik ist meist auf A = 440 Hz gestimmt. HomeTune verschiebt die Tonhöhe direkt auf dem iPhone, das Tempo bleibt gleich. Bei 440 Hz läuft die Datei unverändert.")
+                }
                 Section {
                     LabeledContent("Version", value: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")
                 }
@@ -97,6 +109,17 @@ struct SettingsView: View {
                     if app.showsLogin { dismiss() }
                 }
             } message: { a in Text("Das Konto „\(a.username)“ wird von diesem iPhone entfernt. Auf dem Server bleibt alles erhalten.") }
+        }
+    }
+}
+
+extension Tuning {
+    /// Zweite Zeile in den Einstellungen
+    var subtitle: LocalizedStringKey {
+        switch self {
+        case .hz432: "Standard · A = 432 Hz"
+        case .hz440: "Original · keine Bearbeitung"
+        case .hz528: "A = 444 Hz (C = 528 Hz)"
         }
     }
 }

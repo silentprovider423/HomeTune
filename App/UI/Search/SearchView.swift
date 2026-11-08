@@ -11,7 +11,7 @@ struct SearchView: View {
     private var recent: [String] { (try? JSONDecoder().decode([String].self, from: Data(recentRaw.utf8))) ?? [] }
 
     private var playlists: [Playlist] {
-        query.isEmpty ? [] : app.library.playlists.filter { $0.name.localizedStandardContains(query) }
+        query.isEmpty ? [] : app.library.allPlaylists.filter { $0.name.localizedStandardContains(query) }
     }
 
     var body: some View {

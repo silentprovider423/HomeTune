@@ -3,7 +3,7 @@ import AVFoundation
 @testable import HomeTune
 
 /// „Musik auf diesem iPhone“: Tags lokal lesen, Ordner per Bookmark merken und wiederfinden, neu einlesen,
-/// in die Mediathek einreihen, entfernen ohne Originale zu löschen – und 432 Hz auch für lokale FLAC-Dateien.
+/// in die Mediathek einreihen, entfernen ohne Originale zu löschen – und die Stimmung (432 Hz) auch für lokale FLAC-Dateien.
 /// Testdateien: Tests/Fixtures (erfundene Titel, Sinustöne/Stille, erzeugt mit tools/make-test-audio.sh).
 @MainActor
 final class LocalMusicTests: XCTestCase {
@@ -27,7 +27,10 @@ final class LocalMusicTests: XCTestCase {
         return dst
     }
 
-    private func makeLibrary() -> LocalLibrary { LocalLibrary(directory: work.appending(path: "Store", directoryHint: .isDirectory)) }
+    private func makeLibrary() -> LocalLibrary {
+        LocalLibrary(directory: work.appending(path: "Store", directoryHint: .isDirectory),
+                     documents: work.appending(path: "Documents", directoryHint: .isDirectory))
+    }
 
     // MARK: Metadaten
 
@@ -319,10 +322,10 @@ final class LocalMusicTests: XCTestCase {
         XCTAssertTrue(fm.fileExists(atPath: dir.appending(path: "Morning Set/01 - Paper Boats.flac").path))
     }
 
-    // MARK: 432 Hz
+    // MARK: Stimmung
 
     /// Lokale FLAC (440-Hz-Sinus) über das Bookmark öffnen, mit dem Decoder der Engine lesen und durch die
-    /// 432-Hz-Kette rendern: 440 Hz muss 432 Hz ergeben. Danach live über die PlaybackEngine abspielen.
+    /// Stimmungs-Kette (432 Hz) rendern: 440 Hz muss 432 Hz ergeben. Danach live über die PlaybackEngine abspielen.
     func testLocalFLACPlaysIn432Hz() async throws {
         let dir = try fixtures()
         let lib = makeLibrary()
@@ -331,7 +334,7 @@ final class LocalMusicTests: XCTestCase {
         let url = try lib.fileURL(for: song)
         defer { lib.keepAccess(for: []) }
 
-        let m = Tuning432Tests()
+        let m = TuningTests()
         let fmt = AVAudioFormat(standardFormatWithSampleRate: m.rate, channels: 2)!
         let dec = try TrackDecoder(url: url, outFormat: fmt)
         XCTAssertEqual(dec.duration, 3, accuracy: 0.01)
@@ -343,23 +346,24 @@ final class LocalMusicTests: XCTestCase {
             all.frameLength += b.frameLength
         }
         XCTAssertEqual(Double(all.frameLength), 3 * m.rate, accuracy: 10)
-        let out = try m.render(all, seconds: 3)
+        let out = try m.render(all, seconds: 3, tuning: .hz432)
         let r = m.measure(Array(out.prefix(Int(2.9 * m.rate))))
         print("432-Messung lokal (FLAC): 440 Hz → \(String(format: "%.3f", r.freq)) Hz, Störabstand \(String(format: "%.1f", r.snr)) dB")
         XCTAssertEqual(r.freq, 432.0, accuracy: 0.1)
         XCTAssertGreaterThan(r.snr, 35)
 
-        // Live: gleiche Engine wie in der App (TimePitch −31,77 Cent), Datei bleibt per Bookmark geöffnet
+        // Live: gleiche Engine wie in der App (signalsmith −31,77 Cent), Datei bleibt per Bookmark geöffnet
         try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
         try AVAudioSession.sharedInstance().setActive(true)
         let engine = PlaybackEngine()
+        engine.tuning = .hz432
         var failed: Error?
         engine.onError = { _, e in failed = e }
         engine.load(url: url, token: 1, autoplay: true)
         try await Task.sleep(for: .seconds(1.2))
         XCTAssertNil(failed)
         XCTAssertTrue(engine.isPlaying)
-        XCTAssertEqual(engine.pitchCents, Tuning432.cents)
+        XCTAssertEqual(engine.pitchCents, Tuning.hz432.cents, accuracy: 1e-3)
         XCTAssertEqual(engine.tempoRate, 1)
         XCTAssertEqual(engine.currentTime, 1.2, accuracy: 0.5)
         XCTAssertEqual(lib.openRootIDs.count, 1)

@@ -1,7 +1,7 @@
 import AVFoundation
 import os
 
-/// Wiedergabe-Motor: AVAudioEngine mit fester 432-Hz-Kette, lückenlosem Übergang zum vorgeladenen
+/// Wiedergabe-Motor: AVAudioEngine mit Stimmungs-Kette (432/440/528 Hz, live umschaltbar), lückenlosem Übergang zum vorgeladenen
 /// Folgetitel und eigenem Puffer-Zubringer (wie Apples „AssetSlidingQueue“, nur kleiner).
 ///
 /// Jeder Titel bekommt eine Marke (`token`). Der Zubringer plant immer nur ~1,5 s im Voraus ein; endet die
@@ -9,7 +9,7 @@ import os
 final class PlaybackEngine: @unchecked Sendable {
     let engine = AVAudioEngine()
     private let player = AVAudioPlayerNode()
-    private let chain = PitchChain()
+    let chain = PitchChain()
     private(set) var format: AVAudioFormat
 
     /// Neuer Titel hat hörbar begonnen (am lückenlosen Übergang).
@@ -49,8 +49,15 @@ final class PlaybackEngine: @unchecked Sendable {
 
     var isPlaying: Bool { playing.withLock { $0 } }
     var currentToken: Int { pos.withLock { $0.token } }
-    var pitchCents: Float { chain.timePitch.pitch }
-    var tempoRate: Float { chain.timePitch.rate }
+    /// Stimmung – Umschalten wirkt sofort, auch mitten im Titel
+    var tuning: Tuning {
+        get { chain.tuning }
+        set { chain.apply(newValue) }
+    }
+    /// Tonhöhe in Cent (0 bei 440 Hz/Original)
+    var pitchCents: Double { tuning.isOriginal ? 0 : Double(chain.shifter.semitones) * 100 }
+    /// Tempo: signalsmith bekommt immer gleich viele Samples, wie es ausgibt (rate = 1)
+    let tempoRate: Double = 1
 
     /// Aktuelle Position im laufenden Titel (Sekunden).
     var currentTime: Double {

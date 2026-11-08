@@ -20,7 +20,7 @@ struct LoginView: View {
                             .font(.system(size: 44, weight: .semibold))
                             .foregroundStyle(.accent)
                         Text("HomeTune").font(.largeTitle.bold())
-                        Text("Deine Musik vom eigenen Navidrome-Server – immer in 432 Hz.")
+                        Text("Deine Musik vom eigenen Navidrome-Server.")
                             .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity).padding(.vertical, 12)
@@ -60,7 +60,7 @@ struct LoginView: View {
                             Label {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("Ohne Server fortfahren").foregroundStyle(.primary)
-                                    Text("Nur Musik auf diesem iPhone – ebenfalls in 432 Hz. Einen Server kannst du später in den Einstellungen hinzufügen.")
+                                    Text("Nur Musik auf diesem iPhone. Einen Server kannst du später in den Einstellungen hinzufügen.")
                                         .font(.footnote).foregroundStyle(.secondary)
                                 }
                             } icon: { Image(systemName: "iphone").foregroundStyle(.accent) }

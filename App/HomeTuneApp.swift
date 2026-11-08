@@ -12,8 +12,8 @@ struct HomeTuneApp: App {
                 .tint(.accent)
         }
         .onChange(of: phase) { _, p in
-            if p == .background { app.player.saveQueue() }
-            if p == .active { app.library.retryIfOffline() }
+            if p == .background { app.player.saveQueue(); app.resignedActive() }
+            if p == .active { app.library.retryIfOffline(); app.becameActive() }
         }
     }
 }

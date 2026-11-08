@@ -50,6 +50,16 @@ struct RootView: View {
             SettingsView()
         }
         .overlay(alignment: .top) { NoticeOverlay() }
+        // Dateien im HomeTune-Ordner gehören der App: fragen, ob auch die Datei gelöscht werden soll (Standard: nein)
+        .confirmationDialog("Aus der Mediathek entfernen?", isPresented: Binding(get: { app.pendingLocalRemoval != nil },
+                                                                                 set: { if !$0 { app.pendingLocalRemoval = nil } }),
+                            titleVisibility: .visible) {
+            Button("Nur aus der Mediathek entfernen") { app.confirmLocalRemoval(deleteFiles: false) }
+            Button("Auch Datei löschen", role: .destructive) { app.confirmLocalRemoval(deleteFiles: true) }
+            Button("Abbrechen", role: .cancel) { app.pendingLocalRemoval = nil }
+        } message: {
+            Text("Die Datei liegt im HomeTune-Ordner. Soll sie auch dort gelöscht werden?")
+        }
     }
 }
 

@@ -15,29 +15,57 @@ struct PlaylistsView: View {
                 }
             }
             .accessibilityIdentifier("playlist.new")
-            ForEach(app.library.playlists) { p in
+            ForEach(app.library.allPlaylists) { p in
                 NavigationLink(value: Route.playlist(p.id)) {
                     HStack(spacing: 12) {
                         CoverArt(id: p.coverArt, size: 56, corner: 6).frame(width: 56, height: 56)
                         VStack(alignment: .leading) {
                             Text(p.name).lineLimit(1)
-                            Text("\(p.songCount ?? 0) Titel").font(.subheadline).foregroundStyle(.secondary)
+                            if p.id.isLocalPlaylistID {
+                                // Eigene Playlist auf diesem iPhone (nicht auf dem Server)
+                                Label { Text("Auf diesem iPhone · \(p.songCount ?? 0) Titel") } icon: { Image(systemName: "iphone") }
+                                    .font(.subheadline).foregroundStyle(.secondary).labelStyle(.titleAndIcon)
+                            } else {
+                                Text("\(p.songCount ?? 0) Titel").font(.subheadline).foregroundStyle(.secondary)
+                            }
                         }
                     }
                 }
+                .accessibilityIdentifier(p.id.isLocalPlaylistID ? "playlist.local" : "playlist.server")
                 .contextMenu { PlaylistMenu(playlist: p, onDelete: { toDelete = p }) }
                 .swipeActions { Button("Löschen", systemImage: "trash", role: .destructive) { toDelete = p } }
             }
         }
         .listStyle(.plain)
         .navigationTitle("Playlists")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button("Neue Playlist …", systemImage: "plus") { creating = true }
+                    // .m3u/.m3u8/.pls, z. B. aus Apple Music am Mac exportiert
+                    Button("Playlist importieren …", systemImage: "square.and.arrow.down") { app.importRequest = .files }
+                        .accessibilityIdentifier("playlist.import")
+                } label: { Image(systemName: "ellipsis") }
+                .accessibilityLabel(Text("Mehr"))
+            }
+        }
         .refreshable { await app.library.refreshPlaylists() }
         .sheet(isPresented: $creating) { PlaylistEditor(playlist: nil, initialSongs: []) }
         .confirmationDialog("Playlist löschen?", isPresented: Binding(get: { toDelete != nil }, set: { if !$0 { toDelete = nil } }),
                             titleVisibility: .visible, presenting: toDelete) { p in
             Button("Playlist löschen", role: .destructive) { Task { try? await app.library.delete(playlist: p) } }
-        } message: { p in
-            Text("„\(p.name)“ wird auf dem Server gelöscht. Die Titel bleiben in der Mediathek.")
+        } message: { p in PlaylistDeleteMessage(playlist: p) }
+    }
+}
+
+/// „Wird auf dem Server gelöscht“ bzw. „von diesem iPhone gelöscht“.
+struct PlaylistDeleteMessage: View {
+    let playlist: Playlist
+    var body: some View {
+        if playlist.id.isLocalPlaylistID {
+            Text("„\(playlist.name)“ wird von diesem iPhone gelöscht. Die Titel bleiben in der Mediathek.")
+        } else {
+            Text("„\(playlist.name)“ wird auf dem Server gelöscht. Die Titel bleiben in der Mediathek.")
         }
     }
 }
@@ -55,12 +83,15 @@ struct PlaylistDetailView: View {
 
     var body: some View {
         List {
-            if let p = playlist ?? app.library.playlists.first(where: { $0.id == playlistID }) {
+            if let p = playlist ?? app.library.allPlaylists.first(where: { $0.id == playlistID }) {
                 VStack(spacing: 10) {
                     CoverArt(id: p.coverArt, size: 260, corner: 10).frame(width: 250, height: 250)
                         .shadow(color: .black.opacity(0.2), radius: 12, y: 6)
                     Text(p.name).font(.title2.bold()).multilineTextAlignment(.center)
                     if let owner = p.owner { Text(owner).foregroundStyle(.accent) }
+                    if p.id.isLocalPlaylistID {
+                        Label("Auf diesem iPhone", systemImage: "iphone").font(.subheadline).foregroundStyle(.secondary)
+                    }
                     if let c = p.comment, !c.isEmpty { Text(c).font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center) }
                     PlayShuffleButtons(play: { app.player.play(songs, name: p.name) },
                                        shuffle: { app.player.play(songs, name: p.name, shuffle: true) })
@@ -106,7 +137,7 @@ struct PlaylistDetailView: View {
                     dismiss()
                 }
             }
-        }
+        } message: { if let p = playlist { PlaylistDeleteMessage(playlist: p) } }
     }
 
     private func load() async {
@@ -138,6 +169,12 @@ struct PlaylistEditor: View {
     @State private var confirmDiscard = false
     @State private var saving = false
     @State private var error: String?
+    /// Neue Playlist auf diesem iPhone statt auf dem Server
+    @State private var onDevice = false
+
+    /// Lokale Titel können nur in Playlists auf diesem iPhone stehen
+    private var needsDevice: Bool { app.client == nil || songs.contains(where: \.isLocal) }
+    private var isLocal: Bool { playlist.map { $0.id.isLocalPlaylistID } ?? (onDevice || needsDevice) }
 
     private var changed: Bool {
         name != (playlist?.name ?? "") || comment != (playlist?.comment ?? "") || songs.map(\.id) != initialSongs.map(\.id)
@@ -150,6 +187,18 @@ struct PlaylistEditor: View {
                     TextField("Playlist-Titel", text: $name).font(.title3.bold())
                         .accessibilityIdentifier("playlist.name")
                     TextField("Beschreibung", text: $comment, axis: .vertical)
+                }
+                if playlist == nil && app.client != nil {
+                    Section {
+                        Toggle(isOn: Binding(get: { isLocal }, set: { onDevice = $0 })) {
+                            Label("Auf diesem iPhone speichern", systemImage: "iphone")
+                        }
+                        .disabled(needsDevice)
+                        .accessibilityIdentifier("playlist.onDevice")
+                    } footer: {
+                        Text(needsDevice ? "Titel auf diesem iPhone können nur in Playlists auf diesem iPhone stehen."
+                                         : "Sonst wird die Playlist auf dem Server angelegt.")
+                    }
                 }
                 Section {
                     Button { addMusic = true } label: { Label("Musik hinzufügen", systemImage: "plus.circle.fill") }
@@ -180,7 +229,7 @@ struct PlaylistEditor: View {
                 Button("Änderungen verwerfen", role: .destructive) { dismiss() }
                 Button("Weiter bearbeiten", role: .cancel) {}
             }
-            .sheet(isPresented: $addMusic) { AddMusicSheet { songs += $0 } }
+            .sheet(isPresented: $addMusic) { AddMusicSheet(includeLocal: isLocal) { songs += $0 } }
         }
         .onAppear {
             name = playlist?.name ?? ""
@@ -197,7 +246,7 @@ struct PlaylistEditor: View {
             if let playlist {
                 try await app.library.save(playlist: playlist, name: n, comment: comment, songs: songs.map(\.id))
             } else {
-                _ = try await app.library.createPlaylist(name: n, comment: comment, songs: songs.map(\.id))
+                _ = try await app.library.createPlaylist(name: n, comment: comment, songs: songs.map(\.id), onDevice: isLocal)
             }
             dismiss()
         } catch {
@@ -210,13 +259,15 @@ struct PlaylistEditor: View {
 struct AddMusicSheet: View {
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
+    /// Playlist auf diesem iPhone: auch lokale Titel anbieten
+    var includeLocal = false
     let onAdd: ([Song]) -> Void
     @State private var query = ""
     @State private var picked: [Song] = []
 
     private var results: [Song] {
         // Server-Playlists können nur Server-Titel enthalten
-        let all = app.library.serverSongs
+        let all = includeLocal ? app.library.songs : app.library.serverSongs
         guard !query.isEmpty else { return Array(all.sorted { ($0.created ?? "") > ($1.created ?? "") }.prefix(100)) }
         return all.filter { $0.title.localizedStandardContains(query) || ($0.artist ?? "").localizedStandardContains(query) || ($0.album ?? "").localizedStandardContains(query) }
     }
@@ -264,11 +315,16 @@ struct AddToPlaylistSheet: View {
         NavigationStack {
             List {
                 Button { creating = true } label: { Label("Neue Playlist …", systemImage: "plus") }
-                ForEach(app.library.playlists.filter { $0.readonly != true }) { p in
+                // Lokale Titel passen nur in Playlists auf diesem iPhone
+                ForEach(app.library.allPlaylists.filter { $0.readonly != true && ($0.id.isLocalPlaylistID || !songs.contains(where: \.isLocal)) }) { p in
                     Button { Task { await add(to: p) } } label: {
                         HStack(spacing: 12) {
                             CoverArt(id: p.coverArt, size: 48, corner: 5).frame(width: 48, height: 48)
                             Text(p.name).foregroundStyle(.primary)
+                            if p.id.isLocalPlaylistID {
+                                Spacer()
+                                Image(systemName: "iphone").foregroundStyle(.secondary).accessibilityLabel(Text("Auf diesem iPhone"))
+                            }
                         }
                     }
                 }

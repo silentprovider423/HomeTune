@@ -28,7 +28,8 @@ final class PlaybackEngineTests: XCTestCase {
         let a = try makeWAV(freq: 440, seconds: 1.5)               // Mono 44,1 kHz
         let b = try makeWAV(freq: 660, seconds: 1.5, rate: 96000, channels: 2) // Stereo 96 kHz
         let engine = PlaybackEngine()
-        XCTAssertEqual(engine.pitchCents, Tuning432.cents)
+        engine.tuning = .hz432
+        XCTAssertEqual(engine.pitchCents, Tuning.hz432.cents, accuracy: 1e-3)
         XCTAssertEqual(engine.tempoRate, 1)
         let started = expectation(description: "Folgetitel beginnt")
         let ended = expectation(description: "Ende")
@@ -70,6 +71,34 @@ final class PlaybackEngineTests: XCTestCase {
         let p = engine.currentTime
         try await Task.sleep(for: .milliseconds(400))
         XCTAssertEqual(engine.currentTime, p, accuracy: 0.05)
+        engine.stop()
+    }
+
+    /// Stimmung live umschalten (432 → 528 → 440 → 432): Wiedergabe läuft ohne Unterbrechung weiter, Position zählt
+    /// gleichmäßig, im Original rechnet der Stretcher nicht.
+    func testLiveTuningSwitchKeepsPlaying() async throws {
+        try activate()
+        let a = try makeWAV(freq: 440, seconds: 5, rate: 48000, channels: 2)
+        let engine = PlaybackEngine()
+        engine.tuning = .hz432
+        var failed: Error?
+        engine.onError = { _, e in failed = e }
+        engine.load(url: a, token: 3, autoplay: true)
+        try await Task.sleep(for: .milliseconds(600))
+        var times: [Double] = [engine.currentTime]
+        for t in [Tuning.hz528, .hz440, .hz432] {
+            engine.tuning = t
+            XCTAssertEqual(engine.tuning, t)
+            try await Task.sleep(for: .milliseconds(700))
+            XCTAssertTrue(engine.isPlaying)
+            times.append(engine.currentTime)
+            if t == .hz440 { XCTAssertFalse(engine.chain.shifter.processingActive, "Original: keine Bearbeitung") }
+        }
+        XCTAssertNil(failed)
+        let steps = zip(times.dropFirst(), times).map { $0 - $1 }
+        print("Live-Umschalten (Engine): Position \(times.map { String(format: "%.2f", $0) }), Schritte \(steps.map { String(format: "%.2f", $0) }) s")
+        for d in steps { XCTAssertEqual(d, 0.7, accuracy: 0.25, "Position läuft gleichmäßig weiter") }
+        XCTAssertEqual(engine.pitchCents, Tuning.hz432.cents, accuracy: 1e-3)
         engine.stop()
     }
 

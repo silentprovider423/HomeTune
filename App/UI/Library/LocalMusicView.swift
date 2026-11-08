@@ -25,8 +25,9 @@ struct AddLocalMusicHint: View {
                 .foregroundStyle(.accent)
                 .padding(.bottom, 2)
             Text("Musik vom iPhone hinzufügen").font(.title3.bold()).multilineTextAlignment(.center)
-            Text("Wähle einen Ordner oder einzelne Dateien in der Dateien-App – FLAC, MP3, AAC, ALAC, WAV oder AIFF. HomeTune merkt sich nur, wo sie liegen, und spielt sie in 432 Hz.")
+            Text("Wähle einen Ordner oder einzelne Dateien in der Dateien-App – FLAC, MP3, AAC, ALAC, WAV, AIFF oder Opus. HomeTune merkt sich nur, wo sie liegen.")
                 .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
+            AppFolderHint()
             HStack(spacing: 12) {
                 Button { app.importRequest = .folder } label: {
                     Label("Ordner", systemImage: "folder.badge.plus").frame(maxWidth: .infinity)
@@ -54,8 +55,32 @@ struct AddLocalMusicHint: View {
     }
 }
 
-/// „Auf diesem iPhone“: Musik aus der Dateien-App – Alben, Künstler:innen, Titel, zuletzt hinzugefügt und die
-/// gemerkten Ordner (neu einlesen, entfernen). Entfernen löscht nie die Originaldateien.
+/// Hinweis auf den eigenen Ordner in der Dateien-App (funktioniert ohne Dateien-Dialog).
+struct AppFolderHint: View {
+    var body: some View {
+        Label {
+            Text("Musik in der Dateien-App nach „Auf meinem iPhone › HomeTune“ verschieben – sie erscheint hier automatisch.")
+        } icon: { Image(systemName: "folder.fill").foregroundStyle(.accent) }
+        .font(.subheadline).foregroundStyle(.secondary)
+        .accessibilityIdentifier("local.appFolderHint")
+    }
+}
+
+/// Signatur-Profil gilt für eine andere App-ID: dann übergibt iOS aus dem Dateien-Dialog nichts.
+struct SigningHint: View {
+    let appID: String
+    var body: some View {
+        Label {
+            Text("Dein Signatur-Profil gilt für die App-ID \(appID). Damit der Dateien-Dialog Musik übergeben kann, im Sideload-Tool die Bundle-ID auf \(appID) setzen.")
+        } icon: { Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange) }
+        .font(.subheadline)
+        .accessibilityIdentifier("local.signingHint")
+    }
+}
+
+/// „Auf diesem iPhone“: Musik aus der Dateien-App – Alben, Künstler:innen, Titel, zuletzt hinzugefügt, der
+/// HomeTune-Ordner und die gemerkten Ordner (neu einlesen, entfernen). Entfernen löscht nie Originaldateien
+/// außerhalb des HomeTune-Ordners.
 struct LocalMusicView: View {
     @Environment(AppModel.self) private var app
     @State private var confirmRemove: LocalRoot?
@@ -64,6 +89,9 @@ struct LocalMusicView: View {
         let local = app.local
         let name = String(localized: "Auf diesem iPhone")
         List {
+            if let id = app.signingMismatch {
+                Section { SigningHint(appID: id) }
+            }
             if local.isEmpty && !local.isScanning {
                 AddLocalMusicHint().listRowSeparator(.hidden)
             } else {
@@ -100,26 +128,31 @@ struct LocalMusicView: View {
                     .listRowSeparator(.hidden)
                 }
             }
-            if !local.roots.isEmpty {
-                Section {
-                    ForEach(local.roots) { r in
-                        rootRow(r)
-                            .swipeActions(edge: .trailing) {
+            Section {
+                ForEach(local.allRoots) { r in
+                    rootRow(r)
+                        .swipeActions(edge: .trailing) {
+                            if r.kind != .appFolder {
                                 Button("Entfernen", systemImage: "minus.circle", role: .destructive) { confirmRemove = r }
-                                Button("Neu einlesen", systemImage: "arrow.triangle.2.circlepath") { app.rescanLocal(r.id) }
-                                    .tint(.indigo)
                             }
-                            .contextMenu {
-                                Button("Neu einlesen", systemImage: "arrow.triangle.2.circlepath") { app.rescanLocal(r.id) }
-                                Button("Wiedergeben", systemImage: "play") {
-                                    app.player.play(local.songs(ofRoot: r.id).sorted(by: Self.albumOrder), name: displayName(r))
-                                }
+                            Button("Neu einlesen", systemImage: "arrow.triangle.2.circlepath") { app.rescanLocal(r.id) }
+                                .tint(.indigo)
+                        }
+                        .contextMenu {
+                            Button("Neu einlesen", systemImage: "arrow.triangle.2.circlepath") { app.rescanLocal(r.id) }
+                            Button("Wiedergeben", systemImage: "play") {
+                                app.player.play(local.songs(ofRoot: r.id).sorted(by: Self.albumOrder), name: displayName(r))
+                            }
+                            if r.kind != .appFolder {
                                 Button("Aus der Mediathek entfernen", systemImage: "minus.circle", role: .destructive) { confirmRemove = r }
                             }
-                    }
-                } header: {
-                    Text("Ordner und Dateien").font(.title3.bold()).foregroundStyle(.primary).textCase(nil)
-                } footer: {
+                        }
+                }
+            } header: {
+                Text("Ordner und Dateien").font(.title3.bold()).foregroundStyle(.primary).textCase(nil)
+            } footer: {
+                VStack(alignment: .leading, spacing: 8) {
+                    if !local.isEmpty { AppFolderHint() }
                     Text("HomeTune merkt sich nur, wo die Musik liegt. Entfernen nimmt sie aus der Mediathek – die Dateien selbst bleiben unverändert.")
                 }
             }
@@ -132,7 +165,6 @@ struct LocalMusicView: View {
                     AddLocalMusicMenu()
                     Section {
                         Button("Alle neu einlesen", systemImage: "arrow.triangle.2.circlepath") { app.rescanLocal() }
-                            .disabled(local.roots.isEmpty)
                     }
                 } label: { Image(systemName: "plus") }
                 .accessibilityLabel(Text("Musik hinzufügen"))
@@ -160,7 +192,11 @@ struct LocalMusicView: View {
     }
 
     private func displayName(_ r: LocalRoot) -> String {
-        r.kind == .copied ? String(localized: "Empfangene Dateien") : r.name
+        switch r.kind {
+        case .copied: String(localized: "Empfangene Dateien")
+        case .appFolder: String(localized: "HomeTune-Ordner")
+        default: r.name
+        }
     }
 
     private func link(_ route: Route, _ title: LocalizedStringKey, icon: String, count: Int, id: String) -> some View {
@@ -177,7 +213,7 @@ struct LocalMusicView: View {
 
     private func rootRow(_ r: LocalRoot) -> some View {
         let n = app.local.trackCount(root: r.id)
-        let icon = switch r.kind { case .folder: "folder"; case .file: "doc"; case .copied: "tray.and.arrow.down" }
+        let icon = switch r.kind { case .folder: "folder"; case .file: "doc"; case .copied: "tray.and.arrow.down"; case .appFolder: "folder.fill" }
         return HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.title3).foregroundStyle(.accent)

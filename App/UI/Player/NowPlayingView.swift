@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Vollbild „Jetzt läuft“: Cover, Titel, Favorit, Mehr-Menü, Zeitleiste mit 432-Hz-Kennzeichen,
+/// Vollbild „Jetzt läuft“: Cover, Titel, Favorit, Mehr-Menü, Zeitleiste mit Format-Kennzeichen,
 /// Steuerung, Lautstärke, unten Liedtext · AirPlay · Warteliste.
 struct NowPlayingView: View {
     @Environment(AppModel.self) private var app
@@ -136,7 +136,7 @@ struct NowPlayingView: View {
             HStack {
                 Text(Fmt.time(value)).monospacedDigit()
                 Spacer()
-                tuningBadge(p.currentSong)
+                formatBadge(p.currentSong)
                 Spacer()
                 Text(verbatim: "-" + Fmt.time(max(0, dur - value))).monospacedDigit()
             }
@@ -145,19 +145,21 @@ struct NowPlayingView: View {
         }
     }
 
-    /// Dezentes Kennzeichen: Wiedergabe immer in 432 Hz (+ Dateiformat).
-    private func tuningBadge(_ song: Song?) -> some View {
-        HStack(spacing: 5) {
-            Image(systemName: "tuningfork").font(.caption2)
-            Text(verbatim: "432 Hz")
-            if let f = song?.formatBadge { Text(verbatim: "· \(f)") }
+    /// Dezentes Kennzeichen mit dem Dateiformat (wie Apples „Lossless“-Chip). Die Stimmung steht nur in den
+    /// Einstellungen.
+    @ViewBuilder private func formatBadge(_ song: Song?) -> some View {
+        if let f = song?.formatBadge {
+            HStack(spacing: 5) {
+                Image(systemName: "waveform").font(.caption2)
+                Text(verbatim: f)
+            }
+            .font(.caption2.weight(.semibold))
+            .padding(.horizontal, 7).padding(.vertical, 2)
+            .background(.white.opacity(0.12), in: .capsule)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(Text("Dateiformat \(f)"))
+            .accessibilityIdentifier("formatBadge")
         }
-        .font(.caption2.weight(.semibold))
-        .padding(.horizontal, 7).padding(.vertical, 2)
-        .background(.white.opacity(0.12), in: .capsule)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text("Wiedergabe in 432 Hz"))
-        .accessibilityIdentifier("badge432")
     }
 
     private func transport(_ p: PlayerController) -> some View {

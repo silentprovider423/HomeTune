@@ -91,7 +91,6 @@ struct AlbumDetailView: View {
         if let g = a.genre, !g.isEmpty { parts.append(g.uppercased()) }
         if let y = a.year, y > 0 { parts.append(String(y)) }
         if let f = songs.first?.formatBadge { parts.append(f) }
-        parts.append("432 Hz")
         return parts.joined(separator: " · ")
     }
 

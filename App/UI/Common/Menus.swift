@@ -11,10 +11,8 @@ struct SongMenu: View {
     var onRemoveFromPlaylist: (() -> Void)?
 
     var body: some View {
-        if !song.isLocal {
-            Section {
-                Button("Zur Playlist hinzufügen …", systemImage: "text.badge.plus") { app.addToPlaylist = [song] }
-            }
+        Section {
+            Button("Zur Playlist hinzufügen …", systemImage: "text.badge.plus") { app.addToPlaylist = [song] }
         }
         Section {
             Button("Als Nächstes wiedergeben", systemImage: "text.line.first.and.arrowtriangle.forward") { app.player.playNext([song]) }
@@ -70,9 +68,7 @@ struct AlbumMenu: View {
         }
         let isLocal = album.id.isLocalID
         Section {
-            if !isLocal {
-                Button("Zur Playlist hinzufügen …", systemImage: "text.badge.plus") { Task { app.addToPlaylist = await app.songs(of: album) } }
-            }
+            Button("Zur Playlist hinzufügen …", systemImage: "text.badge.plus") { Task { app.addToPlaylist = await app.songs(of: album) } }
             let fav = app.library.isStarred(album: album.id)
             Button(fav ? LocalizedStringKey("„Favorit“ widerrufen") : LocalizedStringKey("Als Favoriten markieren"), systemImage: fav ? "star.slash" : "star") { app.toggleFavorite(album) }
             let songs = app.library.songs(ofAlbum: album.id)

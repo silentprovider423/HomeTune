@@ -17,8 +17,8 @@ enum LibrarySection: String, CaseIterable, Codable, Identifiable, Hashable {
     case playlists, artists, albums, songs, genres, composers, favorites, downloaded, onThisIPhone
     var id: String { rawValue }
 
-    /// Abschnitte, die nur mit Server-Konto Sinn ergeben
-    var needsServer: Bool { self == .playlists || self == .downloaded }
+    /// Abschnitte, die nur mit Server-Konto Sinn ergeben (Playlists gibt es auch auf diesem iPhone)
+    var needsServer: Bool { self == .downloaded }
 
     var title: LocalizedStringKey {
         switch self {
@@ -95,11 +95,18 @@ final class AppModel {
     var addToPlaylist: [Song]?
     /// Dateien-Dialog für „Musik hinzufügen“
     var importRequest: LocalImportKind?
+    /// Titel aus dem HomeTune-Ordner, für die gefragt wird, ob auch die Datei gelöscht werden soll
+    var pendingLocalRemoval: [Song]?
+    /// Signatur-Profil gilt für eine andere App-ID (dann übergibt der Dateien-Dialog nichts) – erwartete ID
+    let signingMismatch: String? = SigningCheck.currentMismatch()
     /// „Ohne Server fortfahren“: Mediathek nur mit Musik auf diesem iPhone (Server kann später dazukommen)
     var localMode: Bool {
         didSet { UserDefaults.standard.set(localMode, forKey: "localMode") }
     }
     @ObservationIgnored private var signedOut = false
+    @ObservationIgnored private var folderWatcher: DispatchSourceFileSystemObject?
+    @ObservationIgnored private var folderPoll: Task<Void, Never>?
+    @ObservationIgnored private var folderDebounce: Task<Void, Never>?
 
     init() {
         localMode = UserDefaults.standard.bool(forKey: "localMode")
@@ -111,8 +118,56 @@ final class AppModel {
         DebugLocal.apply(to: self)
         #endif
         connect()
-        // Ordner beim Start einmal abgleichen (neue/gelöschte Dateien), im Hintergrund
-        if !local.roots.isEmpty { Task { await local.rescanAll() } }
+        // Beim Start: einmaliger Umzug aus Documents/, dann alle Ordner abgleichen (neue/gelöschte Dateien)
+        Task {
+            await local.migrateDocuments()
+            await local.rescanAll()
+            _ = await local.refreshAppFolderIfChanged()
+        }
+        watchAppFolder()
+    }
+
+    // MARK: HomeTune-Ordner (Dateien-App › Auf meinem iPhone › HomeTune)
+
+    /// Vordergrund: HomeTune-Ordner prüfen und, solange die App offen ist, sparsam weiter beobachten.
+    func becameActive() {
+        refreshAppFolder()
+        folderPoll?.cancel()
+        // Unterordner meldet die Ordner-Beobachtung nicht → zusätzlich alle 20 s ein billiger Fingerabdruck
+        folderPoll = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(20))
+                guard !Task.isCancelled else { return }
+                self?.refreshAppFolder()
+            }
+        }
+    }
+
+    func resignedActive() {
+        folderPoll?.cancel()
+        folderPoll = nil
+    }
+
+    private func refreshAppFolder() {
+        folderDebounce?.cancel()
+        folderDebounce = Task {
+            try? await Task.sleep(for: .milliseconds(800))
+            guard !Task.isCancelled, let s = await local.refreshAppFolderIfChanged() else { return }
+            if s.added > 0 || s.removed > 0 || !s.playlists.isEmpty { report(s, rescan: true) }
+        }
+    }
+
+    /// Änderungen direkt in Documents/ (neue, gelöschte, umbenannte Dateien) sofort bemerken.
+    private func watchAppFolder() {
+        let fd = Darwin.open(local.documentsDirectory.path, O_EVTONLY)
+        guard fd >= 0 else { return }
+        let src = DispatchSource.makeFileSystemObjectSource(fileDescriptor: fd, eventMask: [.write, .rename, .delete, .extend], queue: .main)
+        src.setEventHandler { [weak self] in
+            MainActor.assumeIsolated { self?.refreshAppFolder() }
+        }
+        src.setCancelHandler { Darwin.close(fd) }
+        src.resume()
+        folderWatcher = src
     }
 
     /// Ohne Konto, aber mit lokaler Musik oder „Ohne Server fortfahren“ → Mediathek statt Anmeldung.
@@ -155,13 +210,14 @@ final class AppModel {
         }
     }
 
-    /// „Öffnen in HomeTune“ / „Teilen“: Audiodateien als Kopie aufnehmen.
+    /// „Öffnen in HomeTune“ / „Teilen“: aus der Dateien-App ohne Kopie (Bookmark wie im Dialog), aus Mail/AirDrop
+    /// als Kopie; Playlists (.m3u/.m3u8/.pls) werden importiert.
     func receive(_ urls: [URL]) {
         let files = urls.filter(\.isFileURL)
         guard !files.isEmpty else { return }
         if client == nil { localMode = true }
         Task {
-            let s = await local.receive(files)
+            let s = await local.open(files)
             report(s)
         }
     }
@@ -173,12 +229,33 @@ final class AppModel {
         }
     }
 
+    /// Aus der Mediathek nehmen; liegt etwas im HomeTune-Ordner, wird vorher gefragt, ob auch die Datei weg soll.
     func removeLocal(_ songs: [Song]) {
+        if songs.contains(where: local.isInAppFolder) {
+            pendingLocalRemoval = songs
+            return
+        }
         local.remove(songs: songs)
         notice.show(String(localized: "Aus der Mediathek entfernt"), icon: "minus.circle")
     }
 
+    func confirmLocalRemoval(deleteFiles: Bool) {
+        guard let songs = pendingLocalRemoval else { return }
+        pendingLocalRemoval = nil
+        local.remove(songs: songs, deleteAppFolderFiles: deleteFiles)
+        notice.show(deleteFiles ? String(localized: "Gelöscht") : String(localized: "Aus der Mediathek entfernt"),
+                    icon: deleteFiles ? "trash" : "minus.circle")
+    }
+
     private func report(_ s: LocalScanSummary, rescan: Bool = false) {
+        if let p = s.playlists.first, s.added == 0 || s.playlists.count == 1 {
+            // Playlist-Import: „x von y Titeln gefunden“
+            let text = s.playlists.count == 1
+                ? String(localized: "„\(p.name)“: \(p.found) von \(p.total) Titeln gefunden")
+                : String(localized: "\(s.playlists.count) Playlists importiert")
+            notice.show(text, icon: "music.note.list")
+            return
+        }
         if s.unreachable > 0 {
             notice.show(String(localized: "Ordner nicht erreichbar"), icon: "exclamationmark.triangle")
         } else if s.added == 0 && s.removed == 0 && s.inCloud > 0 {

@@ -1,7 +1,7 @@
 import XCTest
 
 /// „Musik auf diesem iPhone“ ohne Server: Anmeldung überspringen, Ordner einlesen, Album öffnen und abspielen
-/// (432-Hz-Kennzeichen im Player), Dateien-Dialog öffnen. Die Testdateien (erfundene Titel, Sinus/Stille) kommen
+/// (Player ohne Hz-Hinweis), Dateien-Dialog öffnen, HomeTune-Ordner und Playlists auf diesem iPhone. Die Testdateien (erfundene Titel, Sinus/Stille) kommen
 /// aus Tests/Fixtures und werden über den Debug-Hook HOMETUNE_LOCAL_IMPORT per Bookmark eingelesen – der
 /// Dateien-Dialog selbst läuft außerhalb der App und wird nur geöffnet und wieder geschlossen.
 /// Mit SHOT_DIR=<Ordner> entsteht das README-Bildschirmfoto „9-on-this-iphone“.
@@ -52,8 +52,9 @@ final class LocalMusicFlowTests: XCTestCase {
     func testPlayLocalAlbumWithoutServer() throws {
         launch(importing: [try fixture("LocalMusic")])
         continueWithoutServer()
-        // Ohne Server keine Playlists/„Geladen“, dafür „Auf diesem iPhone“
-        XCTAssertFalse(app.buttons["section.playlists"].exists)
+        // Ohne Server kein „Geladen“, aber Playlists auf diesem iPhone und „Auf diesem iPhone“
+        XCTAssertFalse(app.buttons["section.downloaded"].exists)
+        XCTAssertTrue(app.buttons["section.playlists"].waitForExistence(timeout: 5))
         let section = app.buttons["section.onThisIPhone"].firstMatch
         XCTAssertTrue(section.waitForExistence(timeout: 10))
         section.tap()
@@ -77,7 +78,9 @@ final class LocalMusicFlowTests: XCTestCase {
         XCTAssertEqual(pause.label, "Pause", "lokale Datei läuft")
 
         app.otherElements["miniPlayer"].firstMatch.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["badge432"].firstMatch.waitForExistence(timeout: 10), "auch lokal in 432 Hz")
+        XCTAssertTrue(app.buttons["nowPlaying.queue"].firstMatch.waitForExistence(timeout: 10), "„Jetzt läuft“ offen")
+        let hz = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", " Hz"))
+        XCTAssertEqual(hz.count, 0, "kein Hz-Hinweis im Player")
         // Testtitel sind nur 2 s lang – je nach Tempo läuft schon der zweite
         let title = app.staticTexts.matching(NSPredicate(format: "label IN %@", ["Neon Rain", "Tunnel Lights"])).firstMatch
         XCTAssertTrue(title.waitForExistence(timeout: 5))
@@ -91,6 +94,47 @@ final class LocalMusicFlowTests: XCTestCase {
         field.tap()
         field.typeText("Paper")
         XCTAssertTrue(app.staticTexts["Paper Boats"].firstMatch.waitForExistence(timeout: 10))
+    }
+
+    /// Eigene Playlist ohne Server: anlegen, Titel hinzufügen, erscheint gekennzeichnet in „Playlists“, löschen.
+    /// Dazu der feste Eintrag „HomeTune-Ordner“ mit Erklärung.
+    func testLocalPlaylistAndAppFolder() throws {
+        launch(importing: [try fixture("LocalMusic")])
+        continueWithoutServer()
+        let local = app.buttons["section.onThisIPhone"].firstMatch
+        XCTAssertTrue(local.waitForExistence(timeout: 10))
+        local.tap()
+        XCTAssertTrue(app.staticTexts[t("HomeTune-Ordner", "HomeTune Folder")].firstMatch.waitForExistence(timeout: 15))
+        for _ in 0..<4 where !app.descendants(matching: .any)["local.appFolderHint"].firstMatch.exists { app.swipeUp() }
+        XCTAssertTrue(app.descendants(matching: .any)["local.appFolderHint"].firstMatch.exists, "Erklärung zum HomeTune-Ordner")
+        app.navigationBars.buttons.firstMatch.tap()
+
+        app.buttons["section.playlists"].firstMatch.tap()
+        app.buttons["playlist.new"].firstMatch.tap()
+        let name = app.textFields["playlist.name"].firstMatch
+        XCTAssertTrue(name.waitForExistence(timeout: 5))
+        name.tap()
+        let title = "Lokal \(Int.random(in: 1000...9999))"
+        name.typeText(title)
+        app.buttons["playlist.addMusic"].firstMatch.tap()
+        let rows = app.buttons.matching(identifier: "addMusic.row")
+        XCTAssertTrue(rows.element(boundBy: 1).waitForExistence(timeout: 8), "lokale Titel zur Auswahl")
+        rows.element(boundBy: 0).tap()
+        rows.element(boundBy: 1).tap()
+        app.buttons["addMusic.done"].firstMatch.tap()
+        app.buttons["playlist.done"].firstMatch.tap()
+
+        let created = app.staticTexts[title].firstMatch
+        XCTAssertTrue(created.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["playlist.local"].firstMatch.exists, "als „Auf diesem iPhone“ gekennzeichnet")
+        created.press(forDuration: 1.2)
+        let del = app.buttons[t("Playlist löschen", "Delete Playlist")].firstMatch
+        XCTAssertTrue(del.waitForExistence(timeout: 5))
+        del.tap()
+        let confirm = app.buttons[t("Playlist löschen", "Delete Playlist")].firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 5))
+        confirm.tap()
+        XCTAssertTrue(created.waitForNonExistence(timeout: 10))
     }
 
     func testAddMusicOpensFilesDialog() throws {

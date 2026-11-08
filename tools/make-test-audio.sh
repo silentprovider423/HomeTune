@@ -1,13 +1,35 @@
 #!/bin/bash
 # Erzeugt die Testdateien für „Musik auf diesem iPhone“ mit ffmpeg: Sinustöne/Stille mit erfundenen
 # Titeln, Künstler:innen und Verlaufs-Covern (keine echte Musik). Ergebnis liegt in Tests/Fixtures.
-#   ./tools/make-test-audio.sh
+#   ./tools/make-test-audio.sh          alles neu
+#   ./tools/make-test-audio.sh ogg      nur Tests/Fixtures/OggOpus (Vorbis-Kommentare, Cover als METADATA_BLOCK_PICTURE)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 OUT=Tests/Fixtures
-rm -rf "$OUT"; mkdir -p "$OUT/LocalMusic/Morning Set" "$OUT/LocalMusic/Night Drive" "$OUT/DemoAlbums"
 TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
 FF=(ffmpeg -hide_banner -loglevel error -y -fflags +bitexact)
+
+# Ogg Vorbis + Opus mit Vorbis-Kommentaren (Groß-/Kleinschreibung gemischt) und eingebettetem Cover
+ogg() {
+  local d="$OUT/OggOpus/Lantern Hours"; rm -rf "$OUT/OggOpus"; mkdir -p "$d"
+  "${FF[@]}" -f lavfi -i "gradients=s=200x200:c0=0x845EF7:c1=0x22B8CF:nb_colors=2:d=1" -frames:v 1 -q:v 4 -flags +bitexact "$TMP/lantern.jpg"
+  # Ogg kennt kein „attached_pic“ → Cover als base64-FLAC-PICTURE-Block (Typ 3 = Vorderseite)
+  local pic; pic=$(python3 -c 'import base64,struct,sys; d=open(sys.argv[1],"rb").read(); m=b"image/jpeg"
+print(base64.b64encode(struct.pack(">II",3,len(m))+m+struct.pack(">IIIIII",0,200,200,24,0,len(d))+d).decode())' "$TMP/lantern.jpg")
+  "${FF[@]}" -f lavfi -i "sine=frequency=440:sample_rate=48000:duration=2" \
+    -c:a libvorbis -q:a 3 -metadata METADATA_BLOCK_PICTURE="$pic" \
+    -metadata title="River Glass" -metadata artist="Quiet Ferry" -metadata album="Lantern Hours" -metadata ALBUMARTIST="Quiet Ferry" \
+    -metadata tracknumber="1/2" -metadata discnumber="1" -metadata date="2025-03-01" -metadata Genre="Chamber Pop" -metadata composer="Bea Sample" \
+    "$d/01 - river_glass.ogg"
+  "${FF[@]}" -f lavfi -i "sine=frequency=550:sample_rate=48000:duration=2" \
+    -c:a libopus -b:a 48k -metadata metadata_block_picture="$pic" \
+    -metadata TITLE="Paper Lantern" -metadata ARTIST="Quiet Ferry" -metadata ALBUM="Lantern Hours" -metadata albumartist="Quiet Ferry" \
+    -metadata TRACKNUMBER="2" -metadata DISCNUMBER="1/1" -metadata DATE="2025" -metadata GENRE="Chamber Pop" \
+    "$d/02 - paper_lantern.opus"
+}
+if [ "${1:-}" = ogg ]; then ogg; find "$OUT/OggOpus" -type f | sort; exit 0; fi
+
+rm -rf "$OUT"; mkdir -p "$OUT/LocalMusic/Morning Set" "$OUT/LocalMusic/Night Drive" "$OUT/DemoAlbums"
 
 # Cover: Farbverlauf 300×300 als JPEG (ohne EXIF)
 cover() { "${FF[@]}" -f lavfi -i "gradients=s=300x300:c0=$2:c1=$3:c2=$4:nb_colors=3:x0=0:y0=0:x1=300:y1=300:type=$5:d=1" \
@@ -70,5 +92,6 @@ demo "Tidal Rooms" tidal "The Orchid Relay" 2023 "Dream Pop" "Low Tide" "Salt Gl
 demo "Paper Satellites" paper "Northbound Atlas" 2022 "Indie" "Orbiting Home" "Signal Fire"
 demo "Slow Weather" weather "Marigold Engine" 2020 "Downtempo" "Grey Morning" "Window Rain"
 demo "Field Recordings" field "Kite Assembly Club" 2024 "Folk" "Meadow Light" "Open Gate"
+ogg
 find "$OUT" -type f | sort
 du -sh "$OUT"

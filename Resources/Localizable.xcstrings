@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "de",
   "strings": {
+    "%lld Playlists importiert": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Playlists Imported"
+          }
+        }
+      }
+    },
     "%lld Titel": {
       "localizations": {
         "en": {
@@ -65,6 +75,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$lld new, %2$lld removed"
+          }
+        }
+      }
+    },
+    "A = 444 Hz (C = 528 Hz)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A = 444 Hz (C = 528 Hz)"
           }
         }
       }
@@ -199,12 +219,42 @@
         }
       }
     },
+    "Auch Datei löschen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also Delete File"
+          }
+        }
+      }
+    },
     "Auf diesem iPhone": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "On This iPhone"
+          }
+        }
+      }
+    },
+    "Auf diesem iPhone speichern": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save on This iPhone"
+          }
+        }
+      }
+    },
+    "Auf diesem iPhone · %lld Titel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On This iPhone · %lld Songs"
           }
         }
       }
@@ -399,12 +449,48 @@
         }
       }
     },
-    "Deine Musik vom eigenen Navidrome-Server – immer in 432 Hz.": {
+    "Dateiformat %@": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your music from your own Navidrome server – always in 432 Hz."
+            "value": "File format %@"
+          }
+        }
+      }
+    },
+    "Dein Signatur-Profil gilt für die App-ID %@. Damit der Dateien-Dialog Musik übergeben kann, im Sideload-Tool die Bundle-ID auf %@ setzen.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Signatur-Profil gilt für die App-ID %1$@. Damit der Dateien-Dialog Musik übergeben kann, im Sideload-Tool die Bundle-ID auf %2$@ setzen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your signing profile is for the app ID %1$@. For the Files dialog to hand over music, set the bundle ID to %2$@ in your sideloading tool."
+          }
+        }
+      }
+    },
+    "Deine Musik vom eigenen Navidrome-Server.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your music from your own Navidrome server."
+          }
+        }
+      }
+    },
+    "Die Datei liegt im HomeTune-Ordner. Soll sie auch dort gelöscht werden?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file is in the HomeTune folder. Delete it there as well?"
           }
         }
       }
@@ -589,6 +675,16 @@
         }
       }
     },
+    "Gelöscht": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deleted"
+          }
+        }
+      }
+    },
     "Genres": {
       "localizations": {
         "en": {
@@ -649,12 +745,12 @@
         }
       }
     },
-    "HomeTune spielt jeden Titel um 31,77 Cent tiefer (A4 = 432 Hz statt 440 Hz). Das Tempo bleibt gleich, die Originaldatei wird verlustfrei geladen.": {
+    "HomeTune-Ordner": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "HomeTune plays every song 31.77 cents lower (A4 = 432 Hz instead of 440 Hz). The tempo stays the same and the original file is loaded losslessly."
+            "value": "HomeTune Folder"
           }
         }
       }
@@ -665,16 +761,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Heavy Rotation"
-          }
-        }
-      }
-    },
-    "Immer in 432 Hz": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Always in 432 Hz"
           }
         }
       }
@@ -825,16 +911,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "No More Songs"
-          }
-        }
-      }
-    },
-    "Klang": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sound"
           }
         }
       }
@@ -1139,6 +1215,26 @@
         }
       }
     },
+    "Musik in der Dateien-App nach „Auf meinem iPhone › HomeTune“ verschieben – sie erscheint hier automatisch.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move music to “On My iPhone › HomeTune” in the Files app – it appears here automatically."
+          }
+        }
+      }
+    },
+    "Musik ist meist auf A = 440 Hz gestimmt. HomeTune verschiebt die Tonhöhe direkt auf dem iPhone, das Tempo bleibt gleich. Bei 440 Hz läuft die Datei unverändert.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Most music is tuned to A = 440 Hz. HomeTune shifts the pitch right on your iPhone; the tempo stays the same. At 440 Hz the file plays unchanged."
+          }
+        }
+      }
+    },
     "Musik vom iPhone hinzufügen": {
       "localizations": {
         "en": {
@@ -1239,12 +1335,22 @@
         }
       }
     },
-    "Nur Musik auf diesem iPhone – ebenfalls in 432 Hz. Einen Server kannst du später in den Einstellungen hinzufügen.": {
+    "Nur Musik auf diesem iPhone. Einen Server kannst du später in den Einstellungen hinzufügen.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Only music on this iPhone – also in 432 Hz. You can add a server later in Settings."
+            "value": "Only music on this iPhone. You can add a server later in Settings."
+          }
+        }
+      }
+    },
+    "Nur aus der Mediathek entfernen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from Library Only"
           }
         }
       }
@@ -1319,6 +1425,16 @@
         }
       }
     },
+    "Original · keine Bearbeitung": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Original · no processing"
+          }
+        }
+      }
+    },
     "Passwort": {
       "localizations": {
         "en": {
@@ -1345,6 +1461,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Edit Playlist"
+          }
+        }
+      }
+    },
+    "Playlist importieren …": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import Playlist …"
           }
         }
       }
@@ -1469,6 +1595,16 @@
         }
       }
     },
+    "Sonst wird die Playlist auf dem Server angelegt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otherwise the playlist is created on the server."
+          }
+        }
+      }
+    },
     "Sortieren nach": {
       "localizations": {
         "en": {
@@ -1499,12 +1635,32 @@
         }
       }
     },
+    "Standard · A = 432 Hz": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default · A = 432 Hz"
+          }
+        }
+      }
+    },
     "Startseite": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Home"
+          }
+        }
+      }
+    },
+    "Stimmung": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tuning"
           }
         }
       }
@@ -1525,6 +1681,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Songs"
+          }
+        }
+      }
+    },
+    "Titel auf diesem iPhone können nur in Playlists auf diesem iPhone stehen.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Songs on this iPhone can only be in playlists on this iPhone."
           }
         }
       }
@@ -1689,16 +1855,6 @@
         }
       }
     },
-    "Wiedergabe in 432 Hz": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Playing in 432 Hz"
-          }
-        }
-      }
-    },
     "Wiedergeben": {
       "localizations": {
         "en": {
@@ -1765,12 +1921,12 @@
         }
       }
     },
-    "Wähle einen Ordner oder einzelne Dateien in der Dateien-App – FLAC, MP3, AAC, ALAC, WAV oder AIFF. HomeTune merkt sich nur, wo sie liegen, und spielt sie in 432 Hz.": {
+    "Wähle einen Ordner oder einzelne Dateien in der Dateien-App – FLAC, MP3, AAC, ALAC, WAV, AIFF oder Opus. HomeTune merkt sich nur, wo sie liegen.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Choose a folder or individual files in the Files app – FLAC, MP3, AAC, ALAC, WAV or AIFF. HomeTune only remembers where they are and plays them in 432 Hz."
+            "value": "Choose a folder or individual files in the Files app – FLAC, MP3, AAC, ALAC, WAV, AIFF or Opus. HomeTune only remembers where they are."
           }
         }
       }
@@ -2001,6 +2157,32 @@
           "stringUnit": {
             "state": "translated",
             "value": "“%@” will be deleted on the server. The songs stay in your library."
+          }
+        }
+      }
+    },
+    "„%@“ wird von diesem iPhone gelöscht. Die Titel bleiben in der Mediathek.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” will be deleted from this iPhone. The songs stay in your library."
+          }
+        }
+      }
+    },
+    "„%@“: %lld von %lld Titeln gefunden": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%1$@“: %2$lld von %3$lld Titeln gefunden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%1$@”: %2$lld of %3$lld songs found"
           }
         }
       }

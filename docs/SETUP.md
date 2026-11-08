@@ -83,17 +83,23 @@ With a free Apple ID the app has to be **refreshed every 7 days**. SideStore and
 2. Allow **local network** access when asked (needed for servers at home).
 3. Your library loads and is stored on the iPhone, so the next start is instant (and works offline with downloaded music).
 
-Every song plays in **432 Hz** – there is nothing to switch on. The small badge under the time line in *Now Playing* shows it together with the file format.
+Songs play in **432 Hz by default; 440 Hz and 528 Hz are selectable in Settings** (*Account → Tuning*). 440 Hz plays the file unchanged; 528 Hz is the conventional A4 = 444 Hz tuning (C5 = 528 Hz). Switching works immediately, also during a song. The badge under the time line in *Now Playing* only shows the file format.
 
 ## Music on this iPhone (no server needed)
 
 You can also play files that are already on the iPhone – in *On My iPhone*, iCloud Drive or any other location of the Files app. A server is optional for this.
 
+**Easiest way – the HomeTune folder:** in the Files app, move or copy music to **On My iPhone › HomeTune** (on a Mac: Finder → your iPhone → Files → HomeTune). It shows up in *Library → On This iPhone* automatically, subfolders and playlist files included. This needs no Files dialog and therefore also works with sideloading profiles that only cover a different app ID.
+
 1. On the sign-in screen tap **Continue Without a Server** (or, with a server, go to *Library → … → Add Folder … / Add Files …*).
-2. Pick a folder (all subfolders are included) or several files. Supported: FLAC, MP3, AAC/M4A, ALAC, WAV, AIFF, CAF – whatever iOS can decode.
+2. Pick a folder (all subfolders are included) or several files. Supported: FLAC, MP3, AAC/M4A, ALAC, WAV, AIFF, CAF, Opus – whatever iOS can decode. Not supported by iOS: WMA, WavPack, APE, DSD, Ogg Vorbis.
 3. The music appears under **Library → On This iPhone** and also in Albums, Artists, Songs and Search.
 
-HomeTune does **not copy** these files. It keeps a security-scoped bookmark per folder and reads the original file when you play it, so your music only exists once on the phone. Pull to refresh (or *Rescan*) picks up new and deleted files. *Remove from Library* never deletes the original file. Files sent to HomeTune via **Open in / Share** from another app are the exception: iOS hands over a copy, which HomeTune keeps in its own storage (shown as *Received Files*).
+HomeTune does **not copy** these files. It keeps a security-scoped bookmark per folder and reads the original file when you play it, so your music only exists once on the phone. Pull to refresh (or *Rescan*) picks up new and deleted files. *Remove from Library* never deletes files outside the HomeTune folder (inside it, HomeTune asks). **Open in / Share** from the Files app also opens the original in place; only copies handed over by Mail, AirDrop or other apps are kept in HomeTune's own storage (shown as *Received Files*).
+
+**Playlists:** *Library → Playlists → New Playlist …* works without a server too (marked *On This iPhone*). To bring playlists from Apple Music on a Mac: *File → Library → Export Playlist …* as `.m3u` (or `.m3u8`), then open the file in HomeTune (*Add Files …*, *Import Playlist …* or *Open in*). Songs are matched by file name, then by the title in the playlist file; HomeTune shows how many were found.
+
+**"Open" in the Files dialog does nothing?** Some sideloading setups sign the app with a profile for a fixed, different app ID; iOS then hands nothing over from the Files dialog. *On This iPhone* shows a hint with the app ID from the profile – set the bundle ID to that value in your sideloading tool, or use the HomeTune folder instead.
 
 Files that are only in iCloud (cloud icon in Files) are downloaded first; rescan once they are on the phone.
 

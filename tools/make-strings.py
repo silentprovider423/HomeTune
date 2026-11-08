@@ -29,8 +29,6 @@ EN = {
     "Musik vom iPhone hinzufügen": "Add Music from iPhone",
     "Neu einlesen": "Rescan",
     "Nicht erreichbar – bitte erneut hinzufügen": "Not reachable – please add again",
-    "Nur Musik auf diesem iPhone – ebenfalls in 432 Hz. Einen Server kannst du später in den Einstellungen hinzufügen.":
-        "Only music on this iPhone – also in 432 Hz. You can add a server later in Settings.",
     "Ohne Server fortfahren": "Continue Without a Server",
     "Ordner": "Folder",
     "Ordner hinzufügen …": "Add Folder …",
@@ -41,8 +39,6 @@ EN = {
     "Wird aus iCloud geladen – später neu einlesen": "Downloading from iCloud – rescan later",
     "Wird eingelesen …": "Scanning …",
     "Wird eingelesen … %lld von %lld": "Scanning … %1$lld of %2$lld",
-    "Wähle einen Ordner oder einzelne Dateien in der Dateien-App – FLAC, MP3, AAC, ALAC, WAV oder AIFF. HomeTune merkt sich nur, wo sie liegen, und spielt sie in 432 Hz.":
-        "Choose a folder or individual files in the Files app – FLAC, MP3, AAC, ALAC, WAV or AIFF. HomeTune only remembers where they are and plays them in 432 Hz.",
     "„%@“ verschwindet aus HomeTune. Die Dateien bleiben unverändert in der Dateien-App.": "“%@” will be removed from HomeTune. The files stay untouched in the Files app.",
     "%lld Titel": "%lld Songs",
     "%lld Titel · %@": "%1$lld Songs · %2$@",
@@ -72,7 +68,6 @@ EN = {
     "Darstellung": "View",
     "Das Konto „%@“ wird von diesem iPhone entfernt. Auf dem Server bleibt alles erhalten.": "The account “%@” will be removed from this iPhone. Everything stays on the server.",
     "Das Passwort bleibt im Schlüsselbund dieses iPhones. Die App spricht nur mit deinem Server.": "The password stays in this iPhone’s keychain. The app only talks to your server.",
-    "Deine Musik vom eigenen Navidrome-Server – immer in 432 Hz.": "Your music from your own Navidrome server – always in 432 Hz.",
     "Die Wiedergabe beginnt danach von vorn.": "Playback then starts over.",
     "Download entfernen": "Remove Download",
     "Download entfernt": "Download Removed",
@@ -94,10 +89,7 @@ EN = {
     "Hinzufügen": "Add",
     "Hinzugefügt am %@": "Added %@",
     "HomeTune": "HomeTune",
-    "HomeTune spielt jeden Titel um 31,77 Cent tiefer (A4 = 432 Hz statt 440 Hz). Das Tempo bleibt gleich, die Originaldatei wird verlustfrei geladen.":
-        "HomeTune plays every song 31.77 cents lower (A4 = 432 Hz instead of 440 Hz). The tempo stays the same and the original file is loaded losslessly.",
     "Häufig gespielt": "Heavy Rotation",
-    "Immer in 432 Hz": "Always in 432 Hz",
     "In Alben suchen": "Find in Albums",
     "In Künstler:innen suchen": "Find in Artists",
     "In Titeln suchen": "Find in Songs",
@@ -184,7 +176,6 @@ EN = {
     "Wartet": "Waiting",
     "Weiter bearbeiten": "Keep Editing",
     "Wiedergabe fortsetzen": "Continue Playing",
-    "Wiedergabe in 432 Hz": "Playing in 432 Hz",
     "Wiedergeben": "Play",
     "Wiederholen": "Repeat",
     "Wird geladen": "Downloading",
@@ -211,6 +202,36 @@ EN = {
     "Überspringen": "Skip",
     "„%@“ wird auf dem Server gelöscht. Die Titel bleiben in der Mediathek.": "“%@” will be deleted on the server. The songs stay in your library.",
     "„Favorit“ widerrufen": "Undo Favorite",
+    # 1.1: Stimmung, Playlists auf diesem iPhone, HomeTune-Ordner, Signatur-Hinweis
+    "%lld Playlists importiert": "%lld Playlists Imported",
+    "A = 444 Hz (C = 528 Hz)": "A = 444 Hz (C = 528 Hz)",
+    "Auch Datei löschen": "Also Delete File",
+    "Auf diesem iPhone speichern": "Save on This iPhone",
+    "Auf diesem iPhone · %lld Titel": "On This iPhone · %lld Songs",
+    "Dateiformat %@": "File format %@",
+    "Dein Signatur-Profil gilt für die App-ID %@. Damit der Dateien-Dialog Musik übergeben kann, im Sideload-Tool die Bundle-ID auf %@ setzen.":
+        "Your signing profile is for the app ID %1$@. For the Files dialog to hand over music, set the bundle ID to %2$@ in your sideloading tool.",
+    "Deine Musik vom eigenen Navidrome-Server.": "Your music from your own Navidrome server.",
+    "Die Datei liegt im HomeTune-Ordner. Soll sie auch dort gelöscht werden?": "The file is in the HomeTune folder. Delete it there as well?",
+    "Gelöscht": "Deleted",
+    "HomeTune-Ordner": "HomeTune Folder",
+    "Musik in der Dateien-App nach „Auf meinem iPhone › HomeTune“ verschieben – sie erscheint hier automatisch.":
+        "Move music to “On My iPhone › HomeTune” in the Files app – it appears here automatically.",
+    "Musik ist meist auf A = 440 Hz gestimmt. HomeTune verschiebt die Tonhöhe direkt auf dem iPhone, das Tempo bleibt gleich. Bei 440 Hz läuft die Datei unverändert.":
+        "Most music is tuned to A = 440 Hz. HomeTune shifts the pitch right on your iPhone; the tempo stays the same. At 440 Hz the file plays unchanged.",
+    "Nur Musik auf diesem iPhone. Einen Server kannst du später in den Einstellungen hinzufügen.":
+        "Only music on this iPhone. You can add a server later in Settings.",
+    "Nur aus der Mediathek entfernen": "Remove from Library Only",
+    "Original · keine Bearbeitung": "Original · no processing",
+    "Playlist importieren …": "Import Playlist …",
+    "Sonst wird die Playlist auf dem Server angelegt.": "Otherwise the playlist is created on the server.",
+    "Standard · A = 432 Hz": "Default · A = 432 Hz",
+    "Stimmung": "Tuning",
+    "Titel auf diesem iPhone können nur in Playlists auf diesem iPhone stehen.": "Songs on this iPhone can only be in playlists on this iPhone.",
+    "Wähle einen Ordner oder einzelne Dateien in der Dateien-App – FLAC, MP3, AAC, ALAC, WAV, AIFF oder Opus. HomeTune merkt sich nur, wo sie liegen.":
+        "Choose a folder or individual files in the Files app – FLAC, MP3, AAC, ALAC, WAV, AIFF or Opus. HomeTune only remembers where they are.",
+    "„%@“ wird von diesem iPhone gelöscht. Die Titel bleiben in der Mediathek.": "“%@” will be deleted from this iPhone. The songs stay in your library.",
+    "„%@“: %lld von %lld Titeln gefunden": "“%1$@”: %2$lld of %3$lld songs found",
 }
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

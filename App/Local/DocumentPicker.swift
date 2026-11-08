@@ -10,7 +10,8 @@ final class DocumentPicker: NSObject, UIDocumentPickerDelegate {
     private var completion: (([URL]) -> Void)?
 
     func present(_ kind: LocalImportKind, completion: @escaping ([URL]) -> Void) {
-        let types: [UTType] = kind == .folder ? [.folder] : TagReader.contentTypes
+        // „Dateien hinzufügen“ nimmt auch Playlists (.m3u/.m3u8/.pls) an
+        let types: [UTType] = kind == .folder ? [.folder] : TagReader.contentTypes + TagReader.playlistTypes
         let picker = UIDocumentPickerViewController(forOpeningContentTypes: types, asCopy: false)
         picker.allowsMultipleSelection = true
         picker.delegate = self

@@ -20,11 +20,12 @@ struct LocalTags: Sendable, Equatable {
     var artwork: Data?
 }
 
-/// Liest Metadaten lokal – ohne Server. MP3/M4A/AIFF/WAV über `AVAsset`, FLAC über einen eigenen kleinen
-/// Leser für STREAMINFO, VORBIS_COMMENT und PICTURE (so klappt es unabhängig davon, was AVFoundation kann).
+/// Liest Metadaten lokal – ohne Server. MP3/M4A/AIFF/WAV/Ogg/Opus über `AVAsset` (Ogg: Vorbis-Kommentare als
+/// „vorb/…“), FLAC über einen eigenen kleinen Leser für STREAMINFO, VORBIS_COMMENT und PICTURE (so klappt es
+/// unabhängig davon, was AVFoundation kann). Nicht lesbar auf iOS: WMA, WavPack, APE, DSD.
 enum TagReader {
     /// Endungen, die beim Durchsuchen von Ordnern beachtet werden. Ob iOS die Datei wirklich lesen kann,
-    /// entscheidet danach `AVAudioFile` (z. B. Ogg/Opus je nach iOS-Version).
+    /// entscheidet danach `AVAudioFile`.
     static let audioExtensions: Set<String> = ["flac", "mp3", "m4a", "m4b", "aac", "alac", "wav", "wave",
                                                "aif", "aiff", "aifc", "caf", "ogg", "oga", "opus"]
 
@@ -33,7 +34,18 @@ enum TagReader {
     /// Typen für den Dateien-Dialog und „Öffnen in“.
     static var contentTypes: [UTType] {
         var t: [UTType] = [.audio, .mp3, .mpeg4Audio, .wav, .aiff]
-        if let flac = UTType("org.xiph.flac") ?? UTType(filenameExtension: "flac") { t.append(flac) }
+        for ext in ["flac", "ogg", "opus"] {
+            if let u = UTType(filenameExtension: ext), !t.contains(u) { t.append(u) }
+        }
+        return t
+    }
+
+    /// Playlist-Typen für den Dateien-Dialog
+    static var playlistTypes: [UTType] {
+        var t: [UTType] = [.m3uPlaylist, .playlist]
+        for ext in PlaylistFile.extensions {
+            if let u = UTType(filenameExtension: ext), !t.contains(u) { t.append(u) }
+        }
         return t
     }
 
@@ -51,12 +63,7 @@ enum TagReader {
             // Quell-Bittiefe steckt in den Format-Flags (kAppleLosslessFormatFlag_16BitSourceData = 1 …)
             t.bitDepth = [1: 16, 2: 20, 3: 24, 4: 32][Int(asbd.mFormatFlags)]
         }
-        let ext = url.pathExtension.lowercased()
-        if ext == "flac" {
-            FLACTags.read(url, into: &t)
-        } else {
-            await readAsset(url, into: &t)
-        }
+        await readMetadata(url, into: &t)
         let lossless = t.bitDepth != nil
         if !lossless, t.duration > 0, let size = (try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize {
             t.bitRate = Int((Double(size) * 8 / t.duration / 1000).rounded())
@@ -64,7 +71,16 @@ enum TagReader {
         return t
     }
 
-    // MARK: AVAsset (ID3, iTunes/QuickTime, gemeinsame Schlüssel)
+    /// Nur die Tags (ohne Prüfung, ob iOS die Datei dekodieren kann).
+    static func readMetadata(_ url: URL, into t: inout LocalTags) async {
+        if url.pathExtension.lowercased() == "flac" {
+            FLACTags.read(url, into: &t)
+        } else {
+            await readAsset(url, into: &t)
+        }
+    }
+
+    // MARK: AVAsset (ID3, iTunes/QuickTime, Vorbis-Kommentare, gemeinsame Schlüssel)
 
     private static func readAsset(_ url: URL, into t: inout LocalTags) async {
         let asset = AVURLAsset(url: url)
@@ -73,6 +89,25 @@ enum TagReader {
         for item in items {
             guard let id = item.identifier else { continue }
             let s = try? await item.load(.stringValue)
+            // Ogg Vorbis/Opus: AVFoundation liefert die Vorbis-Kommentare als „vorb/TITLE“ usw.
+            if id.rawValue.lowercased().hasPrefix("vorb/") {
+                let key = String(id.rawValue.dropFirst(5))
+                if let s { FLACTags.apply(key: key, value: s, into: &t) }
+                else if key.uppercased() == "METADATA_BLOCK_PICTURE", let d = try? await item.load(.dataValue) {
+                    // iOS liefert den Wert als Daten: meist schon das Bild selbst (JPEG/PNG), sonst base64-Text
+                    // oder der FLAC-PICTURE-Block
+                    if d.starts(with: [0xFF, 0xD8, 0xFF]) || d.starts(with: [0x89, 0x50, 0x4E, 0x47]) {
+                        if t.artwork == nil { t.artwork = d }
+                    } else if let v = String(data: d, encoding: .isoLatin1),
+                       let raw = Data(base64Encoded: v.trimmingCharacters(in: .whitespacesAndNewlines.union(.controlCharacters)), options: .ignoreUnknownCharacters),
+                       raw.count > 32 {
+                        FLACTags.applyPicture([UInt8](raw), into: &t)
+                    } else {
+                        FLACTags.applyPicture([UInt8](d), into: &t)
+                    }
+                }
+                continue
+            }
             func set(_ kp: WritableKeyPath<LocalTags, String?>) {
                 if t[keyPath: kp] == nil, let v = clean(s) { t[keyPath: kp] = v }
             }
@@ -222,21 +257,36 @@ enum FLACTags {
             let s = String(decoding: b[(i + 4)..<(i + 4 + len)], as: UTF8.self)
             i += 4 + len
             guard let eq = s.firstIndex(of: "=") else { continue }
-            let key = s[..<eq].uppercased()
-            let value = String(s[s.index(after: eq)...])
-            switch key {
-            case "TITLE": t.title = t.title ?? TagReader.clean(value)
-            case "ARTIST": t.artist = t.artist ?? TagReader.clean(value)
-            case "ALBUM": t.album = t.album ?? TagReader.clean(value)
-            case "ALBUMARTIST", "ALBUM ARTIST", "ALBUM_ARTIST": t.albumArtist = t.albumArtist ?? TagReader.clean(value)
-            case "TRACKNUMBER": t.track = t.track ?? TagReader.firstInt(value)
-            case "DISCNUMBER": t.discNumber = t.discNumber ?? TagReader.firstInt(value)
-            case "DATE", "YEAR", "ORIGINALDATE": t.year = t.year ?? TagReader.year(value)
-            case "GENRE": t.genre = t.genre ?? TagReader.genre(value)
-            case "COMPOSER": t.composer = t.composer ?? TagReader.clean(value)
-            default: break
-            }
+            apply(key: String(s[..<eq]), value: String(s[s.index(after: eq)...]), into: &t)
         }
+    }
+
+    /// Ein Vorbis-Kommentar (FLAC, Ogg Vorbis, Opus) – Schlüssel ohne Rücksicht auf Groß-/Kleinschreibung.
+    static func apply(key rawKey: String, value: String, into t: inout LocalTags) {
+        switch rawKey.uppercased() {
+        case "TITLE": t.title = t.title ?? TagReader.clean(value)
+        case "ARTIST": t.artist = t.artist ?? TagReader.clean(value)
+        case "ALBUM": t.album = t.album ?? TagReader.clean(value)
+        case "ALBUMARTIST", "ALBUM ARTIST", "ALBUM_ARTIST": t.albumArtist = t.albumArtist ?? TagReader.clean(value)
+        case "TRACKNUMBER", "TRACK": t.track = t.track ?? TagReader.firstInt(value)
+        case "DISCNUMBER", "DISC": t.discNumber = t.discNumber ?? TagReader.firstInt(value)
+        case "DATE", "YEAR", "ORIGINALDATE": t.year = t.year ?? TagReader.year(value)
+        case "GENRE": t.genre = t.genre ?? TagReader.genre(value)
+        case "COMPOSER": t.composer = t.composer ?? TagReader.clean(value)
+        case "METADATA_BLOCK_PICTURE":
+            // base64-kodierter FLAC-PICTURE-Block; Vorderseite (Typ 3) hat Vorrang
+            guard let d = Data(base64Encoded: value.trimmingCharacters(in: .whitespacesAndNewlines), options: .ignoreUnknownCharacters) else { return }
+            applyPicture([UInt8](d), into: &t)
+        case "COVERART":
+            // ältere Ogg-Variante: Bild direkt base64-kodiert
+            if t.artwork == nil, let d = Data(base64Encoded: value, options: .ignoreUnknownCharacters), !d.isEmpty { t.artwork = d }
+        default: break
+        }
+    }
+
+    /// FLAC-PICTURE-Block übernehmen; Vorderseite (Typ 3) hat Vorrang.
+    static func applyPicture(_ b: [UInt8], into t: inout LocalTags) {
+        if t.artwork == nil || picType(b) == 3 { picture(b, into: &t) }
     }
 
     private static func picType(_ b: [UInt8]) -> Int? { be32(b, 0) }
