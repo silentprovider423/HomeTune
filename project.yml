@@ -1,0 +1,77 @@
+name: HomeSpin
+options:
+  bundleIdPrefix: org.homeroll
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+  developmentLanguage: de
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_EMIT_LOC_STRINGS: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+targets:
+  HomeSpin:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+      - path: Resources
+        buildPhase: resources
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDisplayName: HomeSpin
+        CFBundleDevelopmentRegion: en
+        CFBundleLocalizations: [en, de]
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIBackgroundModes: [audio]
+        NSLocalNetworkUsageDescription: "Verbindung zu deinem Musikserver im Heimnetz."
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+          NSAllowsLocalNetworking: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.homeroll.homespin
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+  HomeSpinTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests]
+    dependencies:
+      - target: HomeSpin
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.homeroll.homespin.tests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/HomeSpin.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/HomeSpin
+        BUNDLE_LOADER: $(TEST_HOST)
+  HomeSpinUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: HomeSpin
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.homeroll.homespin.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: HomeSpin
+schemes:
+  HomeSpin:
+    build:
+      targets:
+        HomeSpin: all
+        HomeSpinTests: [test]
+        HomeSpinUITests: [test]
+    test:
+      targets: [HomeSpinTests, HomeSpinUITests]
