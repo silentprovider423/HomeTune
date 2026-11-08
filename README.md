@@ -19,9 +19,14 @@ HomeSpin is an independent iPhone client for self-hosted Navidrome (or any Subso
   <img src="docs/screenshots/3-album.png" width="160" alt="Album">
   <img src="docs/screenshots/4-now-playing.png" width="160" alt="Now Playing in 432 Hz">
   <img src="docs/screenshots/5-queue.png" width="160" alt="Playing Next">
+  <img src="docs/screenshots/8-lyrics.png" width="160" alt="Synced lyrics">
+</p>
+<p align="center">
+  <img src="docs/screenshots/2-albums.png" width="160" alt="Albums">
+  <img src="docs/screenshots/6-search.png" width="160" alt="Search">
   <img src="docs/screenshots/7-home.png" width="160" alt="Home">
 </p>
-<p align="center"><sub>Screenshots with generated demo albums (no real music).</sub></p>
+<p align="center"><sub>Screenshots with generated demo albums and made-up demo lyrics (no real music).</sub></p>
 
 ## Features
 
@@ -103,6 +108,7 @@ HOMESPIN_DEMO_PASSWORD=...
 
 ```bash
 SIM=<simulator-udid> ./test.sh      # unit tests (API, queue, 432 Hz FFT, engine) + UI tests
+TEST_RUNNER_UI_LANG=en TEST_RUNNER_SHOT_DIR=/tmp/shots SIM=<udid> ./test.sh -only-testing:HomeSpinUITests   # English screenshots
 SIM=<simulator-udid> ./sim-run.sh   # start the app signed in (debug builds only)
 ```
 

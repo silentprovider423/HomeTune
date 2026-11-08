@@ -127,6 +127,19 @@ final class SubsonicClientTests: XCTestCase {
         XCTAssertFalse(all.contains { $0.id == p.id })
     }
 
+    /// Zeitsynchroner Liedtext live vom Server (Demo-Titel „Velvet“ hat eine .lrc-Datei).
+    func testSyncedLyricsLive() async throws {
+        let c = try Self.client(demo: true)
+        guard let song = try await c.search("Velvet").songs.first(where: { $0.album == "Harbor Lights" }) else {
+            throw XCTSkip("Demo-Titel fehlt")
+        }
+        let list = try await c.lyrics(songId: song.id)
+        let synced = try XCTUnwrap(list.first { $0.synced == true }, "keine synchronen Liedtexte")
+        let lines = synced.line ?? []
+        XCTAssertGreaterThan(lines.count, 5)
+        XCTAssertEqual(lines.compactMap(\.start), lines.compactMap(\.start).sorted(), "Zeilen nach Zeit geordnet")
+    }
+
     func testCoverArt() async throws {
         let c = try Self.client(demo: true)
         let album = try await c.allAlbums()[0]

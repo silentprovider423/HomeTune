@@ -14,8 +14,13 @@ final class AppFlowTests: XCTestCase {
         }
         app = XCUIApplication()
         app.launchEnvironment = ["HOMESPIN_SERVER": server, "HOMESPIN_USER": user, "HOMESPIN_PASSWORD": pw]
+        if english { app.launchArguments += ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"] }
         app.launch()
     }
+
+    /// UI_LANG=en: Oberfläche auf Englisch (für die README-Screenshots)
+    var english: Bool { ProcessInfo.processInfo.environment["UI_LANG"] == "en" }
+    func t(_ de: String, _ en: String) -> String { english ? en : de }
 
     private func shot(_ name: String) {
         let s = XCUIScreen.main.screenshot()
@@ -31,11 +36,11 @@ final class AppFlowTests: XCTestCase {
     }
 
     func testMainFlow() throws {
-        tapTab("Mediathek")
+        tapTab(t("Mediathek", "Library"))
         let albums = app.buttons["section.albums"].firstMatch
         XCTAssertTrue(albums.waitForExistence(timeout: 15))
         // „Zuletzt hinzugefügt“ laden lassen
-        _ = app.staticTexts["Zuletzt hinzugefügt"].waitForExistence(timeout: 15)
+        _ = app.staticTexts[t("Zuletzt hinzugefügt", "Recently Added")].waitForExistence(timeout: 15)
         sleep(2)
         shot("1-library")
 
@@ -65,7 +70,7 @@ final class AppFlowTests: XCTestCase {
         let track = app.cells.containing(.any, identifier: "track.3").firstMatch
         if track.waitForExistence(timeout: 3) {
             track.press(forDuration: 1.2)
-            let next = app.buttons["Als Nächstes wiedergeben"].firstMatch
+            let next = app.buttons[t("Als Nächstes wiedergeben", "Play Next")].firstMatch
             if next.waitForExistence(timeout: 3) { next.tap() }
         }
 
@@ -84,6 +89,11 @@ final class AppFlowTests: XCTestCase {
 
         app.buttons["nowPlaying.lyrics"].firstMatch.tap()
         XCTAssertTrue(app.descendants(matching: .any)["lyrics"].firstMatch.waitForExistence(timeout: 8))
+        // Demo-Titel „Velvet“ hat einen zeitsynchronen Liedtext (.lrc auf dem Testserver)
+        if app.staticTexts["Soft as velvet, slow as rain"].firstMatch.waitForExistence(timeout: 8) {
+            sleep(2)
+            shot("8-lyrics")
+        }
 
         app.buttons["nowPlaying.next"].firstMatch.tap()
         app.buttons["nowPlaying.lyrics"].firstMatch.tap()
@@ -94,12 +104,12 @@ final class AppFlowTests: XCTestCase {
     }
 
     func testSearchAndHome() throws {
-        tapTab("Startseite")
+        tapTab(t("Startseite", "Home"))
         XCTAssertTrue(app.buttons["home.shuffleAll"].firstMatch.waitForExistence(timeout: 10))
         sleep(3)
         shot("7-home")
 
-        tapTab("Suchen")
+        tapTab(t("Suchen", "Search"))
         let field = app.searchFields.firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: 10))
         field.tap()
@@ -110,7 +120,7 @@ final class AppFlowTests: XCTestCase {
     }
 
     func testCreateAndDeletePlaylist() throws {
-        tapTab("Mediathek")
+        tapTab(t("Mediathek", "Library"))
         let section = app.buttons["section.playlists"].firstMatch
         XCTAssertTrue(section.waitForExistence(timeout: 15))
         section.tap()
@@ -131,10 +141,10 @@ final class AppFlowTests: XCTestCase {
         let created = app.staticTexts[title].firstMatch
         XCTAssertTrue(created.waitForExistence(timeout: 10))
         created.press(forDuration: 1.2)
-        let del = app.buttons["Playlist löschen"].firstMatch
+        let del = app.buttons[t("Playlist löschen", "Delete Playlist")].firstMatch
         XCTAssertTrue(del.waitForExistence(timeout: 5))
         del.tap()
-        let confirm = app.buttons["Playlist löschen"].firstMatch
+        let confirm = app.buttons[t("Playlist löschen", "Delete Playlist")].firstMatch
         XCTAssertTrue(confirm.waitForExistence(timeout: 5))
         confirm.tap()
         XCTAssertTrue(created.waitForNonExistence(timeout: 10))
