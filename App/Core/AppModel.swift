@@ -210,7 +210,11 @@ enum DebugLocal {
         if env["HOMETUNE_LOCAL_ONLY"] == "1" { app.localMode = true }
         if env["HOMETUNE_LOCAL_RESET"] == "1" { app.local.removeAll() }
         if let paths = env["HOMETUNE_LOCAL_IMPORT"], !paths.isEmpty {
-            let urls = paths.split(separator: "|").map { URL(fileURLWithPath: String($0), isDirectory: true) }
+            // relative Pfade (z. B. „Documents/LocalMusic“) gelten ab dem App-Ordner – für Tests auf dem Gerät
+            let urls = paths.split(separator: "|").map { p in
+                p.hasPrefix("/") ? URL(fileURLWithPath: String(p), isDirectory: true)
+                    : URL(fileURLWithPath: NSHomeDirectory()).appending(path: String(p), directoryHint: .isDirectory)
+            }
             Task { await app.local.add(urls) }
         }
     }

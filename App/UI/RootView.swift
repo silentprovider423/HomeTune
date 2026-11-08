@@ -13,10 +13,10 @@ struct RootView: View {
             }
         }
         // „Musik hinzufügen“: Ordner oder Dateien werden referenziert (Bookmark), nicht kopiert
-        .fileImporter(isPresented: Binding(get: { app.importRequest != nil }, set: { if !$0 { app.importRequest = nil } }),
-                      allowedContentTypes: app.importRequest == .folder ? [.folder] : TagReader.contentTypes,
-                      allowsMultipleSelection: true) { result in
-            app.importLocal(result)
+        .onChange(of: app.importRequest) { _, kind in
+            guard let kind else { return }
+            app.importRequest = nil
+            DocumentPicker.shared.present(kind) { urls in app.importLocal(.success(urls)) }
         }
         // „Öffnen in HomeTune“ / „Teilen“ aus der Dateien-App
         .onOpenURL { url in app.receive([url]) }
