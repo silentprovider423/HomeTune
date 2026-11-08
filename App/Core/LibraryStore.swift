@@ -26,6 +26,8 @@ final class LibraryStore {
     private(set) var randomAlbums: [Album] = []
 
     private var client: SubsonicClient?
+    /// Läuft, solange nach einem Verbindungsfehler automatisch neu versucht wird.
+    private var retryTask: Task<Void, Never>?
 
     struct Snapshot: Codable {
         var albums: [Album]; var artists: [Artist]; var songs: [Song]; var playlists: [Playlist]; var genres: [Genre]
@@ -104,7 +106,29 @@ final class LibraryStore {
         } catch {
             isOffline = (error as? URLError) != nil
             lastError = error.localizedDescription
+            if isOffline { scheduleRetries() }
         }
+    }
+
+    /// Nach einem Verbindungsfehler selbst neu versuchen (2, 5, 15 s) – z. B. beim ersten Start, wenn iOS
+    /// noch nach dem lokalen Netzwerk fragt und die erste Anfrage deshalb scheitert.
+    private func scheduleRetries() {
+        guard retryTask == nil else { return }
+        retryTask = Task { [weak self] in
+            for delay in [2, 5, 15] {
+                try? await Task.sleep(for: .seconds(delay))
+                guard !Task.isCancelled, let self, self.isOffline else { break }
+                await self.refresh()   // scheitert sie, startet kein zweiter Timer (retryTask läuft ja)
+                if !self.isOffline { break }
+            }
+            self?.retryTask = nil
+        }
+    }
+
+    /// App wieder im Vordergrund: offline → sofort neu versuchen.
+    func retryIfOffline() {
+        guard isOffline, !isLoading else { return }
+        Task { await refresh() }
     }
 
     func refreshPlaylists() async {

@@ -13,6 +13,7 @@ struct HomeSpinApp: App {
         }
         .onChange(of: phase) { _, p in
             if p == .background { app.player.saveQueue() }
+            if p == .active { app.library.retryIfOffline() }
         }
     }
 }
