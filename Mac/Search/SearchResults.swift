@@ -3,8 +3,8 @@ import SwiftUI
 /// Suchergebnisse im Inhaltsbereich: Topergebnis · Künstler:innen · Alben · Titel · Playlists.
 /// Leeres Feld mit Fokus: „Letzte Sucheinträge“ mit „Löschen“.
 struct SearchResultsView: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     @AppStorage("search.recent") private var recentRaw = "[]"
     @State private var result = SubsonicClient.SearchResult()
     @State private var searching = false
@@ -179,7 +179,7 @@ struct SearchResultsView: View {
 }
 
 private struct SearchSongRow: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     let song: Song
     let selected: Bool
     let odd: Bool

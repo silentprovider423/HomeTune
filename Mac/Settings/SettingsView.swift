@@ -60,8 +60,8 @@ private struct SettingsPage<Content: View>: View {
 // MARK: Allgemein
 
 private struct GeneralSettings: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     var body: some View {
         @Bindable var mac = mac
         SettingsPage {
@@ -91,7 +91,7 @@ private struct GeneralSettings: View {
 // MARK: Konten
 
 private struct AccountsSettings: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     @State private var selection: String?
     @State private var addAccount = false
     @State private var confirmRemove: ServerAccount?
@@ -175,7 +175,7 @@ private struct AccountsSettings: View {
 
 /// Anmeldeblatt: Serveradresse, Benutzername, Passwort (Passwort in den Schlüsselbund, Anfragen mit Salz + Token)
 struct LoginSheet: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     @Environment(\.dismiss) private var dismiss
     @State private var server = ""
     @State private var user = ""
@@ -263,7 +263,7 @@ extension Tuning {
 private let bitRates = [0, 320, 256, 192, 128]
 
 private struct PlaybackSettings: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     @AppStorage("streamMaxBitRate") private var maxBitRate = 0
 
     var body: some View {
@@ -297,7 +297,7 @@ private struct PlaybackSettings: View {
 // MARK: Downloads
 
 private struct DownloadSettings: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     @State private var cacheBytes: Int64 = 0
     @State private var confirmRemoveAll = false
 
@@ -371,8 +371,8 @@ private struct AdvancedSettings: View {
 
 /// Fenster „Informationen“: Datei, Format, Datenrate, Pfad, Wiedergaben – für die gewählten Titel
 struct InfoWindow: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
 
     var body: some View {
         let songs = mac.infoSongs

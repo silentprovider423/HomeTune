@@ -86,7 +86,7 @@ enum OutputDevices {
 
 /// AirPlay-/Ausgabe-Knopf neben der Lautstärke
 struct OutputDeviceMenu: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     @State private var devices: [OutputDevices.Device] = []
     @State private var current: AudioDeviceID?
 

@@ -19,7 +19,7 @@ struct PlayerToolbar: ToolbarContent {
 
 /// Zufällig · Zurück · Wiedergabe/Pause · Weiter · Wiederholen
 struct TransportControls: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
 
     var body: some View {
         let p = app.player
@@ -80,7 +80,7 @@ struct ToggleGlyph: View {
 
 /// Zurück/Weiter: Klick springt, gedrückt halten spult (Vor-/Zurückspringen)
 struct SeekButton: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     let systemImage: String
     let forward: Bool
     let tap: () -> Void
@@ -119,7 +119,7 @@ struct SeekButton: View {
 
 /// Lautstärke der App (nicht des Systems) + Ausgabegerät
 struct VolumeControl: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
 
     var body: some View {
         @Bindable var player = app.player
@@ -144,7 +144,7 @@ struct VolumeControl: View {
 
 /// Liedtext (⌃⌘U) und Nächster Titel (⌥⌘U): schalten die rechte Spalte um
 struct PanelButtons: View {
-    @Environment(MacModel.self) private var mac
+    @MacEnv private var mac
     var body: some View {
         HStack(spacing: 2) {
             Button { mac.toggleInspector(.lyrics) } label: {

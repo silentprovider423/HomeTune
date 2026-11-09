@@ -3,8 +3,8 @@ import SwiftUI
 /// Playlist-Seite: Kopf mit Cover, Name, Beschreibung, „<n> Titel, <Dauer>“, Wiedergabe/Zufällig/„⋯“
 /// (darin „Playlist bearbeiten“), darunter die Titeltabelle mit „Reihenfolge der Playlist“.
 struct PlaylistPage: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let playlistID: String
     @State private var playlist: Playlist?
     @State private var songs: [Song] = []
@@ -159,8 +159,8 @@ struct PlaylistMosaic: View {
 
 /// „Neue Playlist“ (⌘N): Name, Beschreibung (optional), Ort „Auf dem Server“ / „Nur auf diesem Mac“
 struct NewPlaylistSheet: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     @Environment(\.dismiss) private var dismiss
     let songs: [Song]
     @State private var name = ""

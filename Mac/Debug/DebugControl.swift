@@ -96,10 +96,45 @@ enum DebugControl {
                 }
             }
             try? out.write(toFile: arg, atomically: true, encoding: .utf8)
+        case "scroll":
+            // „scroll 0.5“ = längste Liste im Hauptfenster an diese Stelle (0…1) rollen
+            scroll(to: Double(arg) ?? 0)
+        case "stress":
+            // „stress 20“ = so viele Sekunden lang rollen und dabei die Ansicht wechseln (Absturzsuche)
+            stress(seconds: Double(arg) ?? 10, mac: mac)
         case "quit":
             NSApp.terminate(nil)
         default:
             break
+        }
+    }
+
+    private static func scrollViews(in view: NSView) -> [NSScrollView] {
+        ((view as? NSScrollView).map { [$0] } ?? []) + view.subviews.flatMap { scrollViews(in: $0) }
+    }
+
+    private static func scroll(to fraction: Double) {
+        guard let root = mainWindow?.contentView else { return }
+        let all = scrollViews(in: root).sorted { ($0.documentView?.frame.height ?? 0) > ($1.documentView?.frame.height ?? 0) }
+        guard let sv = all.first, let doc = sv.documentView else { return }
+        let y = max(0, doc.frame.height - sv.contentView.bounds.height) * fraction
+        sv.contentView.scroll(to: NSPoint(x: 0, y: y))
+        sv.reflectScrolledClipView(sv.contentView)
+    }
+
+    private static func stress(seconds: Double, mac: MacModel) {
+        let targets: [SidebarItem] = [.library(.songs), .library(.onThisMac), .library(.albums), .home,
+                                         .library(.artists), .library(.songs), .allPlaylists, .library(.genres)]
+        Task { @MainActor in
+            let end = Date().addingTimeInterval(seconds)
+            var step = 0
+            while Date() < end {
+                if step % 40 == 0 { mac.go(targets[(step / 40) % targets.count]) }
+                if step % 97 == 96 { mac.onlyDownloaded.toggle() }
+                scroll(to: Double((step * 37) % 100) / 100)
+                step += 1
+                try? await Task.sleep(for: .milliseconds(16))
+            }
         }
     }
 

@@ -3,8 +3,8 @@ import SwiftUI
 /// Raster-Kachel eines Albums: Cover mit runden Ecken, darunter Name (fett) und Künstler:in. Beim Überfahren
 /// unten links ▶ (sofort abspielen) und unten rechts „⋯“ (Album-Kontextmenü). Klick öffnet die Albumseite.
 struct AlbumTile: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let album: Album
     var size: CGFloat = 180
     var focused = false
@@ -60,8 +60,8 @@ struct AlbumTile: View {
 
 /// Raster mit Albumkacheln, Spaltenzahl wächst mit der Breite. Pfeiltasten bewegen die Auswahl, Return öffnet.
 struct AlbumGridPage: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let title: Text
     let albums: [Album]
     var sortable = true
@@ -148,7 +148,7 @@ struct AlbumGridPage: View {
 
 /// „Sortieren nach“ im Raster (auch im Menü Darstellung)
 struct AlbumSortMenu: View {
-    @Environment(MacModel.self) private var mac
+    @MacEnv private var mac
     var body: some View {
         @Bindable var mac = mac
         Menu {
@@ -173,8 +173,8 @@ struct AlbumSortMenu: View {
 
 /// Alle Playlists als Raster
 struct AllPlaylistsPage: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
 
     var body: some View {
         let list = app.library.allPlaylists.filter { mac.matches($0.name) }
@@ -202,8 +202,8 @@ struct AllPlaylistsPage: View {
 }
 
 struct PlaylistTile: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let playlist: Playlist
     var size: CGFloat = 180
     @State private var hover = false
@@ -251,8 +251,8 @@ struct PlaylistCover: View {
 
 /// Startseite: Regale aus eigenen Serverlisten (waagrecht scrollende Coverreihen)
 struct HomePage: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
 
     var body: some View {
         let lib = app.library

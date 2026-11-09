@@ -3,8 +3,8 @@ import AppKit
 
 /// Künstler:innen zweigeteilt: links alle Namen mit rundem Bild, rechts die gewählte Person mit allen Alben als Blöcke.
 struct ArtistsSplit: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
 
     var body: some View {
         @Bindable var mac = mac
@@ -46,8 +46,8 @@ struct ArtistsSplit: View {
 
 /// Künstlerseite: Kopf mit Name + Wiedergabe/Zufällig, darunter jedes Album als Block (Cover links, Titelliste rechts)
 struct ArtistDetail: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let artistID: String
     @State private var albums: [Album] = []
     @State private var songsByAlbum: [String: [Song]] = [:]
@@ -99,8 +99,8 @@ struct ArtistDetail: View {
 }
 
 private struct ArtistAlbumBlock: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let album: Album
     let songs: [Song]
     @Binding var selected: String?
@@ -143,8 +143,8 @@ private struct ArtistAlbumBlock: View {
 
 /// Genres bzw. Komponist:innen zweigeteilt: links Namensliste, rechts Titeltabelle
 struct ItemSplit: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let names: [String]
     let context: String
     let songsFor: (String) -> [Song]
@@ -178,8 +178,8 @@ struct ItemSplit: View {
 }
 
 struct GenresSplit: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     var body: some View {
         @Bindable var mac = mac
         ItemSplit(names: app.library.genres.map(\.value).filter { mac.matches($0) }
@@ -190,8 +190,8 @@ struct GenresSplit: View {
 }
 
 struct ComposersSplit: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     var body: some View {
         @Bindable var mac = mac
         ItemSplit(names: app.library.composers.map(\.name).filter { mac.matches($0) }
@@ -203,8 +203,8 @@ struct ComposersSplit: View {
 
 /// „Auf diesem Mac“: Musik aus eigenen Ordnern und aus ~/Music/HomeTune (nur verknüpft, nie kopiert)
 struct OnThisMacPage: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     @State private var showFolders = false
 
     var body: some View {
@@ -243,7 +243,7 @@ struct OnThisMacPage: View {
 
 /// Liste der eingebundenen Ordner mit Neu einlesen / Entfernen
 private struct LocalFoldersPopover: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Ordner").font(.headline)

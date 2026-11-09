@@ -2,8 +2,8 @@ import SwiftUI
 
 /// Mittelstück der Symbolleiste: Cover, Titel, „Künstler:in — Album“, Fortschrittslinie, Zeiten beim Überfahren, „⋯“
 struct LCDView: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     @State private var hover = false
     @State private var hoverCover = false
     /// Erst nach dem ersten Layout Inhalte zeigen: Ist beim Start schon ein Titel geladen (gemerkte Warteliste),
@@ -80,7 +80,7 @@ struct LCDView: View {
 
 /// Dünne Fortschrittslinie; beim Überfahren Knopf und Zeiten, Klicken/Ziehen springt. Beim Laden ein laufender Balken.
 struct ProgressLine: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     let hover: Bool
     @State private var dragValue: Double?
 

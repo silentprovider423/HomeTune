@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Rechte Spalte: „Nächster Titel“/Verlauf oder Liedtext
 struct InspectorView: View {
-    @Environment(MacModel.self) private var mac
+    @MacEnv private var mac
     var body: some View {
         Group {
             switch mac.inspector {
@@ -17,8 +17,8 @@ struct InspectorView: View {
 // MARK: Nächster Titel / Verlauf
 
 struct QueuePanel: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     @State private var selection = Set<UUID>()
     @State private var showAllHistory = false
 
@@ -160,7 +160,7 @@ struct QueuePanel: View {
 
 /// Zeile der Warteliste: Cover 34 pt, Titel, Künstler:in; beim Überfahren „⋯“
 private struct QueueRow: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     let entry: PlayQueue.Entry
     var isCurrent = false
     @State private var hover = false
@@ -193,8 +193,8 @@ private struct QueueRow: View {
 }
 
 private struct QueueRowMenu: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let entry: PlayQueue.Entry
     var body: some View {
         Button("Aus „Nächster Titel“ entfernen") { app.player.remove(entry) }
@@ -214,7 +214,7 @@ private struct QueueRowMenu: View {
 
 /// Liedtext: zeitsynchron (aktuelle Zeile groß und hell, Klick springt) oder einfach scrollbar
 struct LyricsPanel: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     var large = false
     @State private var lyrics: StructuredLyrics?
     @State private var plain: String?

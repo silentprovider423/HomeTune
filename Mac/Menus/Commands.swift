@@ -112,8 +112,8 @@ struct MacCommands: Commands {
 
 /// Menü „Titel“: wirkt auf die gewählten Titel der aktuellen Liste
 private struct SongMenuItems: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
 
     var body: some View {
         let songs = mac.selectedSongs

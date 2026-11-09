@@ -5,7 +5,7 @@ import UniformTypeIdentifiers
 
 /// Coverbild mit Platzhalter (Note auf grauem Grund)
 struct CoverArt: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     let id: String?
     var size: CGFloat = 160
     var corner: CGFloat = 6

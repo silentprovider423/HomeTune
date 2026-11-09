@@ -9,8 +9,8 @@ enum SongMenuSource {
 
 /// „Zur Playlist hinzufügen ▸“ – oben „Neue Playlist“, dann alle eigenen Playlists
 struct AddToPlaylistMenu: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let songs: () async -> [Song]
 
     var body: some View {
@@ -26,8 +26,8 @@ struct AddToPlaylistMenu: View {
 
 /// Kontextmenü für einen oder mehrere Titel (Apple-Reihenfolge, Gruppen mit Trennern)
 struct SongContextMenu: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let songs: [Song]
     var source: SongMenuSource = .library
 
@@ -92,8 +92,8 @@ struct SongContextMenu: View {
 }
 
 struct AlbumContextMenu: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let album: Album
     var showGoToArtist = true
 
@@ -133,8 +133,8 @@ struct AlbumContextMenu: View {
 }
 
 struct ArtistContextMenu: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let artist: Artist
 
     var body: some View {
@@ -154,8 +154,8 @@ struct ArtistContextMenu: View {
 }
 
 struct PlaylistContextMenu: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let playlist: Playlist
 
     var body: some View {
@@ -180,8 +180,8 @@ struct PlaylistContextMenu: View {
 }
 
 struct GenreContextMenu: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let songs: [Song]
     let name: String
 

@@ -4,8 +4,8 @@ import AppKit
 /// MiniPlayer (⌥⌘M): quadratisches Fenster in Covergröße. Maus darüber → oben Titel/Künstler:in mit Schließen,
 /// „⋯“ und Ausgabe, unten Transport, Fortschritt mit Zeiten und Lautstärke. Doppelklick aufs Cover → Hauptfenster.
 struct MiniPlayerView: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     @Environment(\.openWindow) private var openWindow
     @Environment(\.dismissWindow) private var dismissWindow
     @AppStorage("mac.miniOnTop") private var onTop = false
@@ -116,8 +116,8 @@ private struct MiniWindowConfigurator: NSViewRepresentable {
 /// Vollbild-Player (⇧⌘F oder Klick aufs LCD-Cover): unscharfe Coverfarben, großes Cover, Transport, Lautstärke,
 /// rechts optional Liedtext. Esc schließt.
 struct FullScreenPlayer: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     @State private var showLyrics = false
 
     var body: some View {

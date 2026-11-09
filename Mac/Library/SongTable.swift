@@ -88,8 +88,8 @@ private enum SortStore {
 /// Titelliste wie bei Apple: Spalten ein-/ausblenden (Rechtsklick auf den Kopf), verschieben, Breite ändern,
 /// Sortieren per Klick auf den Kopf (je Ansicht gemerkt), Mehrfachauswahl, Doppelklick/Return spielt ab.
 struct SongTable: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let songs: [Song]
     /// Schlüssel für Spaltensatz und Sortierung (z. B. „songs“, „playlist“)
     let context: String
@@ -401,7 +401,7 @@ struct SongTable: View {
 
 /// Wiedergabestatus: Lautsprecher am laufenden Titel, beim Überfahren ein kleiner ▶-Knopf
 private struct StatusCell: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     let row: SongRow
     let play: () -> Void
     @State private var hover = false
@@ -428,7 +428,7 @@ private struct StatusCell: View {
 
 /// Download-Zustand: leer / lädt / geladen
 struct DownloadCell: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     let song: Song
     var body: some View {
         Group {
@@ -451,7 +451,7 @@ struct DownloadCell: View {
 
 /// ★ in der Tabelle: Klick schaltet direkt, beim Überfahren leer angedeutet
 struct FavoriteCell: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     let song: Song
     let on: Bool
     @State private var hover = false
@@ -472,8 +472,8 @@ struct FavoriteCell: View {
 
 /// Seite mit Titel, Wiedergabe-Knöpfen und Titeltabelle (Titel, Geladen, Genre, Komponist:in …)
 struct ListPage: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let title: Text
     let context: String
     let songs: [Song]
@@ -509,7 +509,7 @@ struct ListPage: View {
 
 /// Lieblingstitel
 struct FavoritesPage: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     var body: some View {
         ListPage(title: Text("Lieblingstitel"), context: "favorites", songs: app.library.favoriteSongs,
                  name: String(localized: "Lieblingstitel"), emptyTitle: "Keine Lieblingstitel",

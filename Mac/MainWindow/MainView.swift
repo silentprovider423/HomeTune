@@ -2,8 +2,8 @@ import SwiftUI
 
 /// Hauptfenster: Seitenleiste · Inhalt · rechte Spalte („Nächster Titel“/Liedtext), Player in der Symbolleiste.
 struct MainView: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     @Environment(\.openWindow) private var openWindow
     @Environment(\.openSettings) private var openSettings
     @FocusState private var searchFocus: Bool
@@ -110,7 +110,7 @@ extension Notification.Name {
 
 /// Kurze Rückmeldung unten mittig (wie iOS)
 struct NoticeOverlay: View {
-    @Environment(AppModel.self) private var app
+    @AppEnv private var app
     var body: some View {
         Group {
             if let n = app.notice.current {
@@ -131,7 +131,7 @@ struct NoticeOverlay: View {
 
 /// Versteckte Navigations-Kürzel (Apple: unsichtbares Menü)
 private struct HiddenShortcuts: View {
-    @Environment(MacModel.self) private var mac
+    @MacEnv private var mac
     var body: some View {
         ZStack {
             Button("") { mac.go(.home) }.keyboardShortcut("1", modifiers: [.option, .command])
@@ -148,8 +148,8 @@ private struct HiddenShortcuts: View {
 
 /// Inhaltsbereich: Navigation innerhalb des gewählten Seitenleisten-Eintrags, Suchergebnisse, Filterfeld, Statusleiste
 struct DetailRoot: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
 
     var body: some View {
         @Bindable var mac = mac
@@ -217,7 +217,7 @@ struct DetailRoot: View {
 
 /// Filterfeld über der Liste (⌥⌘F): filtert nur die aktuelle Liste, Esc leert es
 struct FilterBar: View {
-    @Environment(MacModel.self) private var mac
+    @MacEnv private var mac
     @FocusState private var focused: Bool
     var body: some View {
         @Bindable var mac = mac
@@ -239,7 +239,7 @@ struct FilterBar: View {
 
 /// Statusleiste (⌘/): „1.234 Titel, 3,2 Tage, 18,4 GB“ bzw. Auswahl
 struct StatusBar: View {
-    @Environment(MacModel.self) private var mac
+    @MacEnv private var mac
     var body: some View {
         let sel = mac.selectedSongs
         let list = sel.count > 1 ? sel : mac.visibleSongs
@@ -266,8 +266,8 @@ struct StatusBar: View {
 
 /// Ohne Konto: Anmelden oder ohne Server weiter
 struct WelcomeView: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     var body: some View {
         VStack(spacing: 16) {
             Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 96, height: 96)

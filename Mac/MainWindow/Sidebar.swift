@@ -2,8 +2,8 @@ import SwiftUI
 
 /// Seitenleiste: Suchfeld (oben, vom Fenster), HomeTune · Mediathek („Bearbeiten“) · Playlists
 struct Sidebar: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     @AppStorage("mac.sidebar.libraryExpanded") private var libraryExpanded = true
     @AppStorage("mac.sidebar.playlistsExpanded") private var playlistsExpanded = true
     @State private var hoverLibrary = false
@@ -103,8 +103,8 @@ struct Sidebar: View {
 
 /// Playlist-Zeile: Ablegen fügt hinzu, Doppelklick/„Umbenennen“ bearbeitet den Namen direkt
 struct PlaylistSidebarRow: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let playlist: Playlist
     @State private var targeted = false
     @State private var name = ""

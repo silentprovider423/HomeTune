@@ -3,8 +3,8 @@ import SwiftUI
 /// Albumseite: großes Cover, Name, Künstler:in (Akzentfarbe, Klick → Künstlerseite), „Genre · Jahr“, Format,
 /// Wiedergabe/Zufällig, ★ und „⋯“; darunter die Titel mit Titelnummer, bei mehreren CDs „Disc 1“, „Disc 2“.
 struct AlbumPage: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let albumID: String
     @State private var album: Album?
     @State private var songs: [Song] = []
@@ -90,8 +90,8 @@ struct AlbumPage: View {
 }
 
 private struct AlbumHeader: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let album: Album
     let songs: [Song]
 
@@ -159,8 +159,8 @@ private struct AlbumFooter: View {
 
 /// Titelzeile der Albumseite: Nummer (beim Überfahren ▶, laufend: Lautsprecher), Name, ★, Dauer
 struct AlbumTrackRow: View {
-    @Environment(AppModel.self) private var app
-    @Environment(MacModel.self) private var mac
+    @AppEnv private var app
+    @MacEnv private var mac
     let song: Song
     var showArtist = false
     let play: () -> Void
