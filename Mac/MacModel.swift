@@ -8,6 +8,15 @@ enum SidebarItem: Hashable, Codable {
     case playlist(String)
 }
 
+/// Darstellung von „Auf diesem Mac“
+enum LocalView: String, CaseIterable, Identifiable {
+    case playlists, albums, artists, songs
+    var id: String { rawValue }
+    var title: LocalizedStringKey {
+        switch self { case .playlists: "Playlists"; case .albums: "Alben"; case .artists: "Künstler:innen"; case .songs: "Titel" }
+    }
+}
+
 /// Woher die Musik der Mediathek kommt (Umschalter über den Listen, Menü „Darstellung“)
 enum MusicSource: String, CaseIterable, Identifiable {
     case all, server, local
@@ -200,6 +209,10 @@ final class MacModel {
     var source: MusicSource {
         didSet { d.set(source.rawValue, forKey: "mac.source") }
     }
+    /// Gewählte Darstellung von „Auf diesem Mac“; ohne Wahl siehe `activeLocalView`
+    var localView: LocalView? {
+        didSet { d.set(localView?.rawValue, forKey: "mac.localView") }
+    }
     var albumSort: AlbumSort {
         didSet { d.set(albumSort.rawValue, forKey: "mac.albumSort") }
     }
@@ -241,6 +254,7 @@ final class MacModel {
         showFavoritesColumn = d.object(forKey: "mac.showFavorites") as? Bool ?? true
         onlyDownloaded = d.bool(forKey: "mac.onlyDownloaded")
         source = MusicSource(rawValue: d.string(forKey: "mac.source") ?? "") ?? .all
+        localView = LocalView(rawValue: d.string(forKey: "mac.localView") ?? "")
         albumSort = AlbumSort(rawValue: d.string(forKey: "mac.albumSort") ?? "") ?? .title
         albumSortAscending = d.object(forKey: "mac.albumSortAsc") as? Bool ?? true
     }
@@ -501,6 +515,12 @@ final class MacModel {
     }
 
     var activeSource: MusicSource { hasBothSources ? source : .all }
+
+    /// Ohne eigene Wahl: Playlists, wenn es auf diesem Mac welche gibt, sonst Alben
+    var activeLocalView: LocalView {
+        if let localView { return localView }
+        return app?.local.playlists.isEmpty == false ? .playlists : .albums
+    }
 
     /// Umschalter „Alle · Server · Auf diesem Mac“ (IDs mit „local“-Vorsatz liegen auf diesem Mac)
     func inSource(_ id: String) -> Bool {

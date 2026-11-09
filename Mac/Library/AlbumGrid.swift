@@ -68,6 +68,7 @@ struct AlbumGridPage: View {
     let title: Text
     let albums: [Album]
     var sortable = true
+    var showHeader = true
     @State private var focusIndex: Int?
     @State private var columnsCount = 4
     @FocusState private var gridFocused: Bool
@@ -80,8 +81,10 @@ struct AlbumGridPage: View {
     var body: some View {
         let list = shown
         VStack(spacing: 0) {
-            PageHeader(title: title) {
-                if sortable { AlbumSortMenu() }
+            if showHeader {
+                PageHeader(title: title) {
+                    if sortable { AlbumSortMenu() }
+                }
             }
             if list.isEmpty {
                 if app.library.isLoading && !app.library.loadedOnce {
@@ -189,16 +192,27 @@ struct AllPlaylistsPage: View {
                 EmptyState(title: "Keine Playlists", systemImage: "music.note.list",
                            message: "Lege mit ⌘N eine Playlist an oder zieh Titel auf „Playlists“ in der Seitenleiste.")
             } else {
-                GeometryReader { geo in
-                    let side = AlbumGridPage.tileSide(width: geo.size.width)
-                    ScrollView {
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: side, maximum: side), spacing: 20, alignment: .top)],
-                                  alignment: .leading, spacing: 22) {
-                            ForEach(list) { p in PlaylistTile(playlist: p, size: side) }
-                        }
-                        .padding(.horizontal, 24).padding(.bottom, 24)
-                    }
+                PlaylistGrid(playlists: list)
+            }
+        }
+    }
+}
+
+/// Raster mit Playlist-Kacheln (Alle Playlists, „Auf diesem Mac“)
+struct PlaylistGrid: View {
+    @MacEnv private var mac
+    let playlists: [Playlist]
+
+    var body: some View {
+        let list = playlists.filter { mac.matches($0.name) }
+        GeometryReader { geo in
+            let side = AlbumGridPage.tileSide(width: geo.size.width)
+            ScrollView {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: side, maximum: side), spacing: 20, alignment: .top)],
+                          alignment: .leading, spacing: 22) {
+                    ForEach(list) { p in PlaylistTile(playlist: p, size: side) }
                 }
+                .padding(.horizontal, 24).padding(.bottom, 24)
             }
         }
     }

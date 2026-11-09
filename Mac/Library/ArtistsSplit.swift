@@ -5,20 +5,25 @@ import AppKit
 struct ArtistsSplit: View {
     @AppEnv private var app
     @MacEnv private var mac
+    /// Nur Musik auf diesem Mac („Auf diesem Mac“ › Künstler:innen), unabhängig vom Quellen-Umschalter
+    var localOnly = false
+    @State private var localSelection: String?
 
     var body: some View {
         @Bindable var mac = mac
+        let all = localOnly ? app.local.artists : mac.inSource(app.library.artists)
         let list = mac.available(app.library.albums).isEmpty && mac.onlyDownloaded ? [] :
-            mac.inSource(app.library.artists).filter { mac.matches($0.name) }
+            all.filter { mac.matches($0.name) }
                 .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        let selection = localOnly ? $localSelection : $mac.artistSelection
         HSplitView {
-            List(selection: $mac.artistSelection) {
+            List(selection: selection) {
                 ForEach(list) { a in
                     HStack(spacing: 10) {
                         ArtistAvatar(artist: a, size: 30)
                         Text(a.name).lineLimit(1)
                         Spacer(minLength: 4)
-                        SourceBadge(id: a.id)
+                        if !localOnly { SourceBadge(id: a.id) }
                     }
                     .padding(.vertical, 2)
                     .tag(a.id)
@@ -30,8 +35,8 @@ struct ArtistsSplit: View {
             .listStyle(.inset)
             .frame(minWidth: 180, idealWidth: 220, maxWidth: 320)
             Group {
-                if let id = mac.artistSelection {
-                    ArtistDetail(artistID: id)
+                if let id = selection.wrappedValue {
+                    ArtistDetail(artistID: id, localOnly: localOnly)
                 } else if list.isEmpty {
                     EmptyState(title: "Keine Künstler:innen", systemImage: "music.microphone")
                 } else {
@@ -41,7 +46,7 @@ struct ArtistsSplit: View {
             .frame(minWidth: 400, maxWidth: .infinity, maxHeight: .infinity)
         }
         .onAppear {
-            if mac.artistSelection == nil { mac.artistSelection = list.first?.id }
+            if selection.wrappedValue == nil { selection.wrappedValue = list.first?.id }
         }
     }
 }
@@ -51,6 +56,7 @@ struct ArtistDetail: View {
     @AppEnv private var app
     @MacEnv private var mac
     let artistID: String
+    var localOnly = false
     @State private var albums: [Album] = []
     @State private var songsByAlbum: [String: [Song]] = [:]
     @State private var selected: String?
@@ -90,7 +96,7 @@ struct ArtistDetail: View {
         selected = nil
         var list = app.library.albums(ofArtist: artistID)
         if list.isEmpty, !artistID.isLocalID, let a = try? await app.client?.artist(id: artistID) { list = a.album ?? [] }
-        list = mac.available(mac.inSource(list)).sorted { ($0.year ?? 0, $0.name) > ($1.year ?? 0, $1.name) }
+        list = mac.available(localOnly ? list.filter(\.id.isLocalID) : mac.inSource(list)).sorted { ($0.year ?? 0, $0.name) > ($1.year ?? 0, $1.name) }
         albums = list
         var map: [String: [Song]] = [:]
         for al in list {
@@ -203,17 +209,23 @@ struct ComposersSplit: View {
     }
 }
 
-/// „Auf diesem Mac“: Musik aus eigenen Ordnern und aus ~/Music/HomeTune (nur verknüpft, nie kopiert)
+/// „Auf diesem Mac“: Musik aus eigenen Ordnern und aus ~/Music/HomeTune (nur verknüpft, nie kopiert),
+/// umschaltbar als Playlists, Alben oder Titelliste
 struct OnThisMacPage: View {
     @AppEnv private var app
     @MacEnv private var mac
     @State private var showFolders = false
 
+    private var playlists: [Playlist] { app.library.allPlaylists.filter(\.id.isLocalPlaylistID) }
+
     var body: some View {
+        @Bindable var mac = mac
+        let view = mac.activeLocalView
         VStack(spacing: 0) {
             PageHeader(title: Text("Auf diesem Mac")) {
                 HStack {
                     if app.local.isScanning { ProgressView().controlSize(.small) }
+                    if view == .albums, !app.local.songs.isEmpty { AlbumSortMenu() }
                     Button { OpenPanel.addMusic(app) } label: { Label("Musik hinzufügen …", systemImage: "plus") }
                         .accessibilityIdentifier("local.add")
                     Button { showFolders.toggle() } label: { Label("Ordner", systemImage: "folder") }
@@ -228,17 +240,39 @@ struct OnThisMacPage: View {
             if app.local.songs.isEmpty {
                 EmptyState(title: "Keine Musik auf diesem Mac", systemImage: "desktopcomputer",
                            message: "Füge Ordner oder Dateien hinzu (⌘O) oder lege Musik in den Ordner „HomeTune“ im Ordner „Musik“. Dateien werden nur verknüpft, nicht kopiert.")
-                    .dropDestination(for: URL.self) { urls, _ in
-                        Task { _ = await app.local.add(urls) }
-                        return true
-                    }
             } else {
-                SongTable(songs: app.local.songs, context: "local", queueName: String(localized: "Auf diesem Mac"), defaultSort: "artist:asc")
-                    .dropDestination(for: URL.self) { urls, _ in
-                        Task { _ = await app.local.add(urls) }
-                        return true
+                HStack {
+                    Picker("Ansicht", selection: Binding(get: { view }, set: { mac.localView = $0 })) {
+                        ForEach(LocalView.allCases) { v in Text(v.title).tag(v) }
                     }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .fixedSize()
+                    .accessibilityIdentifier("local.view")
+                    Spacer()
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 12)
+                switch view {
+                case .playlists:
+                    if playlists.isEmpty {
+                        EmptyState(title: "Keine Playlists auf diesem Mac", systemImage: "music.note.list",
+                                   message: "Playlist-Dateien (.m3u, .m3u8, .pls) aus deinen Ordnern und aus dem Ordner „HomeTune“ erscheinen hier.")
+                    } else {
+                        PlaylistGrid(playlists: playlists)
+                    }
+                case .albums:
+                    AlbumGridPage(title: Text("Alben"), albums: app.local.albums, sortable: true, showHeader: false)
+                case .artists:
+                    ArtistsSplit(localOnly: true)
+                case .songs:
+                    SongTable(songs: app.local.songs, context: "local", queueName: String(localized: "Auf diesem Mac"), defaultSort: "artist:asc")
+                }
             }
+        }
+        .dropDestination(for: URL.self) { urls, _ in
+            Task { _ = await app.local.add(urls) }
+            return true
         }
     }
 }

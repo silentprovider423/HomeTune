@@ -519,6 +519,16 @@
         }
       }
     },
+    "Ansicht": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View"
+          }
+        }
+      }
+    },
     "Anzeigen:": {
       "localizations": {
         "en": {
@@ -1945,6 +1955,16 @@
         }
       }
     },
+    "Keine Playlists auf diesem Mac": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Playlists on This Mac"
+          }
+        }
+      }
+    },
     "Keine Titel": {
       "localizations": {
         "en": {
@@ -3001,6 +3021,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Playlist Not Available"
+          }
+        }
+      }
+    },
+    "Playlist-Dateien (.m3u, .m3u8, .pls) aus deinen Ordnern und aus dem Ordner „HomeTune“ erscheinen hier.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playlist files (.m3u, .m3u8, .pls) from your folders and from the “HomeTune” folder appear here."
           }
         }
       }

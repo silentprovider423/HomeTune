@@ -42,6 +42,9 @@ enum DebugControl {
         case "source":
             // „source local“ = Umschalter Alle/Server/Auf diesem Mac
             mac.source = MusicSource(rawValue: arg) ?? .all
+        case "local":
+            // „local albums“ = Darstellung von „Auf diesem Mac“ (playlists, albums, artists, songs)
+            mac.localView = LocalView(rawValue: arg)
         case "inspector":
             mac.inspector = InspectorPanel(rawValue: arg)
         case "queueTab":
