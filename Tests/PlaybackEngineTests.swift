@@ -21,8 +21,10 @@ final class PlaybackEngineTests: XCTestCase {
     }
 
     private func activate() throws {
+        #if os(iOS)
         try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
         try AVAudioSession.sharedInstance().setActive(true)
+        #endif
     }
 
     func testGaplessTransitionAndQueueEnd() async throws {

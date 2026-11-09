@@ -309,7 +309,12 @@ final class LocalMusicTests: XCTestCase {
         let s = await lib.receive([inbox.appending(path: "01 - Paper Boats.flac")])
         XCTAssertEqual(s.added, 1)
         XCTAssertEqual(lib.roots.first?.kind, .copied)
+        #if os(iOS)
         XCTAssertFalse(fm.fileExists(atPath: inbox.appending(path: "01 - Paper Boats.flac").path), "aus dem Posteingang verschoben")
+        #else
+        // Mac: nie etwas außerhalb des eigenen Ordners verschieben oder löschen – nur kopieren
+        XCTAssertTrue(fm.fileExists(atPath: inbox.appending(path: "01 - Paper Boats.flac").path), "Original bleibt liegen")
+        #endif
         XCTAssertGreaterThan(lib.importedBytes, 0)
         // Gleiche Datei noch einmal (von außerhalb des Posteingangs) → keine zweite Kopie
         let s2 = await lib.receive([dir.appending(path: "Morning Set/01 - Paper Boats.flac")])
@@ -355,8 +360,10 @@ final class LocalMusicTests: XCTestCase {
         XCTAssertGreaterThan(r.snr, 35)
 
         // Live: gleiche Engine wie in der App (signalsmith −31,77 Cent), Datei bleibt per Bookmark geöffnet
+        #if os(iOS)
         try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .longFormAudio)
         try AVAudioSession.sharedInstance().setActive(true)
+        #endif
         let engine = PlaybackEngine()
         engine.tuning = .hz432
         var failed: Error?

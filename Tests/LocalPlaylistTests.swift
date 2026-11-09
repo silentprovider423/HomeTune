@@ -282,6 +282,20 @@ final class LocalPlaylistTests: XCTestCase {
         XCTAssertEqual(lib.allRoots.first?.kind, .appFolder)
     }
 
+    #if os(macOS)
+    /// Mac: Der sichtbare Musikordner (~/Music/HomeTune) wird nie umgeräumt – kein Altbestand, nichts verschieben.
+    func testMacMigrationNeverMovesAnything() async throws {
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: "migration-\(UUID().uuidString)"))
+        try fm.createDirectory(at: docs.appending(path: "Inbox"), withIntermediateDirectories: true)
+        try Data([1, 2, 3]).write(to: docs.appending(path: "Inbox/a.mp3"))
+        try fm.createDirectory(at: docs.appending(path: "Covers"), withIntermediateDirectories: true)
+        let lib = makeLibrary()
+        let moved = await lib.migrateDocuments(defaults: defaults)
+        XCTAssertEqual(moved, 0)
+        XCTAssertTrue(fm.fileExists(atPath: docs.appending(path: "Inbox/a.mp3").path))
+        XCTAssertTrue(fm.fileExists(atPath: docs.appending(path: "Covers").path))
+    }
+    #else
     func testMigrationMovesInternalFilesOutOfDocuments() async throws {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: "migration-\(UUID().uuidString)"))
         try fm.createDirectory(at: docs.appending(path: "Covers"), withIntermediateDirectories: true)
@@ -304,13 +318,21 @@ final class LocalPlaylistTests: XCTestCase {
         XCTAssertEqual(again, 0)
     }
 
+    #endif
+
     // MARK: „Öffnen in“ ohne Kopie
 
     func testOpenInPlaceReferencesFilesAppOriginals() async throws {
         let lib = makeLibrary()
         let home = URL(fileURLWithPath: NSHomeDirectory())
+        #if os(iOS)
         XCTAssertTrue(lib.needsCopy(lib.inboxDirectory.appending(path: "a.mp3")), "Mail/AirDrop → Posteingang → Kopie")
         XCTAssertTrue(lib.needsCopy(home.appending(path: "tmp/org.homeroll.hometune-Inbox/a.mp3")))
+        #else
+        // Mac (ohne Sandbox): alles wird nur verknüpft, nie kopiert
+        XCTAssertFalse(lib.needsCopy(lib.inboxDirectory.appending(path: "a.mp3")))
+        XCTAssertFalse(lib.needsCopy(home.appending(path: "Music/a.mp3")))
+        #endif
         XCTAssertFalse(lib.needsCopy(URL(fileURLWithPath: "/private/var/mobile/Library/Mobile Documents/com~apple~CloudDocs/a.flac")),
                        "iCloud Drive / andere Apps → Original")
         XCTAssertFalse(lib.needsCopy(docs.appending(path: "Sub/a.flac")), "HomeTune-Ordner gehört schon dazu")
@@ -341,6 +363,7 @@ final class LocalPlaylistTests: XCTestCase {
         return Data([0x30, 0x82, 0x10, 0x00, 0x06, 0x09]) + Data(plist.utf8) + Data([0xA0, 0x82, 0x00, 0x01, 0x30])
     }
 
+    #if os(iOS)
     func testSigningProfileMismatch() {
         XCTAssertEqual(SigningCheck.applicationIdentifier(in: profile(appID: "com.example.other")), "com.example.other")
         XCTAssertEqual(SigningCheck.mismatch(profile: profile(appID: "com.example.other"), bundleID: "org.homeroll.hometune"), "com.example.other")
@@ -351,4 +374,5 @@ final class LocalPlaylistTests: XCTestCase {
         XCTAssertNil(SigningCheck.mismatch(profile: Data("kein Profil".utf8), bundleID: "org.homeroll.hometune"))
         XCTAssertNil(SigningCheck.currentMismatch(), "Simulator: kein Profil")
     }
+    #endif
 }

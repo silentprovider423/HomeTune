@@ -22,6 +22,7 @@ struct MainView: View {
         }
         .searchable(text: $mac.search, placement: .sidebar, prompt: Text("Suchen"))
         .searchFocused($searchFocus)
+        .onSubmit(of: .search) { NotificationCenter.default.post(name: .searchSubmitted, object: nil) }
         .onChange(of: searchFocus) { _, f in mac.searchFocused = f }
         .onReceive(NotificationCenter.default.publisher(for: .focusSearch)) { _ in searchFocus = true }
         .toolbar { PlayerToolbar() }

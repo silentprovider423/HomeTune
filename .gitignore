@@ -10,3 +10,4 @@ Payload/
 *.p12
 *.mobileprovision
 .sim-udid
+build-mac/
