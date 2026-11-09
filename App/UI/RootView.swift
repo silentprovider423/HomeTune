@@ -77,6 +77,7 @@ extension View {
             case .localAlbums: AlbumsView(localOnly: true)
             case .localArtists: ArtistsView(localOnly: true)
             case .localSongs: SongsView(localOnly: true)
+            case .stats: StatsView()
             }
         }
     }

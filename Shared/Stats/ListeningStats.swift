@@ -306,3 +306,39 @@ final class ListeningStats {
         try? d.write(to: file, options: .atomic)
     }
 }
+
+#if DEBUG
+extension ListeningStats {
+    /// Nur Debug: erfundene Statistik aus vorhandenen Titeln (Sichtprüfung, Bildschirmfotos) – ersetzt die echte.
+    func seedDemo(songs: [Song]) {
+        let pool = Array(songs.prefix(120))
+        guard !pool.isEmpty else { return }
+        var rng: UInt64 = 42
+        func next() -> Int {
+            rng = rng &* 6364136223846793005 &+ 1442695040888963407
+            return Int(rng >> 33)
+        }
+        data = Stored()
+        let end = now(), today = calendar.startOfDay(for: end)
+        let hours = [7, 8, 8, 9, 12, 13, 17, 18, 19, 19, 20, 20, 21, 21, 22, 23]
+        for back in (0..<75).reversed() where back % 13 != 9 {
+            guard let day = calendar.date(byAdding: .day, value: -back, to: today) else { continue }
+            for _ in 0..<(3 + next() % 18) {
+                // zwei Würfe, der kleinere gewinnt: die ersten Titel werden deutlich öfter gehört
+                let song = pool[min(next() % pool.count, next() % pool.count)]
+                let hour = hours[next() % hours.count]
+                let t = day.addingTimeInterval(Double(hour * 3600 + next() % 3000))
+                guard t <= end else { continue }
+                let seconds = Double(120 + next() % 140)
+                data.days[dayKey(t), default: 0] += seconds
+                data.hours[hour] += seconds
+                update(song) { $0.seconds += seconds; $0.plays += 1; $0.last = max($0.last ?? t, t) }
+                data.events.append(PlayEvent(t: t, id: song.id))
+            }
+        }
+        data.events.sort { $0.t < $1.t }
+        data.since = data.events.first?.t
+        revision += 1
+    }
+}
+#endif

@@ -4,7 +4,7 @@
 
 HomeTune is an independent iPhone and Mac client for self-hosted Navidrome (or any Subsonic/OpenSubsonic server). It aims to feel like the Music app on iOS 26 (library sections, album and artist pages, mini player, full-screen player, "Playing Next" queue, lyrics …) while your music stays on hardware you own.
 
-> **Status:** iPhone app 1.1.2, Mac app 1.2.0 ([see below](#hometune-for-mac)), tested against Navidrome 0.64 with MP3, AAC/ALAC and FLAC (up to 24 bit/96 kHz). UI in **English and German** (follows the iPhone language). Code comments are in German.
+> **Status:** version 1.2.0 for iPhone and Mac ([Mac: see below](#hometune-for-mac)), tested against Navidrome 0.64 with MP3, AAC/ALAC and FLAC (up to 24 bit/96 kHz). UI in **English and German** (follows the iPhone language). Code comments are in German.
 >
 > Built with help from [Claude Code](https://claude.com/claude-code): Apple's Music app was analysed (names and texts only, see the HomeRoll series), the design decisions and testing are mine, a lot of the Swift was written together with it.
 >
@@ -49,6 +49,8 @@ A native macOS app (SwiftUI, macOS 15 or newer, version 1.2.0) that looks and wo
 - Media keys and *Now Playing* in Control Center, playback continues when the window is closed, MiniPlayer (⌥⌘M) and full-screen player (⇧⌘F)
 - **Settings**: General (list size, favorites column, library items), Accounts (several servers, test connection, rescan), Playback (**tuning 440 Hz – original / 432 Hz / 528 Hz**, streaming quality), Downloads (location, remove all, cache), Advanced
 - **On This Mac**: add folders or files (⌘O, drag from Finder) – they are only linked, never copied or deleted; music put into `~/Music/HomeTune` appears automatically. App data lives in `~/Library/Application Support/HomeTune` and `~/Library/Caches/HomeTune`.
+- **Where music comes from**: with a server and local music at the same time, a switch *All · Server · On This Mac* above the lists, a column with cloud / downloaded / Mac marks, and *On This Mac* shown as playlists, albums, artists or songs
+- **Listening Stats** in the sidebar and a **sleep timer** (moon in the toolbar, *Controls* menu) – see [below](#features)
 - The queue is kept separately per device (iPhone and Mac don’t share it).
 
 **Install:** download `HomeTune-mac.zip` from the Releases page (when available), unzip, move `HomeTune.app` to *Applications*. The app is ad-hoc signed: the first time, right-click → *Open* (or allow it under *System Settings › Privacy & Security*). macOS asks once for local network access when your server is in your home network. Build it yourself: `./build-mac.sh --install` (see below).
@@ -74,6 +76,11 @@ A native macOS app (SwiftUI, macOS 15 or newer, version 1.2.0) that looks and wo
 - Lock screen / Control Center / headphone controls (play, pause, next, previous, scrubbing, shuffle, repeat), background audio, interruptions and route changes
 - Synced lyrics (OpenSubsonic `songLyrics`): current line highlighted, tap a line to jump; plain lyrics as fallback
 - Scrobbling ("now playing" + played after 50 % or 4 minutes)
+
+**Listening stats and sleep timer** (iPhone and Mac)
+- **Listening Stats**: listening time, plays, different songs, streak, minutes per day and per time of day, top songs, artists and albums – for 7 days, 30 days, 12 months or all time. A play counts after 50 % or 4 minutes. Without a server, *Recently Played* and *Heavy Rotation* on Home and the play count of local songs come from these stats
+- Stats are kept **only on the device** (one file in the app's storage) and can be reset at any time
+- **Sleep timer**: stop after 5–90 minutes (the last seconds fade out) or at the end of the current song – iPhone: *More* menu in the player, Mac: moon in the toolbar
 
 **Playlists, search, downloads, accounts**
 - Create, rename, describe, add music, reorder, remove songs, delete; "already in playlist" prompt; *Discard Changes?*
@@ -165,6 +172,7 @@ Regenerate the English strings after adding texts: build the iPhone and the Mac 
 - Music on this iPhone never leaves the device: tags and covers are read locally, only bookmarks, tags and small cover thumbnails are stored in the app.
 - All API calls are sent as POST forms with token authentication (`t`/`s`), so the password never appears in URLs or server logs; the password itself stays in the iPhone Keychain.
 - Pitch shifting happens on the device; the server only delivers the original files.
+- Listening stats are a file on the device. They are never sent anywhere, not even to your own server.
 - The HomeTune folder (Documents) only contains your music – caches, covers and the local library database live in the app's private storage.
 
 ## Project layout
@@ -176,6 +184,7 @@ Shared/Player     queue (Apple's model) and player controller (lock screen / Now
 Shared/Core       accounts, library index, actions, artwork, app paths (own folders on the Mac)
 Shared/Downloads  offline downloads
 Shared/Local      local music: HomeTune folder, bookmarks, folder scan, tag reader (incl. FLAC/Opus), playlists (m3u/pls)
+Shared/Stats      listening stats (on device only) and their charts
 App/              iPhone app: SwiftUI views, Files dialog, signing check
 Mac/              Mac app: main window, sidebar, song table, player toolbar/LCD, queue & lyrics, search, menus, settings, MiniPlayer
 Tests             unit tests (API against a test server, queue, FFT measurement, live engine, local music, Mac paths) – iOS and macOS
@@ -217,5 +226,7 @@ All apps: [github.com/silentprovider423](https://github.com/silentprovider423)
 **HomeTune** ist eine eigene iPhone-Musik-App für deinen selbst betriebenen Navidrome-Server. Sie sieht aus und bedient sich wie die Mediathek von Apples Musik-App unter iOS 26 – verlustfrei (FLAC bis 24/96), lückenlos, offline und mit mitlaufenden Songtexten. Die Dateien laufen standardmäßig unverändert; wer möchte, kann in den Einstellungen eine andere Stimmung wählen (432 Hz oder 528 Hz, Tempo bleibt gleich). Die Oberfläche gibt es auf Deutsch und Englisch, je nach Sprache des iPhones. Funktionen, Voraussetzungen und Installation stehen oben.
 
 **Mac:** Seit 1.2.0 gibt es HomeTune auch als Mac-App (ab macOS 15). Sie sieht aus wie die Musik-App auf dem Mac: Player in der Symbolleiste, Seitenleiste mit Suche, Titeltabelle mit Spalten und Sortierung, „Nächster Titel“ und Liedtext rechts, Menüleiste mit den bekannten Kürzeln, MiniPlayer und Vollbild-Player. Die Stimmung (440 Hz Original, 432 Hz, 528 Hz) steht in den Einstellungen unter *Wiedergabe*. Musik „Auf diesem Mac“ wird nur verknüpft, nie kopiert oder gelöscht; der eigene Ordner ist `~/Music/HomeTune`.
+
+**Hör-Statistik und Schlaf-Timer (iPhone und Mac):** Hörzeit, Wiedergaben, Hör-Serie, Minuten je Tag und Uhrzeit sowie die meistgespielten Titel, Künstler:innen und Alben – für 7 Tage, 30 Tage, 12 Monate oder insgesamt. Die Statistik bleibt auf dem Gerät und wird nirgendwohin übertragen. Der Schlaf-Timer hält die Musik nach 5–90 Minuten oder am Ende des Titels an.
 
 **Musik auf diesem iPhone:** Auch ohne Server nutzbar („Ohne Server fortfahren“). Über *Ordner hinzufügen …* / *Dateien hinzufügen …* wählst du Musik in der Dateien-App (FLAC, MP3, AAC, ALAC, WAV, AIFF). HomeTune kopiert nichts, sondern merkt sich per Bookmark, wo die Dateien liegen, liest die Tags auf dem Gerät und spielt sie in der gewählten Stimmung – offline, mit Warteliste und Sperrbildschirm. Noch einfacher: Musik in der Dateien-App nach *Auf meinem iPhone › HomeTune* verschieben, sie erscheint automatisch – auch Tausende Dateien, mit Fortschrittsbalken („Importiere 312 von 2.900 …“). Vom Server beginnt die Wiedergabe nach wenigen Sekunden, der Rest lädt im Hintergrund weiter (Puffer statt Stocken). Eigene Playlists gibt es auch ohne Server, .m3u/.m3u8/.pls lassen sich importieren.

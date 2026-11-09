@@ -503,6 +503,8 @@ EN.update({
     "Wartet auf den Download": "Waiting to download",
     "Zeigt alle Musik, nur die vom Server oder nur die auf diesem Mac.": "Shows all music, only music from the server, or only music on this Mac.",
     "Zeitraum": "Period",
+    "Sobald du Musik hörst, erscheint hier deine Auswertung. Sie bleibt auf diesem iPhone.": "Once you listen to music, your stats appear here. They stay on this iPhone.",
+    "Die Statistik bleibt auf diesem iPhone und wird nirgendwohin übertragen.": "Your stats stay on this iPhone and are never sent anywhere.",
 })
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

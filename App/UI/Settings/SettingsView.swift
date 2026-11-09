@@ -91,6 +91,10 @@ struct SettingsView: View {
                     Text("Musik ist meist auf A = 440 Hz gestimmt. HomeTune verschiebt die Tonhöhe direkt auf dem iPhone, das Tempo bleibt gleich. Bei 440 Hz läuft die Datei unverändert.")
                 }
                 Section {
+                    NavigationLink { StatsView() } label: { Label("Hör-Statistik", systemImage: "chart.bar") }
+                        .accessibilityIdentifier("settings.stats")
+                }
+                Section {
                     LabeledContent("Version", value: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")
                 }
             }

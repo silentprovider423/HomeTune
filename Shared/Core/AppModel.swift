@@ -10,6 +10,8 @@ enum Route: Hashable {
     case section(LibrarySection)
     /// „Auf diesem iPhone“: nur lokale Alben, Künstler:innen, Titel
     case localAlbums, localArtists, localSongs
+    /// Hör-Statistik
+    case stats
 }
 
 /// Abschnitte der Mediathek (Apple: „Abschnitte bearbeiten“ – ein-/ausblenden und ordnen).
@@ -300,6 +302,23 @@ enum DebugLocal {
             }
             Task { await app.local.add(urls) }
         }
+        // HOMETUNE_STATS_DEMO=1: erfundene Hör-Statistik aus den geladenen Titeln (wird nicht gespeichert, solange nichts läuft)
+        if env["HOMETUNE_STATS_DEMO"] == "1" {
+            Task {
+                for _ in 0..<60 where app.library.songs.isEmpty { try? await Task.sleep(for: .milliseconds(500)) }
+                app.stats.seedDemo(songs: app.library.songs)
+            }
+        }
+        #if os(iOS)
+        // HOMETUNE_OPEN=stats: direkt die Hör-Statistik zeigen
+        if env["HOMETUNE_OPEN"] == "stats" {
+            Task {
+                try? await Task.sleep(for: .seconds(1))
+                app.tab = .home
+                app.homePath.append(Route.stats)
+            }
+        }
+        #endif
     }
 }
 

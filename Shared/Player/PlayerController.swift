@@ -457,7 +457,16 @@ final class PlayerController {
 
     func cancelSleepTimer() {
         sleepTimer = .off
-        engine.engine.mainMixerNode.outputVolume = volume
+        engine.engine.mainMixerNode.outputVolume = baseVolume
+    }
+
+    /// Lautstärke der App ohne Ausblenden (das iPhone regelt nur über die Systemlautstärke)
+    private var baseVolume: Float {
+        #if os(macOS)
+        volume
+        #else
+        1
+        #endif
     }
 
     private func checkSleepTimer() {
@@ -466,9 +475,9 @@ final class PlayerController {
         if left <= 0 {
             sleepTimer = .off
             if isPlaying { pause() }
-            engine.engine.mainMixerNode.outputVolume = volume
+            engine.engine.mainMixerNode.outputVolume = baseVolume
         } else if left < SleepTimer.fade, isPlaying {
-            engine.engine.mainMixerNode.outputVolume = volume * Float(left / SleepTimer.fade)
+            engine.engine.mainMixerNode.outputVolume = baseVolume * Float(left / SleepTimer.fade)
         }
     }
 

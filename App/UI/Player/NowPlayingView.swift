@@ -77,6 +77,12 @@ struct NowPlayingView: View {
                     SongMenu(song: song)
                     Section {
                         Button("Liedtext anzeigen", systemImage: "quote.bubble") { panel = .lyrics }
+                        Menu {
+                            SleepTimerMenuItems(player: app.player)
+                        } label: {
+                            Label("Schlaf-Timer", systemImage: app.player.sleepTimer.isOn ? "moon.zzz.fill" : "moon.zzz")
+                        }
+                        .accessibilityIdentifier("nowPlaying.sleepTimer")
                     }
                 } label: {
                     Image(systemName: "ellipsis").font(.body.weight(.semibold)).frame(width: 34, height: 34)

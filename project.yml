@@ -9,8 +9,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "1.1.2"
-    CURRENT_PROJECT_VERSION: "4"
+    MARKETING_VERSION: "1.2.0"
+    CURRENT_PROJECT_VERSION: "5"
     DEVELOPMENT_TEAM: ""
     CODE_SIGN_STYLE: Automatic
     SWIFT_EMIT_LOC_STRINGS: YES
@@ -153,8 +153,7 @@ targets:
             LSItemContentTypes: [public.m3u-playlist, public.pls-playlist, public.playlist]
     settings:
       base:
-        # Mac startet als 1.2.0 (eigener Versionsstand), das iPhone bleibt bei 1.1.1
-        MARKETING_VERSION: "1.2.0"
+        # Mac: eigene Build-Nummer, Version wie das iPhone
         CURRENT_PROJECT_VERSION: "1"
         PRODUCT_BUNDLE_IDENTIFIER: org.homeroll.hometune.mac
         PRODUCT_NAME: HomeTune

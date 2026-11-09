@@ -1,5 +1,4 @@
 import SwiftUI
-import Charts
 
 /// Hör-Statistik: Kacheln, Verlauf je Tag, Uhrzeit und die meistgespielten Titel, Künstler:innen und Alben.
 /// Alles stammt aus `ListeningStats` und bleibt auf diesem Mac.
@@ -33,8 +32,10 @@ struct StatsPage: View {
                     VStack(alignment: .leading, spacing: 24) {
                         tiles(stats)
                         HStack(alignment: .top, spacing: 16) {
-                            DailyChart(days: stats.daily(last: period == .week ? 7 : 30), week: period == .week)
-                            HoursChart(hours: stats.hours)
+                            ChartCard(title: period == .week ? "Letzte 7 Tage" : "Letzte 30 Tage") {
+                                StatsDailyChart(days: stats.daily(last: period == .week ? 7 : 30), week: period == .week)
+                            }
+                            ChartCard(title: "Uhrzeit") { StatsHoursChart(hours: stats.hours) }
                         }
                         top(stats)
                         footer(stats)
@@ -56,7 +57,7 @@ struct StatsPage: View {
         let s = stats.summary(period)
         let streak = stats.streak
         return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: 4), spacing: 16) {
-            StatTile(title: "Hörzeit", value: Fmt.total(Int(s.seconds)), icon: "clock")
+            StatTile(title: "Hörzeit", value: StatsText.duration(s.seconds), icon: "clock")
             StatTile(title: "Wiedergaben", value: s.plays.formatted(), icon: "play")
             StatTile(title: "Verschiedene Titel", value: s.songs.formatted(), icon: "music.note")
             StatTile(title: "Hör-Serie (Tage)", value: streak.current.formatted(), icon: "flame",
@@ -113,53 +114,6 @@ private struct StatTile: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.quaternary.opacity(0.5), in: .rect(cornerRadius: 10))
         .accessibilityElement(children: .combine)
-    }
-}
-
-/// Minuten je Tag
-private struct DailyChart: View {
-    let days: [(day: Date, seconds: Double)]
-    let week: Bool
-
-    var body: some View {
-        ChartCard(title: week ? "Letzte 7 Tage" : "Letzte 30 Tage") {
-            Chart(days, id: \.day) { d in
-                BarMark(x: .value("Tag", d.day, unit: .day), y: .value("Minuten", d.seconds / 60))
-                    .foregroundStyle(Color.accent.gradient)
-                    .cornerRadius(2)
-            }
-            .chartXAxis {
-                AxisMarks(preset: .aligned, values: .stride(by: .day, count: week ? 1 : 7)) { _ in
-                    AxisGridLine()
-                    AxisValueLabel(format: week ? .dateTime.weekday(.abbreviated) : .dateTime.day().month(.abbreviated))
-                }
-            }
-            .chartYAxisLabel { Text("Minuten") }
-        }
-    }
-}
-
-/// Minuten je Uhrzeit (über die ganze Zeit)
-private struct HoursChart: View {
-    let hours: [Double]
-
-    var body: some View {
-        ChartCard(title: "Uhrzeit") {
-            Chart(Array(hours.enumerated()), id: \.offset) { h in
-                RectangleMark(xStart: .value("Uhrzeit", Double(h.offset) - 0.35), xEnd: .value("Uhrzeit", Double(h.offset) + 0.35),
-                              yStart: .value("Minuten", 0), yEnd: .value("Minuten", h.element / 60))
-                    .foregroundStyle(Color.accent.gradient)
-                    .cornerRadius(2)
-            }
-            .chartXScale(domain: -0.5...23.5)
-            .chartXAxis {
-                AxisMarks(preset: .aligned, values: [0, 6, 12, 18, 23]) { v in
-                    AxisGridLine()
-                    AxisValueLabel { if let h = v.as(Int.self) { Text(verbatim: "\(h)") } }
-                }
-            }
-            .chartYAxisLabel { Text("Minuten") }
-        }
     }
 }
 

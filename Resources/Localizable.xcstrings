@@ -1235,6 +1235,16 @@
         }
       }
     },
+    "Die Statistik bleibt auf diesem iPhone und wird nirgendwohin übertragen.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your stats stay on this iPhone and are never sent anywhere."
+          }
+        }
+      }
+    },
     "Die Wiedergabe beginnt danach von vorn.": {
       "localizations": {
         "en": {
@@ -3467,6 +3477,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Once you listen to music, your stats appear here. They stay on this Mac."
+          }
+        }
+      }
+    },
+    "Sobald du Musik hörst, erscheint hier deine Auswertung. Sie bleibt auf diesem iPhone.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Once you listen to music, your stats appear here. They stay on this iPhone."
           }
         }
       }

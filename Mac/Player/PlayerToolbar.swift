@@ -185,28 +185,3 @@ struct SleepTimerButton: View {
         .accessibilityIdentifier("player.sleep")
     }
 }
-
-/// Einträge des Schlaf-Timers (Symbolleiste und Menü „Steuerungen“)
-struct SleepTimerMenuItems: View {
-    let player: PlayerController
-
-    var body: some View {
-        switch player.sleepTimer {
-        case .off:
-            EmptyView()
-        case .at(let end):
-            Text("Hält um \(end.formatted(date: .omitted, time: .shortened)) an")
-            Button("Schlaf-Timer beenden") { player.cancelSleepTimer() }
-            Divider()
-        case .endOfTrack:
-            Text("Hält am Ende des Titels an")
-            Button("Schlaf-Timer beenden") { player.cancelSleepTimer() }
-            Divider()
-        }
-        ForEach(SleepTimer.presets, id: \.self) { m in
-            Button("\(m) Minuten") { player.setSleepTimer(minutes: m) }
-        }
-        Button("Ende des Titels") { player.setSleepTimerEndOfTrack() }
-            .disabled(!player.hasItem)
-    }
-}

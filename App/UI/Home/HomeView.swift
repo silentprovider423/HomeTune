@@ -17,12 +17,25 @@ struct HomeView: View {
                 if app.client == nil && app.local.isEmpty && !app.local.isScanning {
                     AddLocalMusicHint().padding(.horizontal)
                 }
-                shelf("Zuletzt gespielt", app.library.recentlyPlayed)
+                // ohne Server-Listen: aus der eigenen Hör-Statistik
+                shelf("Zuletzt gespielt", app.library.recentlyPlayed.isEmpty ? app.stats.recentAlbumIDs().compactMap(app.library.album) : app.library.recentlyPlayed)
                 shelf("Zuletzt hinzugefügt", app.library.recentlyAdded)
                 shelf("Auf diesem iPhone", app.local.recentAlbums)
-                shelf("Häufig gespielt", app.library.frequent)
+                shelf("Häufig gespielt", app.library.frequent.isEmpty ? app.stats.frequentAlbumIDs().compactMap(app.library.album) : app.library.frequent)
                 shelf("Favoriten", app.library.albums.filter { app.library.isStarred(album: $0.id) })
                 shelf("Zufällige Alben", app.library.randomAlbums)
+                NavigationLink(value: Route.stats) {
+                    HStack {
+                        Label("Hör-Statistik", systemImage: "chart.bar").font(.headline)
+                        Spacer()
+                        Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(.tertiary)
+                    }
+                    .padding()
+                    .background(.fill.tertiary, in: .rect(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal)
+                .accessibilityIdentifier("home.stats")
             }
             .padding(.vertical)
         }
