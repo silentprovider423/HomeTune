@@ -4,6 +4,9 @@
 # Ergebnis: build-mac/HomeTune.app und build-mac/HomeTune-mac.zip
 #   ./build-mac.sh             bauen
 #   ./build-mac.sh --install   bauen und nach /Applications/HomeTune.app kopieren
+# Liegt neben dem Skript eine Datei .sign-identity (eine Zeile: Name oder SHA-1 eines eigenen Signatur-Zertifikats),
+# wird nur die installierte Kopie damit signiert – sonst fragt der Schlüsselbund nach jedem neuen Bau wieder nach
+# dem Passwort, weil eine Ad-hoc-Signatur bei jedem Bau anders ist. Das Zip bleibt ad hoc und ohne Namen.
 set -euo pipefail
 cd "$(dirname "$0")"
 REPO="$PWD"
@@ -39,6 +42,10 @@ codesign --verify --strict build-mac/HomeTune.app
 if [ "${1:-}" = "--install" ]; then
   rm -rf /Applications/HomeTune.app
   ditto build-mac/HomeTune.app /Applications/HomeTune.app
+  if [ -s .sign-identity ]; then
+    codesign -f -s "$(head -1 .sign-identity)" /Applications/HomeTune.app
+    codesign --verify --strict /Applications/HomeTune.app
+  fi
   echo "Installiert: /Applications/HomeTune.app"
 fi
 echo "Fertig: build-mac/HomeTune.app (+ HomeTune-mac.zip)"

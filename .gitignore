@@ -10,4 +10,5 @@ Payload/
 *.p12
 *.mobileprovision
 .sim-udid
+.sign-identity
 build-mac/
