@@ -8,6 +8,8 @@ struct HomeTuneMacApp: App {
     @State private var mac: MacModel
 
     init() {
+        // Sichtbarer Musikordner „Auf diesem Mac“ (~/Music/HomeTune) – nur anlegen, nie etwas darin verschieben
+        try? FileManager.default.createDirectory(at: AppPaths.appFolder, withIntermediateDirectories: true)
         let a = AppModel()
         let m = MacModel()
         m.app = a
@@ -149,7 +151,7 @@ final class MacAppDelegate: NSObject, NSApplicationDelegate {
 }
 
 /// Menüpunkt mit Block statt Selektor (Dock-Menü)
-final class BlockMenuItem: NSMenuItem {
+@MainActor final class BlockMenuItem: NSMenuItem {
     private let block: @MainActor () -> Void
     init(_ title: String, _ block: @escaping @MainActor () -> Void) {
         self.block = block

@@ -127,6 +127,15 @@ struct ItemsTransfer: Codable, Transferable, Sendable {
     static func artist(_ a: Artist) -> ItemsTransfer { ItemsTransfer(kind: .artist, id: a.id, name: a.name) }
     static func playlist(_ p: Playlist) -> ItemsTransfer { ItemsTransfer(kind: .playlist, id: p.id, name: p.name) }
 
+    /// Aus einem NSItemProvider lesen (Ablegen über onInsert)
+    static func load(from provider: NSItemProvider) async -> ItemsTransfer? {
+        await withCheckedContinuation { cont in
+            _ = provider.loadTransferable(type: ItemsTransfer.self) { result in
+                cont.resume(returning: try? result.get())
+            }
+        }
+    }
+
     @MainActor func resolve(_ app: AppModel) async -> [Song] {
         switch kind {
         case .songs: return songs

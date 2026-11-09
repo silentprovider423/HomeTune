@@ -1,6 +1,8 @@
 import Foundation
 #if os(iOS)
 import UIKit
+#else
+import AppKit
 #endif
 import ImageIO
 import UniformTypeIdentifiers
@@ -277,7 +279,12 @@ final class LocalLibrary {
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
             guard TagReader.isAudio(url) else { skipped += 1; continue }
             // iOS legt „Öffnen in“-Dateien als Kopie in Documents/Inbox ab → verschieben statt nochmal kopieren
+            #if os(macOS)
+            // Mac: nie etwas außerhalb des eigenen Ordners verschieben oder löschen
+            let inbox = false
+            #else
             let inbox = url.path.contains("/Inbox/") || url.path.contains("-Inbox/")
+            #endif
             let size = (try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize
             let ext = url.pathExtension
             let base = url.deletingPathExtension().lastPathComponent

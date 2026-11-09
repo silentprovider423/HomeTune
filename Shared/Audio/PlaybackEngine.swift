@@ -260,5 +260,11 @@ final class PlaybackEngine: @unchecked Sendable {
             seek(to: t)
             play()
         }
+        #if os(macOS)
+        // Mac: anderes Ausgabegerät (Kopfhörer, AirPlay …) auch im angehaltenen Zustand – Position neu einplanen
+        if !wasPlaying && currentToken >= 0 {
+            seek(to: t)
+        }
+        #endif
     }
 }
