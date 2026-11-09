@@ -1895,6 +1895,22 @@
         }
       }
     },
+    "Importiere %@ von %@ …": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importiere %1$@ von %2$@ …"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importing %1$@ of %2$@ …"
+          }
+        }
+      }
+    },
     "In Alben suchen": {
       "localizations": {
         "en": {
@@ -4161,18 +4177,12 @@
         }
       }
     },
-    "Wird eingelesen … %lld von %lld": {
+    "Wird fertiggestellt …": {
       "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wird eingelesen … %1$lld von %2$lld"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scanning … %1$lld of %2$lld"
+            "value": "Finishing …"
           }
         }
       }

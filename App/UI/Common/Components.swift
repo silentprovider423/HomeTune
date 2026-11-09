@@ -159,3 +159,34 @@ enum Fmt {
         return f.date(from: iso) ?? ISO8601DateFormatter().date(from: iso)
     }
 }
+
+/// Import-Fortschritt „Auf diesem iPhone“ (Mediathek, „Auf diesem iPhone“): „Importiere 312 von 2.900 …“ mit Balken,
+/// danach „Wird fertiggestellt …“, solange Alben, Playlists und Cover zusammengestellt werden.
+struct ImportProgressRow: View {
+    let progress: LocalLibrary.ImportProgress
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Image(systemName: progress.finishing ? "checkmark.circle" : "square.and.arrow.down.on.square")
+                    .foregroundStyle(.accent)
+                if progress.finishing {
+                    Text("Wird fertiggestellt …")
+                } else {
+                    Text("Importiere \(progress.done.formatted()) von \(progress.total.formatted()) …")
+                        .monospacedDigit()
+                }
+                Spacer(minLength: 0)
+            }
+            .font(.subheadline.weight(.medium))
+            if progress.finishing || progress.total == 0 {
+                ProgressView().progressViewStyle(.linear)
+            } else {
+                ProgressView(value: Double(progress.done), total: Double(max(progress.total, 1)))
+            }
+        }
+        .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("local.importProgress")
+    }
+}
