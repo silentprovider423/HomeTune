@@ -29,6 +29,7 @@ struct MiniPlayerView: View {
         }
         .frame(minWidth: 200, idealWidth: 300, maxWidth: 500, minHeight: 200, idealHeight: 300, maxHeight: 500)
         .aspectRatio(1, contentMode: .fit)
+        .ignoresSafeArea()
         .onHover { h in withAnimation(.easeInOut(duration: 0.15)) { hover = h } }
         .onTapGesture(count: 2) { backToMain() }
         .background(MiniWindowConfigurator(onTop: onTop))
@@ -173,6 +174,7 @@ struct FullScreenPlayer: View {
                     Button { close() } label: { Image(systemName: "xmark").font(.system(size: 14, weight: .bold)).padding(10) }
                         .buttonStyle(.plain).foregroundStyle(.white.opacity(0.8))
                         .help(Text("Vollbild-Player schließen"))
+                        .padding(.top, 24)
                     Spacer()
                 }
                 Spacer()

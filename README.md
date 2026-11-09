@@ -2,9 +2,9 @@
 
 **A native iOS music app for your own [Navidrome](https://www.navidrome.org) server – the look and feel of the Library in Apple's Music app: lossless FLAC up to 24/96, gapless playback, offline downloads, synced lyrics and music stored on the iPhone itself.**
 
-HomeTune is an independent iPhone client for self-hosted Navidrome (or any Subsonic/OpenSubsonic server). It aims to feel like the Music app on iOS 26 (library sections, album and artist pages, mini player, full-screen player, "Playing Next" queue, lyrics …) while your music stays on hardware you own.
+HomeTune is an independent iPhone and Mac client for self-hosted Navidrome (or any Subsonic/OpenSubsonic server). It aims to feel like the Music app on iOS 26 (library sections, album and artist pages, mini player, full-screen player, "Playing Next" queue, lyrics …) while your music stays on hardware you own.
 
-> **Status:** version 1.1.1, tested against Navidrome 0.64 with MP3, AAC/ALAC and FLAC (up to 24 bit/96 kHz). UI in **English and German** (follows the iPhone language). Code comments are in German.
+> **Status:** iPhone app 1.1.1, Mac app 1.2.0 ([see below](#hometune-for-mac)), tested against Navidrome 0.64 with MP3, AAC/ALAC and FLAC (up to 24 bit/96 kHz). UI in **English and German** (follows the iPhone language). Code comments are in German.
 >
 > Built with help from [Claude Code](https://claude.com/claude-code): Apple's Music app was analysed (names and texts only, see the HomeRoll series), the design decisions and testing are mine, a lot of the Swift was written together with it.
 >
@@ -27,6 +27,31 @@ HomeTune is an independent iPhone client for self-hosted Navidrome (or any Subso
   <img src="docs/screenshots/10-settings-tuning.png" width="160" alt="Settings: Tuning">
 </p>
 <p align="center"><sub>Screenshots with generated demo albums, made-up artists and demo lyrics (no real music).</sub></p>
+
+## HomeTune for Mac
+
+A native macOS app (SwiftUI, macOS 15 or newer, version 1.2.0) that looks and works like the Music app on the Mac – same server, same engine and tuning as on the iPhone.
+
+<p align="center">
+  <img src="docs/screenshots/mac-1-albums.png" width="780" alt="Mac: albums grid with the player in the toolbar">
+</p>
+<p align="center">
+  <img src="docs/screenshots/mac-2-album-queue.png" width="520" alt="Mac: album page with Playing Next">
+  <img src="docs/screenshots/mac-3-settings-tuning.png" width="300" alt="Mac: Settings, Playback with tuning">
+</p>
+
+- **Player in the toolbar**: shuffle · back · play/pause · forward · repeat, an LCD with cover, title, “artist — album”, progress line (hover for times and scrubbing, “⋯” menu), app volume and output device (incl. AirPlay speakers – only for HomeTune, the system output stays untouched)
+- **Sidebar** with search field, Home, Library (Recently Added, Artists, Albums, Songs by default; Genres, Composers, Compilations, Downloaded and On This Mac via *Edit*) and Playlists
+- **Song table** like Music: sort by clicking a header (remembered per view), show/hide, move and resize columns (right-click the header), multiple selection, double-click or Return plays, ★ column, download state, Delete removes from a playlist, Copy
+- Album grid with hover play/“⋯”, album pages with disc headers, artists split view, genres and composers, playlists (create, rename, describe, reorder by dragging, delete), All Playlists, Favorite Songs
+- **Playing Next / History** and **synced lyrics** in the right column; drag songs, albums, artists or playlists onto a playlist in the sidebar or into Playing Next; “Keep queue?” question like Music
+- Full menu bar with Music’s shortcuts (Space, ⌘→/⌘←, ⌥⌘→/⌥⌘←, ⌘L, ⌘↑/⌘↓, ⌘N, ⇧⌘N, ⌘I, View menu with *Only Downloaded Music*, filter field ⌥⌘F, ⌥⌘U, ⌃⌘U, ⌘/, ⌃⌘1–6 …), context menus everywhere, Dock menu
+- Media keys and *Now Playing* in Control Center, playback continues when the window is closed, MiniPlayer (⌥⌘M) and full-screen player (⇧⌘F)
+- **Settings**: General (list size, favorites column, library items), Accounts (several servers, test connection, rescan), Playback (**tuning 440 Hz – original / 432 Hz / 528 Hz**, streaming quality), Downloads (location, remove all, cache), Advanced
+- **On This Mac**: add folders or files (⌘O, drag from Finder) – they are only linked, never copied or deleted; music put into `~/Music/HomeTune` appears automatically. App data lives in `~/Library/Application Support/HomeTune` and `~/Library/Caches/HomeTune`.
+- The queue is kept separately per device (iPhone and Mac don’t share it).
+
+**Install:** download `HomeTune-mac.zip` from the Releases page (when available), unzip, move `HomeTune.app` to *Applications*. The app is ad-hoc signed: the first time, right-click → *Open* (or allow it under *System Settings › Privacy & Security*). macOS asks once for local network access when your server is in your home network. Build it yourself: `./build-mac.sh --install` (see below).
 
 ## Features
 
@@ -80,7 +105,7 @@ HomeTune also works without a server. On the sign-in screen tap **Continue Witho
 
 - A Navidrome server (tested with **0.64**) reachable from the iPhone – at home or via VPN. Other OpenSubsonic servers should work for the basics. Optional if you only want to play music that is already on the iPhone.
 - Xcode 26, [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
-- iPhone with iOS 26
+- iPhone with iOS 26, Mac with macOS 15 or newer (Liquid Glass touches on macOS 26)
 
 ## Install without a Mac
 
@@ -102,6 +127,7 @@ open HomeTune.xcodeproj
 1. Set your own **bundle identifier** in `project.yml` (default: `org.homeroll.hometune`) and select your team in Xcode.
 2. Run on your iPhone. Sign in with your server address (e.g. `https://music.example.com` or `http://192.168.x.y:4533`) and your Navidrome account.
 3. Unsigned IPA for sideloading (AltStore/SideStore): `./build-ipa.sh`.
+4. Mac app: scheme **HomeTuneMac** (bundle `org.homeroll.hometune.mac`). `./build-mac.sh` builds a Release app from a clean clone under `/private/tmp/hrb/…`, signs it ad hoc and checks that no user name or home path ends up in the binary; `./build-mac.sh --install` also copies it to `/Applications/HomeTune.app`.
 
 ### Tests and simulator with a test account
 
@@ -123,9 +149,11 @@ SIM=<simulator-udid> ./sim-run.sh   # start the app signed in (debug builds only
 SIM=<udid> ./tools/sim-files.sh && TEST_RUNNER_PICKER=1 SIM=<udid> ./test.sh -only-testing:HomeTuneUITests/LocalMusicFlowTests   # also drive the real Files dialog
 ```
 
+**Mac:** `./test-mac.sh` runs the unit tests of the shared core directly on the Mac (no simulator, no UI tests that would take over mouse and keyboard). `DEMO=1 ./run-mac.sh` starts the debug app (“HomeTune Test”, own folders, password only in memory) signed in with the demo account; `swift tools/mac-debug.swift "go albums" "album Golden Hour" "inspector queue" "snapshot /tmp/a.png"` drives it without mouse and keyboard and captures only its own window (`APP_LANG=en` for English).
+
 Debug builds can import local music without the Files dialog: `HOMETUNE_LOCAL_IMPORT=<folder>|<folder>`, `HOMETUNE_SIGNED_OUT=1`, `HOMETUNE_LOCAL_RESET=1` (launch environment).
 
-Regenerate the English strings after adding texts: build once, then `python3 tools/make-strings.py`. App icon: `swift tools/make-icon.swift Resources/Assets.xcassets/AppIcon.appiconset`.
+Regenerate the English strings after adding texts: build the iPhone and the Mac app once, then `python3 tools/make-strings.py`. App icon: `swift tools/make-icon.swift Resources/Assets.xcassets/AppIcon.appiconset`.
 
 ## Privacy
 
@@ -138,18 +166,19 @@ Regenerate the English strings after adding texts: build once, then `python3 too
 ## Project layout
 
 ```
-App/API        Subsonic/OpenSubsonic client and models
-App/Audio      tuning chain (Audio Unit with signalsmith-stretch, Objective-C++), decoder, gapless engine, track cache
-App/Player     queue (Apple's model) and player controller (lock screen, remote commands, scrobbling)
-App/Core       accounts, library index, actions, artwork
-App/Downloads  offline downloads
-App/Local      music on this iPhone: HomeTune folder, bookmarks, folder scan, tag reader (incl. FLAC/Opus), playlists (m3u/pls), signing check
-App/UI         SwiftUI views (library, details, player, search, home, settings)
-Tests          unit tests (API against a test server, queue, FFT measurement, live engine, local music)
-Tests/Fixtures generated test audio (tools/make-test-audio.sh)
-UITests        UI flow tests and screenshots
-tools          icon and strings generators
-Vendor         signalsmith-stretch + signalsmith-linear (headers, MIT)
+Shared/API        Subsonic/OpenSubsonic client and models
+Shared/Audio      tuning chain (Audio Unit with signalsmith-stretch, Objective-C++), decoder, gapless engine, track cache
+Shared/Player     queue (Apple's model) and player controller (lock screen / Now Playing, remote commands, scrobbling)
+Shared/Core       accounts, library index, actions, artwork, app paths (own folders on the Mac)
+Shared/Downloads  offline downloads
+Shared/Local      local music: HomeTune folder, bookmarks, folder scan, tag reader (incl. FLAC/Opus), playlists (m3u/pls)
+App/              iPhone app: SwiftUI views, Files dialog, signing check
+Mac/              Mac app: main window, sidebar, song table, player toolbar/LCD, queue & lyrics, search, menus, settings, MiniPlayer
+Tests             unit tests (API against a test server, queue, FFT measurement, live engine, local music, Mac paths) – iOS and macOS
+Tests/Fixtures    generated test audio (tools/make-test-audio.sh)
+UITests           iPhone UI flow tests and screenshots
+tools             icon and strings generators, Mac debug remote
+Vendor            signalsmith-stretch + signalsmith-linear (headers, MIT)
 ```
 
 ## License
@@ -182,5 +211,7 @@ All apps: [github.com/silentprovider423](https://github.com/silentprovider423)
 ## Deutsch
 
 **HomeTune** ist eine eigene iPhone-Musik-App für deinen selbst betriebenen Navidrome-Server. Sie sieht aus und bedient sich wie die Mediathek von Apples Musik-App unter iOS 26 – verlustfrei (FLAC bis 24/96), lückenlos, offline und mit mitlaufenden Songtexten. Die Dateien laufen standardmäßig unverändert; wer möchte, kann in den Einstellungen eine andere Stimmung wählen (432 Hz oder 528 Hz, Tempo bleibt gleich). Die Oberfläche gibt es auf Deutsch und Englisch, je nach Sprache des iPhones. Funktionen, Voraussetzungen und Installation stehen oben.
+
+**Mac:** Seit 1.2.0 gibt es HomeTune auch als Mac-App (ab macOS 15). Sie sieht aus wie die Musik-App auf dem Mac: Player in der Symbolleiste, Seitenleiste mit Suche, Titeltabelle mit Spalten und Sortierung, „Nächster Titel“ und Liedtext rechts, Menüleiste mit den bekannten Kürzeln, MiniPlayer und Vollbild-Player. Die Stimmung (440 Hz Original, 432 Hz, 528 Hz) steht in den Einstellungen unter *Wiedergabe*. Musik „Auf diesem Mac“ wird nur verknüpft, nie kopiert oder gelöscht; der eigene Ordner ist `~/Music/HomeTune`.
 
 **Musik auf diesem iPhone:** Auch ohne Server nutzbar („Ohne Server fortfahren“). Über *Ordner hinzufügen …* / *Dateien hinzufügen …* wählst du Musik in der Dateien-App (FLAC, MP3, AAC, ALAC, WAV, AIFF). HomeTune kopiert nichts, sondern merkt sich per Bookmark, wo die Dateien liegen, liest die Tags auf dem Gerät und spielt sie in der gewählten Stimmung – offline, mit Warteliste und Sperrbildschirm. Noch einfacher: Musik in der Dateien-App nach *Auf meinem iPhone › HomeTune* verschieben, sie erscheint automatisch. Eigene Playlists gibt es auch ohne Server, .m3u/.m3u8/.pls lassen sich importieren.

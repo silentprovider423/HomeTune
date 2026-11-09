@@ -10,7 +10,7 @@ struct MacSettingsView: View {
         TabView(selection: $tab) {
             GeneralSettings().tabItem { Label("Allgemein", systemImage: "gearshape") }.tag(0)
             AccountsSettings().tabItem { Label("Konten", systemImage: "person.crop.circle") }.tag(1)
-            PlaybackSettings().tabItem { Label("Wiedergabe", systemImage: "play.circle") }.tag(2)
+            PlaybackSettings().tabItem { Label("settings.playback", systemImage: "play.circle") }.tag(2)
             DownloadSettings().tabItem { Label("Downloads", systemImage: "arrow.down.circle") }.tag(3)
             AdvancedSettings().tabItem { Label("Erweitert", systemImage: "gearshape.2") }.tag(4)
         }

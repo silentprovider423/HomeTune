@@ -8,7 +8,7 @@ struct PlayerToolbar: ToolbarContent {
         }
         ToolbarItem(placement: .principal) {
             LCDView()
-                .frame(minWidth: 200, idealWidth: 480, maxWidth: 680)
+                .frame(minWidth: 200, idealWidth: 330, maxWidth: 620)
         }
         ToolbarItemGroup(placement: .primaryAction) {
             VolumeControl()

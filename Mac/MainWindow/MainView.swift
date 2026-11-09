@@ -16,10 +16,11 @@ struct MainView: View {
                 .navigationSplitViewColumnWidth(min: 180, ideal: 220, max: 320)
         } detail: {
             DetailRoot()
-                .inspector(isPresented: Binding(get: { mac.inspector != nil }, set: { if !$0 { mac.inspector = nil } })) {
-                    InspectorView()
-                        .inspectorColumnWidth(min: 260, ideal: 300, max: 420)
-                }
+        }
+        // Rechte Spalte am Split-View (nicht am Inhalt), sonst schließt sie beim Öffnen einer Unterseite
+        .inspector(isPresented: Binding(get: { mac.inspector != nil }, set: { if !$0 { mac.inspector = nil } })) {
+            InspectorView()
+                .inspectorColumnWidth(min: 260, ideal: 300, max: 420)
         }
         .searchable(text: $mac.search, placement: .sidebar, prompt: Text("Suchen"))
         .searchFocused($searchFocus)

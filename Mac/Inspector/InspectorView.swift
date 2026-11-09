@@ -27,7 +27,7 @@ struct QueuePanel: View {
         VStack(spacing: 0) {
             HStack {
                 Picker("", selection: $mac.queueTab) {
-                    Text("Nächster Titel").tag(0)
+                    Text("queue.playingNext").tag(0)
                     Text("Verlauf").tag(1)
                 }
                 .pickerStyle(.segmented)

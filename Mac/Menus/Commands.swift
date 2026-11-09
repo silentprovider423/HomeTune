@@ -44,7 +44,7 @@ struct MacCommands: Commands {
         }
 
         // MARK: Titel
-        CommandMenu("Titel") {
+        CommandMenu("menu.song") {
             SongMenuItems().environment(app).environment(mac)
         }
 

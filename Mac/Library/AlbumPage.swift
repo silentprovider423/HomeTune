@@ -66,7 +66,6 @@ struct AlbumPage: View {
                 .listRowSeparator(.hidden)
         }
         .listStyle(.inset)
-        .alternatingRowBackgrounds()
         .environment(\.defaultMinListRowHeight, mac.listSize.rowHeight)
         .font(.system(size: mac.listSize.fontSize))
         .contextMenu(forSelectionType: String.self) { ids in

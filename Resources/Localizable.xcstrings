@@ -1,12 +1,84 @@
 {
   "sourceLanguage": "de",
   "strings": {
+    "%@ Kopie": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Copy"
+          }
+        }
+      }
+    },
+    "%@ Tage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Days"
+          }
+        }
+      }
+    },
+    "%@, %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@, %2$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%@-Audiodatei": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Audio File"
+          }
+        }
+      }
+    },
+    "%lld Min.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld min"
+          }
+        }
+      }
+    },
     "%lld Playlists importiert": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "%lld Playlists Imported"
+          }
+        }
+      }
+    },
+    "%lld Std., %lld Min.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld Std., %2$lld Min."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld hr %2$lld min"
           }
         }
       }
@@ -21,12 +93,48 @@
         }
       }
     },
+    "%lld Titel ausgewählt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Songs Selected"
+          }
+        }
+      }
+    },
+    "%lld Titel ausgewählt, %@, %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld Titel ausgewählt, %2$@, %3$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld songs selected, %2$@, %3$@"
+          }
+        }
+      }
+    },
     "%lld Titel hinzugefügt": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "%lld Songs Added"
+          }
+        }
+      }
+    },
+    "%lld Titel werden hinzugefügt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld songs will be added."
           }
         }
       }
@@ -47,6 +155,38 @@
         }
       }
     },
+    "%lld Titel, %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld Titel, %2$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld songs, %2$@"
+          }
+        }
+      }
+    },
+    "%lld Titel, %@, %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld Titel, %2$@, %3$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld songs, %2$@, %3$@"
+          }
+        }
+      }
+    },
     "%lld Titel, %lld Minuten": {
       "localizations": {
         "de": {
@@ -63,6 +203,16 @@
         }
       }
     },
+    "%lld kbit/s": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld kbit/s"
+          }
+        }
+      }
+    },
     "%lld neu, %lld entfernt": {
       "localizations": {
         "de": {
@@ -75,6 +225,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$lld new, %2$lld removed"
+          }
+        }
+      }
+    },
+    "432 Hz": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "432 Hz"
+          }
+        }
+      }
+    },
+    "440 Hz – Standard (Original)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "440 Hz – Standard (Original)"
+          }
+        }
+      }
+    },
+    "528 Hz": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "528 Hz"
           }
         }
       }
@@ -109,6 +289,26 @@
         }
       }
     },
+    "Absteigend": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descending"
+          }
+        }
+      }
+    },
+    "Abtastrate": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sample Rate"
+          }
+        }
+      }
+    },
     "AirPlay": {
       "localizations": {
         "en": {
@@ -139,12 +339,42 @@
         }
       }
     },
+    "Album in Mediathek anzeigen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Album in Library"
+          }
+        }
+      }
+    },
+    "Album nicht verfügbar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Album Not Available"
+          }
+        }
+      }
+    },
     "Album · %@": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Album · %@"
+          }
+        }
+      }
+    },
+    "Alle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
           }
         }
       }
@@ -159,12 +389,62 @@
         }
       }
     },
+    "Alle Downloads entfernen …": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove All Downloads …"
+          }
+        }
+      }
+    },
     "Alle Downloads entfernen?": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Remove all downloads?"
+          }
+        }
+      }
+    },
+    "Alle Musikdateien": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Music"
+          }
+        }
+      }
+    },
+    "Alle Playlists": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Playlists"
+          }
+        }
+      }
+    },
+    "Alle Warnhinweise, bei denen „Nicht mehr fragen“ gewählt wurde, erscheinen wieder.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All warnings for which “Don’t ask again” was chosen will appear again."
+          }
+        }
+      }
+    },
+    "Alle anzeigen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See All"
           }
         }
       }
@@ -185,6 +465,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shuffle All"
+          }
+        }
+      }
+    },
+    "Allgemein": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "General"
           }
         }
       }
@@ -229,12 +519,62 @@
         }
       }
     },
+    "Anzeigen:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show:"
+          }
+        }
+      }
+    },
+    "Art": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kind"
+          }
+        }
+      }
+    },
     "Auch Datei löschen": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Also Delete File"
+          }
+        }
+      }
+    },
+    "Auch die Datei löschen?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also delete the file?"
+          }
+        }
+      }
+    },
+    "Auf dem Server": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On the Server"
+          }
+        }
+      }
+    },
+    "Auf diesem Mac": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On This Mac"
           }
         }
       }
@@ -269,12 +609,32 @@
         }
       }
     },
+    "Aufsteigend": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ascending"
+          }
+        }
+      }
+    },
     "Aus": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Off"
+          }
+        }
+      }
+    },
+    "Aus MiniPlayer wechseln": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch from MiniPlayer"
           }
         }
       }
@@ -295,6 +655,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Removed from Playlist"
+          }
+        }
+      }
+    },
+    "Aus Verlauf entfernen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from History"
           }
         }
       }
@@ -329,6 +699,96 @@
         }
       }
     },
+    "Aus „Auf diesem Mac“ entfernen …": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from “On This Mac” …"
+          }
+        }
+      }
+    },
+    "Aus „Nächster Titel“ entfernen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from Playing Next"
+          }
+        }
+      }
+    },
+    "Ausgabe": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Output"
+          }
+        }
+      }
+    },
+    "Ausgabe: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Output: %@"
+          }
+        }
+      }
+    },
+    "Ausgabegerät": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Output Device"
+          }
+        }
+      }
+    },
+    "Auswahl aufheben": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deselect All"
+          }
+        }
+      }
+    },
+    "Automatisch wiedergeben": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autoplay"
+          }
+        }
+      }
+    },
+    "Automatische Wiedergabe ist aktiviert": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autoplay is on"
+          }
+        }
+      }
+    },
+    "Automatische Wiedergabe ist deaktiviert": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autoplay is off"
+          }
+        }
+      }
+    },
     "A–Z": {
       "localizations": {
         "en": {
@@ -345,6 +805,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Edit"
+          }
+        }
+      }
+    },
+    "Beenden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quit"
+          }
+        }
+      }
+    },
+    "Beim Laden des Liedtexts ist ein Problem aufgetreten.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There was a problem loading the lyrics."
           }
         }
       }
@@ -389,12 +869,92 @@
         }
       }
     },
+    "Beschreibung (optional)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Description (optional)"
+          }
+        }
+      }
+    },
+    "Beschreibung hinzufügen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Description"
+          }
+        }
+      }
+    },
+    "Bewertet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rated"
+          }
+        }
+      }
+    },
+    "Bewertung": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rating"
+          }
+        }
+      }
+    },
+    "Bewertung entfernt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rating Removed"
+          }
+        }
+      }
+    },
+    "Bittiefe": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bit Depth"
+          }
+        }
+      }
+    },
     "CD %lld": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Disc %lld"
+          }
+        }
+      }
+    },
+    "Cache leeren": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear Cache"
+          }
+        }
+      }
+    },
+    "Compilations": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compilations"
           }
         }
       }
@@ -409,6 +969,16 @@
         }
       }
     },
+    "Das Konto „%@“ wird von diesem Mac entfernt. Auf dem Server bleibt alles erhalten.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The account “%@” will be removed from this Mac. Everything stays on the server."
+          }
+        }
+      }
+    },
     "Das Konto „%@“ wird von diesem iPhone entfernt. Auf dem Server bleibt alles erhalten.": {
       "localizations": {
         "en": {
@@ -419,12 +989,42 @@
         }
       }
     },
+    "Das Passwort bleibt im Schlüsselbund dieses Macs. HomeTune spricht nur mit deinem Server.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The password stays in this Mac’s keychain. HomeTune only talks to your server."
+          }
+        }
+      }
+    },
     "Das Passwort bleibt im Schlüsselbund dieses iPhones. Die App spricht nur mit deinem Server.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "The password stays in this iPhone’s keychain. The app only talks to your server."
+          }
+        }
+      }
+    },
+    "Das Tempo bleibt gleich. Die Umstellung wirkt sofort, auch mitten im Titel.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The tempo stays the same. The change takes effect immediately, even in the middle of a song."
+          }
+        }
+      }
+    },
+    "Datei löschen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete File"
           }
         }
       }
@@ -459,12 +1059,42 @@
         }
       }
     },
+    "Dateien werden nur verknüpft. Beim Entfernen bleiben sie, wo sie sind.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files are only linked. When removed, they stay where they are."
+          }
+        }
+      }
+    },
     "Dateiformat %@": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "File format %@"
+          }
+        }
+      }
+    },
+    "Datenrate": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bit Rate"
+          }
+        }
+      }
+    },
+    "Dauer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time"
           }
         }
       }
@@ -491,6 +1121,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Your music from your own Navidrome server."
+          }
+        }
+      }
+    },
+    "Der Server liest die Mediathek neu ein.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The server is rescanning the library."
+          }
+        }
+      }
+    },
+    "Die Datei liegt im HomeTune-Ordner im Ordner „Musik“.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file is in the HomeTune folder inside your Music folder."
           }
         }
       }
@@ -525,6 +1175,56 @@
         }
       }
     },
+    "Die geladenen Titel werden von diesem Mac gelöscht. Auf dem Server bleibt alles erhalten.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The downloaded songs will be deleted from this Mac. Everything stays on the server."
+          }
+        }
+      }
+    },
+    "Diese Einträge erscheinen in der Seitenleiste unter „Mediathek“.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "These items appear in the sidebar under “Library”."
+          }
+        }
+      }
+    },
+    "Diese Warteliste enthält keine Musik.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There’s no music in this queue."
+          }
+        }
+      }
+    },
+    "Disc %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disc %lld"
+          }
+        }
+      }
+    },
+    "Disc-Nummer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disc Number"
+          }
+        }
+      }
+    },
     "Download entfernen": {
       "localizations": {
         "en": {
@@ -545,12 +1245,62 @@
         }
       }
     },
+    "Downloads": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloads"
+          }
+        }
+      }
+    },
+    "Du startest gerade die Wiedergabe. Möchtest du die %lld Titel löschen, die zuvor zu „Nächster Titel“ hinzugefügt wurden?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’re starting playback. Do you want to clear the %lld songs you added to Playing Next?"
+          }
+        }
+      }
+    },
+    "Duplizieren": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate"
+          }
+        }
+      }
+    },
+    "Durchsuche deine Mediathek nach Künstler:innen, Alben, Titeln und Playlists.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search your library for artists, albums, songs and playlists."
+          }
+        }
+      }
+    },
     "Ein": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "On"
+          }
+        }
+      }
+    },
+    "Einige Titel sind bereits in „%@“.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some songs are already in “%@”."
           }
         }
       }
@@ -571,6 +1321,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Scanning …"
+          }
+        }
+      }
+    },
+    "Eins": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One"
           }
         }
       }
@@ -615,12 +1375,62 @@
         }
       }
     },
+    "Erstellen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create"
+          }
+        }
+      }
+    },
+    "Erweitert": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Advanced"
+          }
+        }
+      }
+    },
+    "Es befinden sich keine Titel in dieser Playlist.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There are no songs in this playlist."
+          }
+        }
+      }
+    },
+    "Es werden gerade Titel geladen. Möchtest du den Vorgang abbrechen?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Songs are being downloaded. Do you want to cancel?"
+          }
+        }
+      }
+    },
     "Favorisiert": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Favorited"
+          }
+        }
+      }
+    },
+    "Favorisierte Titel werden hier angezeigt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Songs you favorite will appear here."
           }
         }
       }
@@ -665,12 +1475,42 @@
         }
       }
     },
+    "Filterfeld ausblenden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide Filter Field"
+          }
+        }
+      }
+    },
+    "Filterfeld einblenden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Filter Field"
+          }
+        }
+      }
+    },
     "Filtern": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Filter"
+          }
+        }
+      }
+    },
+    "Füge Ordner oder Dateien hinzu (⌘O) oder lege Musik in den Ordner „HomeTune“ im Ordner „Musik“. Dateien werden nur verknüpft, nicht kopiert.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add folders or files (⌘O) or put music into the “HomeTune” folder inside your Music folder. Files are only linked, not copied."
           }
         }
       }
@@ -685,6 +1525,16 @@
         }
       }
     },
+    "Geladen:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloaded:"
+          }
+        }
+      }
+    },
     "Gelöscht": {
       "localizations": {
         "en": {
@@ -695,12 +1545,62 @@
         }
       }
     },
+    "Genre": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genre"
+          }
+        }
+      }
+    },
     "Genres": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Genres"
+          }
+        }
+      }
+    },
+    "Gilt für neu geladene Titel. Geladene Titel bleiben im Original. Lückenlose Wiedergabe ist immer an.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applies to newly loaded songs. Downloads stay original. Gapless playback is always on."
+          }
+        }
+      }
+    },
+    "Groß": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Large"
+          }
+        }
+      }
+    },
+    "Größe": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Size"
+          }
+        }
+      }
+    },
+    "Größe der Liste:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "List size:"
           }
         }
       }
@@ -725,6 +1625,16 @@
         }
       }
     },
+    "Hinzugefügt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Date Added"
+          }
+        }
+      }
+    },
     "Hinzugefügt am %@": {
       "localizations": {
         "en": {
@@ -745,12 +1655,32 @@
         }
       }
     },
+    "HomeTune ist freie Software (GPLv3). Tonhöhe: signalsmith-stretch (MIT).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HomeTune is free software (GPLv3). Pitch: signalsmith-stretch (MIT)."
+          }
+        }
+      }
+    },
     "HomeTune merkt sich nur, wo die Musik liegt. Entfernen nimmt sie aus der Mediathek – die Dateien selbst bleiben unverändert.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "HomeTune only remembers where your music is. Removing takes it out of the library – the files themselves stay untouched."
+          }
+        }
+      }
+    },
+    "HomeTune-Hilfe": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HomeTune Help"
           }
         }
       }
@@ -771,6 +1701,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Heavy Rotation"
+          }
+        }
+      }
+    },
+    "Im Finder anzeigen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show in Finder"
+          }
+        }
+      }
+    },
+    "Im Finder zeigen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show in Finder"
           }
         }
       }
@@ -805,12 +1755,82 @@
         }
       }
     },
+    "In deiner Mediathek wurden keine Ergebnisse für „%@“ gefunden.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No results for “%@” in your library."
+          }
+        }
+      }
+    },
+    "Informationen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get Info"
+          }
+        }
+      }
+    },
+    "Jahr": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Year"
+          }
+        }
+      }
+    },
+    "Jetzt läuft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Now Playing"
+          }
+        }
+      }
+    },
     "Kategorien": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Categories"
+          }
+        }
+      }
+    },
+    "Kein Konto": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Account"
+          }
+        }
+      }
+    },
+    "Kein Liedtext verfügbar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Lyrics Available"
+          }
+        }
+      }
+    },
+    "Kein Verlauf": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No History"
           }
         }
       }
@@ -885,12 +1905,42 @@
         }
       }
     },
+    "Keine Musik auf diesem Mac": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Music on This Mac"
+          }
+        }
+      }
+    },
+    "Keine Playlists": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Playlists"
+          }
+        }
+      }
+    },
     "Keine Titel": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "No Songs"
+          }
+        }
+      }
+    },
+    "Keine Titel ausgewählt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Songs Selected"
           }
         }
       }
@@ -921,6 +1971,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "No More Songs"
+          }
+        }
+      }
+    },
+    "Klein": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small"
+          }
+        }
+      }
+    },
+    "Komponist:in": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composer"
           }
         }
       }
@@ -1015,12 +2085,32 @@
         }
       }
     },
+    "Kopieren": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy"
+          }
+        }
+      }
+    },
     "Künstler:in": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Artist"
+          }
+        }
+      }
+    },
+    "Künstler:in in Mediathek anzeigen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Artist in Library"
           }
         }
       }
@@ -1065,6 +2155,26 @@
         }
       }
     },
+    "Lautstärke erhöhen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Increase Volume"
+          }
+        }
+      }
+    },
+    "Lautstärke verringern": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decrease Volume"
+          }
+        }
+      }
+    },
     "Leeren": {
       "localizations": {
         "en": {
@@ -1075,12 +2185,42 @@
         }
       }
     },
+    "Lege mit ⌘N eine Playlist an oder zieh Titel auf „Playlists“ in der Seitenleiste.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create a playlist with ⌘N or drag songs onto “Playlists” in the sidebar."
+          }
+        }
+      }
+    },
+    "Letzte Sucheinträge": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recent Searches"
+          }
+        }
+      }
+    },
     "Lieblingstitel": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Favorite Songs"
+          }
+        }
+      }
+    },
+    "Liedtext": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lyrics"
           }
         }
       }
@@ -1105,6 +2245,46 @@
         }
       }
     },
+    "Liedtexte anzeigen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Lyrics"
+          }
+        }
+      }
+    },
+    "Liedtexte ausblenden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide Lyrics"
+          }
+        }
+      }
+    },
+    "Link kopieren": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Link"
+          }
+        }
+      }
+    },
+    "Link kopiert": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link Copied"
+          }
+        }
+      }
+    },
     "Liste": {
       "localizations": {
         "en": {
@@ -1121,6 +2301,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Clear"
+          }
+        }
+      }
+    },
+    "Löschen …": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete …"
           }
         }
       }
@@ -1165,6 +2355,16 @@
         }
       }
     },
+    "Mediathek:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Library:"
+          }
+        }
+      }
+    },
     "Mehr": {
       "localizations": {
         "en": {
@@ -1195,12 +2395,72 @@
         }
       }
     },
+    "MiniPlayer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MiniPlayer"
+          }
+        }
+      }
+    },
+    "MiniPlayer immer im Vordergrund halten": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep MiniPlayer on top of all other windows"
+          }
+        }
+      }
+    },
+    "MiniPlayer:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MiniPlayer:"
+          }
+        }
+      }
+    },
+    "Mit einem Server verbinden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to a Server"
+          }
+        }
+      }
+    },
     "Mit einem Server verbinden …": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Connect to a Server …"
+          }
+        }
+      }
+    },
+    "Mittel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium"
+          }
+        }
+      }
+    },
+    "Musik auf diesem Mac hinzufügen …": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Music on This Mac …"
           }
         }
       }
@@ -1221,6 +2481,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Add Music"
+          }
+        }
+      }
+    },
+    "Musik hinzufügen …": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Music …"
           }
         }
       }
@@ -1255,6 +2525,56 @@
         }
       }
     },
+    "Möchtest du diese Playlist wirklich löschen?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are you sure you want to delete this playlist?"
+          }
+        }
+      }
+    },
+    "Name": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
+          }
+        }
+      }
+    },
+    "Name der Playlist": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playlist Name"
+          }
+        }
+      }
+    },
+    "Navidrome oder ein anderer Subsonic-Server.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navidrome or another Subsonic server."
+          }
+        }
+      }
+    },
+    "Neu": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New"
+          }
+        }
+      }
+    },
     "Neu einlesen": {
       "localizations": {
         "en": {
@@ -1271,6 +2591,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rescanning needs an administrator account in Navidrome."
+          }
+        }
+      }
+    },
+    "Neu mischen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reshuffle"
           }
         }
       }
@@ -1315,6 +2645,16 @@
         }
       }
     },
+    "Nicht mehr fragen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Don’t ask again"
+          }
+        }
+      }
+    },
     "Nicht verfügbar": {
       "localizations": {
         "en": {
@@ -1331,6 +2671,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Not Playing"
+          }
+        }
+      }
+    },
+    "Noch keine Musik": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Music Yet"
           }
         }
       }
@@ -1355,12 +2705,32 @@
         }
       }
     },
+    "Nur auf diesem Mac": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only on This Mac"
+          }
+        }
+      }
+    },
     "Nur aus der Mediathek entfernen": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Remove from Library Only"
+          }
+        }
+      }
+    },
+    "Nur geladene Musik": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only Downloaded Music"
           }
         }
       }
@@ -1385,12 +2755,32 @@
         }
       }
     },
+    "Ohne": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        }
+      }
+    },
     "Ohne Server fortfahren": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Continue Without a Server"
+          }
+        }
+      }
+    },
+    "Ohne Server spielt HomeTune nur Musik auf diesem Mac.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Without a server, HomeTune only plays music on this Mac."
           }
         }
       }
@@ -1425,12 +2815,42 @@
         }
       }
     },
+    "Ordner oder Audiodateien auswählen. Sie werden nur verknüpft, nicht kopiert.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose folders or audio files. They are only linked, not copied."
+          }
+        }
+      }
+    },
     "Ordner und Dateien": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Folders and Files"
+          }
+        }
+      }
+    },
+    "Original (verlustfrei)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Original (lossless)"
+          }
+        }
+      }
+    },
+    "Ort": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Location"
           }
         }
       }
@@ -1451,6 +2871,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pause"
+          }
+        }
+      }
+    },
+    "Pfad": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Path"
+          }
+        }
+      }
+    },
+    "Playlist": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playlist"
+          }
+        }
+      }
+    },
+    "Playlist aus Auswahl": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playlist from Selection"
           }
         }
       }
@@ -1495,6 +2945,16 @@
         }
       }
     },
+    "Playlist nicht verfügbar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playlist Not Available"
+          }
+        }
+      }
+    },
     "Playlist-Titel": {
       "localizations": {
         "en": {
@@ -1521,6 +2981,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Grid"
+          }
+        }
+      }
+    },
+    "Regeln werden auf dem Server festgelegt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rules are set on the server."
           }
         }
       }
@@ -1555,12 +3025,52 @@
         }
       }
     },
+    "Seite neu laden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reload Page"
+          }
+        }
+      }
+    },
+    "Sender erstellen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create Station"
+          }
+        }
+      }
+    },
+    "Sender: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Station: %@"
+          }
+        }
+      }
+    },
     "Server": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Server"
+          }
+        }
+      }
+    },
+    "Server-Mediathek aktualisieren": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update Server Library"
           }
         }
       }
@@ -1635,6 +3145,26 @@
         }
       }
     },
+    "Speicherort:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Location:"
+          }
+        }
+      }
+    },
+    "Spiele einen Titel ab und finde hier den Liedtext.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play a song to see its lyrics here."
+          }
+        }
+      }
+    },
     "Standard · Original, keine Bearbeitung": {
       "localizations": {
         "en": {
@@ -1655,6 +3185,36 @@
         }
       }
     },
+    "Statusleiste ausblenden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide Status Bar"
+          }
+        }
+      }
+    },
+    "Statusleiste einblenden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Status Bar"
+          }
+        }
+      }
+    },
+    "Steuerungen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Controls"
+          }
+        }
+      }
+    },
     "Stimmung": {
       "localizations": {
         "en": {
@@ -1665,12 +3225,62 @@
         }
       }
     },
+    "Stimmung:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tuning:"
+          }
+        }
+      }
+    },
+    "Stoppen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop"
+          }
+        }
+      }
+    },
+    "Streaming-Qualität:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Streaming quality:"
+          }
+        }
+      }
+    },
     "Suchen": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Search"
+          }
+        }
+      }
+    },
+    "Suchergebnisse": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search Results"
+          }
+        }
+      }
+    },
+    "Teilen ist am Server nicht aktiviert": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sharing is not enabled on the server"
           }
         }
       }
@@ -1705,6 +3315,16 @@
         }
       }
     },
+    "Titelnummer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Track Number"
+          }
+        }
+      }
+    },
     "Titelposition": {
       "localizations": {
         "en": {
@@ -1735,6 +3355,16 @@
         }
       }
     },
+    "Umbenennen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rename"
+          }
+        }
+      }
+    },
     "Unerwartete Antwort vom Server.": {
       "localizations": {
         "en": {
@@ -1755,12 +3385,58 @@
         }
       }
     },
+    "Verbinde einen Server oder füge Musik auf diesem Mac hinzu.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect a server or add music on this Mac."
+          }
+        }
+      }
+    },
+    "Verbindung testen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test Connection"
+          }
+        }
+      }
+    },
+    "Verbunden: %@ %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbunden: %1$@ %2$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connected: %1$@ %2$@"
+          }
+        }
+      }
+    },
     "Verlauf": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "History"
+          }
+        }
+      }
+    },
+    "Verlauf löschen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear History"
           }
         }
       }
@@ -1785,6 +3461,66 @@
         }
       }
     },
+    "Version:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version:"
+          }
+        }
+      }
+    },
+    "Verwenden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use"
+          }
+        }
+      }
+    },
+    "Veröffentlicht %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Released %@"
+          }
+        }
+      }
+    },
+    "Vollbild-Player": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full Screen Player"
+          }
+        }
+      }
+    },
+    "Vollbild-Player schließen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close Full Screen Player"
+          }
+        }
+      }
+    },
+    "Von %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From %@"
+          }
+        }
+      }
+    },
     "Vorheriger Titel": {
       "localizations": {
         "en": {
@@ -1795,12 +3531,52 @@
         }
       }
     },
+    "Vorspringen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip Forward"
+          }
+        }
+      }
+    },
+    "Warnhinweise:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warnings:"
+          }
+        }
+      }
+    },
     "Warteliste": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Playing Next"
+          }
+        }
+      }
+    },
+    "Warteliste behalten": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Queue"
+          }
+        }
+      }
+    },
+    "Warteliste behalten?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep queue?"
           }
         }
       }
@@ -1845,12 +3621,52 @@
         }
       }
     },
+    "Weiteren Verlauf einblenden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show More History"
+          }
+        }
+      }
+    },
+    "Wiedergabe": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play"
+          }
+        }
+      }
+    },
     "Wiedergabe fortsetzen": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Continue Playing"
+          }
+        }
+      }
+    },
+    "Wiedergaben": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plays"
+          }
+        }
+      }
+    },
+    "Wiedergabeposition": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playback Position"
           }
         }
       }
@@ -1871,6 +3687,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Repeat"
+          }
+        }
+      }
+    },
+    "Wiederholen: Alle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repeat: All"
+          }
+        }
+      }
+    },
+    "Wiederholen: Aus": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repeat: Off"
+          }
+        }
+      }
+    },
+    "Wiederholen: Eins": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repeat: One"
           }
         }
       }
@@ -1931,12 +3777,62 @@
         }
       }
     },
+    "Wähle links eine Künstlerin oder einen Künstler aus.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose an artist on the left."
+          }
+        }
+      }
+    },
+    "Wähle links einen Bereich aus.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a section on the left."
+          }
+        }
+      }
+    },
+    "Zieh Titel hierher oder auf die Playlist in der Seitenleiste.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag songs here or onto the playlist in the sidebar."
+          }
+        }
+      }
+    },
     "Zu Künstler:in": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Go to Artist"
+          }
+        }
+      }
+    },
+    "Zu „%@“ hinzugefügt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added to “%@”"
+          }
+        }
+      }
+    },
+    "Zu „Nächster Titel“ hinzugefügt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added to Playing Next"
           }
         }
       }
@@ -1971,6 +3867,36 @@
         }
       }
     },
+    "Zufällige Wiedergabe": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shuffle"
+          }
+        }
+      }
+    },
+    "Zufällige Wiedergabe: Aus": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shuffle: Off"
+          }
+        }
+      }
+    },
+    "Zufällige Wiedergabe: Ein": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shuffle: On"
+          }
+        }
+      }
+    },
     "Zuletzt": {
       "localizations": {
         "en": {
@@ -1987,6 +3913,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Recently Played"
+          }
+        }
+      }
+    },
+    "Zuletzt gespielte Titel bleiben für schnelles Wiederhören im Zwischenspeicher (höchstens 3 GB).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recently played songs stay in the cache for quick replay (up to 3 GB)."
           }
         }
       }
@@ -2031,6 +3967,26 @@
         }
       }
     },
+    "Zum MiniPlayer wechseln": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch to MiniPlayer"
+          }
+        }
+      }
+    },
+    "Zum aktuellen Titel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Go to Current Song"
+          }
+        }
+      }
+    },
     "Zur Playlist hinzufügen": {
       "localizations": {
         "en": {
@@ -2061,6 +4017,36 @@
         }
       }
     },
+    "Zurück": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back"
+          }
+        }
+      }
+    },
+    "Zurücksetzen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset"
+          }
+        }
+      }
+    },
+    "Zurückspringen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip Back"
+          }
+        }
+      }
+    },
     "Zwischenspeicher": {
       "localizations": {
         "en": {
@@ -2081,12 +4067,86 @@
         }
       }
     },
+    "Zwischenspeicher:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cache:"
+          }
+        }
+      }
+    },
     "Z–A": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Z–A"
+          }
+        }
+      }
+    },
+    "menu.song": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Titel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Song"
+          }
+        }
+      }
+    },
+    "queue.playingNext": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächster Titel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playing Next"
+          }
+        }
+      }
+    },
+    "settings.playback": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiedergabe"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playback"
+          }
+        }
+      }
+    },
+    "sort.title": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Titel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Title"
           }
         }
       }
@@ -2151,12 +4211,32 @@
         }
       }
     },
+    "„%@“ wiederholen …": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repeating “%@” …"
+          }
+        }
+      }
+    },
     "„%@“ wird auf dem Server gelöscht. Die Titel bleiben in der Mediathek.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "“%@” will be deleted on the server. The songs stay in your library."
+          }
+        }
+      }
+    },
+    "„%@“ wird gelöscht. Die Titel bleiben in der Mediathek.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” will be deleted. The songs stay in the library."
           }
         }
       }
@@ -2193,6 +4273,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Undo Favorite"
+          }
+        }
+      }
+    },
+    "„Nächster Titel“ ausblenden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide Playing Next"
+          }
+        }
+      }
+    },
+    "„Nächster Titel“ einblenden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Playing Next"
           }
         }
       }

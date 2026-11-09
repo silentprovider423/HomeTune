@@ -84,7 +84,7 @@ enum AlbumSort: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: LocalizedStringKey {
         switch self {
-        case .title: "Titel"
+        case .title: "sort.title"
         case .artist: "Künstler:in"
         case .year: "Jahr"
         case .added: "Zuletzt hinzugefügt"

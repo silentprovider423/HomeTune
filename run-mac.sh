@@ -1,7 +1,7 @@
 #!/bin/bash
 # Baut die Debug-App („HomeTune Test“, eigene Ordner) und startet sie angemeldet über die Startumgebung
 # (Zugang aus .test-account, kein Schlüsselbund-Eintrag). DEMO=1 nimmt das Demo-Konto (nur Demodaten, für Screenshots).
-#   ./run-mac.sh          DEMO=1 ./run-mac.sh
+#   ./run-mac.sh          DEMO=1 ./run-mac.sh          APP_LANG=en DEMO=1 ./run-mac.sh (englische Oberfläche)
 set -euo pipefail
 cd "$(dirname "$0")"
 set -a; source .test-account; set +a
@@ -12,5 +12,5 @@ APP="build/mac-dd/Build/Products/Debug/HomeTune Test.app"
 pkill -f "HomeTune Test.app/Contents/MacOS" || true
 if [ "${DEMO:-0}" = "1" ]; then HOMETUNE_USER="$HOMETUNE_DEMO_USER"; HOMETUNE_PASSWORD="$HOMETUNE_DEMO_PASSWORD"; fi
 HOMETUNE_SERVER="$HOMETUNE_SERVER" HOMETUNE_USER="$HOMETUNE_USER" HOMETUNE_PASSWORD="$HOMETUNE_PASSWORD" \
-  nohup "$APP/Contents/MacOS/HomeTune Test" >/dev/null 2>&1 &
+  nohup "$APP/Contents/MacOS/HomeTune Test" ${APP_LANG:+-AppleLanguages "($APP_LANG)"} >/dev/null 2>&1 &
 echo "gestartet (PID $!)"
