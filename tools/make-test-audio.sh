@@ -3,6 +3,7 @@
 # Titeln, Künstler:innen und Verlaufs-Covern (keine echte Musik). Ergebnis liegt in Tests/Fixtures.
 #   ./tools/make-test-audio.sh          alles neu
 #   ./tools/make-test-audio.sh ogg      nur Tests/Fixtures/OggOpus (Vorbis-Kommentare, Cover als METADATA_BLOCK_PICTURE)
+#   ./tools/make-test-audio.sh stream   nur Tests/Fixtures/Stream (Hi-Res-FLAC für die Streaming-Tests)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 OUT=Tests/Fixtures
@@ -27,7 +28,18 @@ print(base64.b64encode(struct.pack(">II",3,len(m))+m+struct.pack(">IIIIII",0,200
     -metadata TRACKNUMBER="2" -metadata DISCNUMBER="1/1" -metadata DATE="2025" -metadata GENRE="Chamber Pop" \
     "$d/02 - paper_lantern.opus"
 }
+# Hi-Res-FLAC (96 kHz/24 Bit, rosa Rauschen ohne Stille, mit Cover-Block im Kopf) für die Streaming-Tests:
+# fortlaufendes Lesen einer noch ladenden Datei, Aussetzer, Fortsetzen per Range
+stream() {
+  local d="$OUT/Stream"; rm -rf "$d"; mkdir -p "$d"
+  "${FF[@]}" -f lavfi -i "gradients=s=300x300:c0=0x1864AB:c1=0x63E6BE:nb_colors=2:d=1" -frames:v 1 -q:v 4 -flags +bitexact "$TMP/stream.jpg"
+  "${FF[@]}" -f lavfi -i "anoisesrc=d=10:c=pink:r=96000:a=0.06:seed=11" -f lavfi -i "anoisesrc=d=10:c=pink:r=96000:a=0.06:seed=12" \
+    -i "$TMP/stream.jpg" -filter_complex "[0:a][1:a]amerge=inputs=2[a]" -map "[a]" -map 2:v \
+    -c:a flac -sample_fmt s32 -bits_per_raw_sample 24 -c:v copy -disposition:v attached_pic \
+    -metadata title="Static Bloom" -metadata artist="Quiet Ferry" -metadata album="Test Signals" "$d/hires.flac"
+}
 if [ "${1:-}" = ogg ]; then ogg; find "$OUT/OggOpus" -type f | sort; exit 0; fi
+if [ "${1:-}" = stream ]; then stream; ls -l "$OUT/Stream"; exit 0; fi
 
 rm -rf "$OUT"; mkdir -p "$OUT/LocalMusic/Morning Set" "$OUT/LocalMusic/Night Drive" "$OUT/DemoAlbums"
 
@@ -93,5 +105,6 @@ demo "Paper Satellites" paper "Northbound Atlas" 2022 "Indie" "Orbiting Home" "S
 demo "Slow Weather" weather "Marigold Engine" 2020 "Downtempo" "Grey Morning" "Window Rain"
 demo "Field Recordings" field "Kite Assembly Club" 2024 "Folk" "Meadow Light" "Open Gate"
 ogg
+stream
 find "$OUT" -type f | sort
 du -sh "$OUT"

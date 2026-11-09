@@ -21,6 +21,10 @@ struct LibraryView: View {
 
     var body: some View {
         List {
+            // Import „Auf diesem iPhone“ gut sichtbar auch auf der Startseite der Mediathek
+            if let progress = app.local.importProgress {
+                Section { ImportProgressRow(progress: progress) }
+            }
             if let err = app.library.lastError, app.library.isOffline || !app.library.loadedOnce {
                 Section {
                     Label(app.library.isOffline ? String(localized: "Offline – nur geladene Musik ist verfügbar.") : err,

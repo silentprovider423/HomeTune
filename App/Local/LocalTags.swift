@@ -51,6 +51,29 @@ enum TagReader {
 
     /// Tags + Dauer; nil, wenn iOS die Datei nicht als Audio öffnen kann.
     static func read(_ url: URL) async -> LocalTags? {
+        // Synchrone Teile je Datei in einem eigenen Autorelease-Pool: beim Einlesen von Tausenden Dateien läuft die
+        // Schleife sonst ohne Unterbrechung, und Core-Audio-/Daten-Objekte sammeln sich bis zum Ende an (GB-Bereich).
+        if url.pathExtension.lowercased() == "flac" {
+            // FLAC: STREAMINFO liefert Abtastrate, Bittiefe, Kanäle und Länge – kein AVAudioFile nötig (spart beim
+            // Einlesen Tausender Dateien je Datei das Öffnen durch Core Audio). Nur bei kaputtem Kopf wie bisher prüfen.
+            var t = LocalTags()
+            autoreleasepool { FLACTags.read(url, into: &t) }
+            if t.sampleRate != nil, t.duration > 0 { return t }
+            guard var checked = autoreleasepool(invoking: { formatInfo(url) }) else { return nil }
+            autoreleasepool { FLACTags.read(url, into: &checked) }
+            return checked
+        }
+        guard var t = autoreleasepool(invoking: { formatInfo(url) }) else { return nil }
+        await readAsset(url, into: &t)
+        let lossless = t.bitDepth != nil
+        if !lossless, t.duration > 0, let size = (try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize {
+            t.bitRate = Int((Double(size) * 8 / t.duration / 1000).rounded())
+        }
+        return t
+    }
+
+    /// Dauer und Format; nil, wenn iOS die Datei nicht als Audio öffnen kann.
+    private static func formatInfo(_ url: URL) -> LocalTags? {
         guard let file = try? AVAudioFile(forReading: url), file.length > 0, file.processingFormat.sampleRate > 0 else { return nil }
         var t = LocalTags()
         let asbd = file.fileFormat.streamDescription.pointee
@@ -62,11 +85,6 @@ enum TagReader {
         } else if asbd.mFormatID == kAudioFormatFLAC || asbd.mFormatID == kAudioFormatAppleLossless {
             // Quell-Bittiefe steckt in den Format-Flags (kAppleLosslessFormatFlag_16BitSourceData = 1 …)
             t.bitDepth = [1: 16, 2: 20, 3: 24, 4: 32][Int(asbd.mFormatFlags)]
-        }
-        await readMetadata(url, into: &t)
-        let lossless = t.bitDepth != nil
-        if !lossless, t.duration > 0, let size = (try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize {
-            t.bitRate = Int((Double(size) * 8 / t.duration / 1000).rounded())
         }
         return t
     }

@@ -118,9 +118,10 @@ final class AppModel {
         DebugLocal.apply(to: self)
         #endif
         connect()
-        // Beim Start: einmaliger Umzug aus Documents/, dann alle Ordner abgleichen (neue/gelöschte Dateien)
+        // Beim Start: Rechte im HomeTune-Ordner reparieren und Reste vom Gerätetest entfernen
         Task {
             await local.migrateDocuments()
+            await local.repairAppFolder()
             await local.rescanAll()
             _ = await local.refreshAppFolderIfChanged()
         }
@@ -151,7 +152,8 @@ final class AppModel {
     private func refreshAppFolder() {
         folderDebounce?.cancel()
         folderDebounce = Task {
-            try? await Task.sleep(for: .milliseconds(800))
+            // Beim Kopieren vieler Dateien kommen laufend Meldungen – erst einlesen, wenn kurz Ruhe ist
+            try? await Task.sleep(for: .milliseconds(1500))
             guard !Task.isCancelled, let s = await local.refreshAppFolderIfChanged() else { return }
             if s.added > 0 || s.removed > 0 || !s.playlists.isEmpty { report(s, rescan: true) }
         }

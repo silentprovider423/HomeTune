@@ -104,15 +104,13 @@ struct LocalMusicView: View {
                     link(.localSongs, "Titel", icon: "music.note", count: local.songs.count, id: "local.songs")
                 }
             }
-            if local.isScanning {
+            if let progress = local.importProgress {
+                Section { ImportProgressRow(progress: progress) }
+            } else if local.isScanning {
                 Section {
                     HStack(spacing: 10) {
                         ProgressView()
-                        if local.scanTotal > 0 {
-                            Text("Wird eingelesen … \(local.scanDone) von \(local.scanTotal)")
-                        } else {
-                            Text("Wird eingelesen …")
-                        }
+                        Text("Wird eingelesen …")
                     }
                     .font(.subheadline).foregroundStyle(.secondary)
                 }

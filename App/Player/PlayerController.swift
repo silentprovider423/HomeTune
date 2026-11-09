@@ -31,6 +31,9 @@ final class PlayerController {
     @ObservationIgnored private var sessionReady = false
     @ObservationIgnored private var artworkFor: String?
     @ObservationIgnored private var nowPlayingArtwork: MPMediaItemArtwork?
+    /// Datei des laufenden Titels (evtl. noch im Laden) – der Folgetitel wird erst danach geholt
+    @ObservationIgnored private var currentSource: TrackSource?
+    @ObservationIgnored private var preloadedSources: [Int: TrackSource] = [:]
 
     var currentSong: Song? { queue.current?.song }
     var hasItem: Bool { queue.current != nil }
@@ -42,6 +45,10 @@ final class PlayerController {
         engine.onTrackStarted = { [weak self] token in self?.engineAdvanced(to: token) }
         engine.onQueueEnded = { [weak self] token in self?.engineEnded(token) }
         engine.onError = { [weak self] token, error in self?.engineFailed(token, error) }
+        engine.onBuffering = { [weak self] token, waiting in
+            guard let self, token == self.currentToken else { return }
+            self.isLoading = waiting
+        }
         setupRemoteCommands()
         NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification, object: nil, queue: .main) { [weak self] n in
             let type = (n.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt).flatMap(AVAudioSession.InterruptionType.init)
@@ -190,9 +197,11 @@ final class PlayerController {
         isPlaying = false; isLoading = false
         position = 0; duration = 0
         currentToken = -1
+        currentSource = nil
         ticker?.cancel()
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         app?.local.keepAccess(for: [])
+        Task { await TrackCache.shared.keepLoading(only: []) }
     }
 
     /// Security-scoped Zugriff nur für die Ordner des laufenden und des nächsten Titels offen halten.
@@ -202,15 +211,16 @@ final class PlayerController {
 
     // MARK: Laden und Vorladen
 
-    private func localFile(for song: Song) async throws -> URL {
+    /// Datei eines Titels: lokal/geladen sofort, vom Server fortlaufend (Wiedergabe beginnt, bevor alles da ist).
+    private func source(for song: Song) async throws -> TrackSource {
         // Musik auf diesem iPhone: Originaldatei über das Bookmark (Zugriff bleibt offen, solange gebraucht)
         if song.isLocal {
             guard let local = app?.local else { throw LocalError.missing }
-            return try local.fileURL(for: song)
+            return .file(try local.fileURL(for: song))
         }
-        if let f = app?.downloads.localFile(song.id) { return f }
+        if let f = app?.downloads.localFile(song.id) { return .file(f) }
         guard let client else { throw URLError(.notConnectedToInternet) }
-        return try await TrackCache.shared.file(for: song, client: client)
+        return try await TrackCache.shared.source(for: song, client: client)
     }
 
     private func startCurrent(autoplay: Bool, at seconds: Double = 0) {
@@ -220,19 +230,26 @@ final class PlayerController {
         let token = tokenCounter
         currentToken = token
         preloaded.removeAll()
+        preloadedSources.removeAll()
         preloadTask?.cancel()
         loadTask?.cancel()
+        currentSource = nil
         isLoading = true
         position = seconds
         duration = entry.song.durationSeconds
         if autoplay { isPlaying = true }
         updateNowPlaying()
+        // Bandbreite gehört dem neuen Titel: andere angefangene Server-Downloads abbrechen
+        let keep: Set<String> = [entry.song.id]
         loadTask = Task {
+            await TrackCache.shared.keepLoading(only: keep)
             do {
-                let url = try await localFile(for: entry.song)
+                let src = try await source(for: entry.song)
                 guard token == currentToken, !Task.isCancelled else { return }
-                engine.load(url: url, token: token, at: seconds, autoplay: autoplay)
-                isLoading = false
+                currentSource = src
+                engine.load(source: src, token: token, at: seconds, autoplay: autoplay, durationHint: entry.song.durationSeconds)
+                // Ladeanzeige bleibt, bis die Engine genug gepuffert hat (onBuffering)
+                if !autoplay || src.isComplete { isLoading = false }
                 isPlaying = autoplay
                 trackDidStart()
             } catch {
@@ -267,12 +284,19 @@ final class PlayerController {
             engine.setNext(url: nil, token: -1)
             return
         }
+        let current = currentSource
+        let keep = Set([queue.current?.song.id, next.song.id].compactMap { $0 })
         preloadTask = Task {
-            guard let url = try? await localFile(for: next.song), !Task.isCancelled else { return }
+            // Erst den laufenden Titel fertig laden (volle Bandbreite), dann den nächsten vorladen
+            if let current, !current.isComplete { _ = try? await current.waitUntilComplete() }
+            guard !Task.isCancelled else { return }
+            await TrackCache.shared.keepLoading(only: keep)
+            guard let src = try? await source(for: next.song), !Task.isCancelled else { return }
             tokenCounter += 1
             let token = tokenCounter
             preloaded[token] = next.id
-            engine.setNext(url: url, token: token)
+            preloadedSources = [token: src]
+            engine.setNext(source: src, token: token)
         }
     }
 
@@ -304,6 +328,9 @@ final class PlayerController {
         }
         currentToken = token
         position = 0
+        isLoading = false
+        currentSource = preloadedSources[token]
+        preloadedSources.removeAll()
         trackDidStart()
     }
 
