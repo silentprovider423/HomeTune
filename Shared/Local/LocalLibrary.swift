@@ -1,5 +1,9 @@
 import Foundation
+#if os(iOS)
 import UIKit
+#endif
+import ImageIO
+import UniformTypeIdentifiers
 import CryptoKit
 
 extension String {
@@ -113,8 +117,8 @@ final class LocalLibrary {
     /// Offene security-scoped Zugriffe (Ordner des laufenden und des vorgeladenen Titels)
     @ObservationIgnored private var open: [String: (url: URL, scoped: Bool)] = [:]
 
-    init(directory: URL = URL.applicationSupportDirectory.appending(path: "Local", directoryHint: .isDirectory),
-         documents: URL = URL.documentsDirectory) {
+    init(directory: URL = AppPaths.applicationSupport.appending(path: "Local", directoryHint: .isDirectory),
+         documents: URL = AppPaths.appFolder) {
         self.directory = directory
         documentsDirectory = documents
         try? FileManager.default.createDirectory(at: coversDirectory, withIntermediateDirectories: true)
@@ -228,11 +232,16 @@ final class LocalLibrary {
     /// anderen Apps → Documents/Inbox bzw. tmp der App). Dateien aus der Dateien-App kommen dank
     /// LSSupportsOpeningDocumentsInPlace als Original (security-scoped) und werden wie im Dialog referenziert.
     func needsCopy(_ url: URL) -> Bool {
+        #if os(macOS)
+        // Mac (ohne Sandbox): alles wird referenziert, nie kopiert
+        return false
+        #else
         let path = url.standardizedFileURL.path
         if path.hasPrefix(inboxDirectory.standardizedFileURL.path + "/") { return true }
         if path.contains("/Inbox/") || path.contains("-Inbox/") { return true }
         let home = URL(fileURLWithPath: NSHomeDirectory()).standardizedFileURL.path
         return path.hasPrefix(home + "/") && !isInsideAppFolder(url)
+        #endif
     }
 
     func isInsideAppFolder(_ url: URL) -> Bool {
@@ -310,6 +319,11 @@ final class LocalLibrary {
     @discardableResult
     func migrateDocuments(defaults: UserDefaults = .standard) async -> Int {
         guard !defaults.bool(forKey: Self.migrationKey) else { return 0 }
+        #if os(macOS)
+        // Mac: kein Altbestand – im sichtbaren Musikordner nie etwas verschieben
+        defaults.set(true, forKey: Self.migrationKey)
+        return 0
+        #else
         let fm = FileManager.default
         var moved = 0
         let internalItems: [(name: String, to: URL)] = [("Covers", coversDirectory), ("Imported", importedDirectory),
@@ -349,6 +363,7 @@ final class LocalLibrary {
         }
         defaults.set(true, forKey: Self.migrationKey)
         return moved
+        #endif
     }
 
     // MARK: Neu einlesen
@@ -573,16 +588,29 @@ final class LocalLibrary {
         let h = SHA256.hash(data: data).prefix(10).map { String(format: "%02x", $0) }.joined()
         let file = dir.appending(path: h + ".jpg")
         if FileManager.default.fileExists(atPath: file.path) { return "local-cover:" + h }
+        #if os(iOS)
         guard let img = UIImage(data: data), img.size.width > 0 else { return nil }
         let side: CGFloat = 600
         let scale = min(1, side / max(img.size.width, img.size.height))
         let target = CGSize(width: (img.size.width * scale).rounded(), height: (img.size.height * scale).rounded())
         let small = scale < 1 ? (img.preparingThumbnail(of: target) ?? img) : img
         guard let jpg = small.jpegData(compressionQuality: 0.85) else { return nil }
+        #else
+        guard let cg = PlatformImage.thumbnail(data, maxPixel: 600), let jpg = jpegData(cg, quality: 0.85) else { return nil }
+        #endif
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         try? jpg.write(to: file, options: .atomic)
         return "local-cover:" + h
     }
+
+    #if os(macOS)
+    nonisolated private static func jpegData(_ cg: CGImage, quality: Double) -> Data? {
+        let out = NSMutableData()
+        guard let dest = CGImageDestinationCreateWithData(out, UTType.jpeg.identifier as CFString, 1, nil) else { return nil }
+        CGImageDestinationAddImage(dest, cg, [kCGImageDestinationLossyCompressionQuality: quality] as CFDictionary)
+        return CGImageDestinationFinalize(dest) ? out as Data : nil
+    }
+    #endif
 
     private func cleanupCovers() {
         let used = Set(tracks.values.compactMap { $0.song.coverArt?.replacingOccurrences(of: "local-cover:", with: "") })
@@ -657,10 +685,11 @@ final class LocalLibrary {
             switch root.kind {
             case .folder: updateRoot(root.id) { $0.excluded.insert(t.rel) }
             case .file: closeAccess(root.id); roots.removeAll { $0.id == root.id }
-            case .copied: try? FileManager.default.removeItem(at: importedDirectory.appending(path: t.rel))
+            case .copied: AppPaths.removeItem(importedDirectory.appending(path: t.rel), inside: importedDirectory)
             case .appFolder:
                 if deleteAppFolderFiles {
-                    try? FileManager.default.removeItem(at: documentsDirectory.appending(path: t.rel))
+                    // nur innerhalb des eigenen HomeTune-Ordners, nie außerhalb
+                    AppPaths.removeItem(documentsDirectory.appending(path: t.rel), inside: documentsDirectory)
                 } else {
                     appFolder.excluded.insert(t.rel)
                 }
@@ -678,7 +707,7 @@ final class LocalLibrary {
         // Der HomeTune-Ordner ist ein fester Eintrag
         guard id != Self.appFolderRootID, let root = roots.first(where: { $0.id == id }) else { return }
         closeAccess(id)
-        if root.kind == .copied { try? FileManager.default.removeItem(at: importedDirectory) }
+        if root.kind == .copied { AppPaths.removeItem(importedDirectory, inside: directory) }
         let gone = Set(tracks.values.filter { $0.root == id }.map(\.song.id))
         tracks = tracks.filter { !gone.contains($0.key) }
         starred.subtract(gone)
@@ -955,19 +984,25 @@ final class LocalLibrary {
 /// Cover von Musik auf diesem iPhone (aus den Tags oder cover.jpg), im Speicher zwischengespeichert.
 actor LocalCovers {
     static let shared = LocalCovers()
-    private let memory = NSCache<NSString, UIImage>()
-    var directory = URL.applicationSupportDirectory.appending(path: "Local/Covers", directoryHint: .isDirectory)
+    private let memory = NSCache<NSString, PlatformImage>()
+    var directory = AppPaths.applicationSupport.appending(path: "Local/Covers", directoryHint: .isDirectory)
 
     init() { memory.countLimit = 300 }
 
-    func image(id: String, size: Int) -> UIImage? {
+    func image(id: String, size: Int) -> PlatformImage? {
         let step = size <= 120 ? 120 : size <= 300 ? 300 : 600
         let key = "\(id)-\(step)" as NSString
         if let m = memory.object(forKey: key) { return m }
         let h = id.replacingOccurrences(of: "local-cover:", with: "")
+        #if os(iOS)
         guard let img = UIImage(contentsOfFile: directory.appending(path: h + ".jpg").path) else { return nil }
         let scale = min(1, CGFloat(step) / max(img.size.width, img.size.height))
         let out = scale < 1 ? (img.preparingThumbnail(of: CGSize(width: img.size.width * scale, height: img.size.height * scale)) ?? img) : img
+        #else
+        guard let d = try? Data(contentsOf: directory.appending(path: h + ".jpg")),
+              let cg = PlatformImage.thumbnail(d, maxPixel: step) else { return nil }
+        let out = NSImage(cgImage: cg, size: NSSize(width: cg.width, height: cg.height))
+        #endif
         memory.setObject(out, forKey: key)
         return out
     }

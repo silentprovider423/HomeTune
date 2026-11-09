@@ -9,7 +9,7 @@ actor TrackCache {
     private let limitBytes: Int64 = 3 * 1024 * 1024 * 1024
 
     private func dir(for account: String) -> URL {
-        let d = URL.cachesDirectory.appending(path: "Tracks/\(account)", directoryHint: .isDirectory)
+        let d = AppPaths.caches.appending(path: "Tracks/\(account)", directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: d, withIntermediateDirectories: true)
         return d
     }
@@ -23,9 +23,26 @@ actor TrackCache {
         return nil
     }
 
+    /// Streaming-Qualität in kbit/s (0 = Original, verlustfrei). Nur am Mac einstellbar; das iPhone nutzt immer 0.
+    static var maxBitRate: Int { UserDefaults.standard.integer(forKey: "streamMaxBitRate") }
+
     /// Lokale Datei für einen Titel (lädt bei Bedarf; parallele Anfragen werden zusammengelegt).
     func file(for song: Song, client: SubsonicClient) async throws -> URL {
         let account = client.account.id
+        let rate = Self.maxBitRate
+        // Gewählte Höchst-Datenrate: nur wenn das Original darüber liegt, umgewandelt als MP3 holen
+        if rate > 0, (song.bitRate ?? Int.max) > rate {
+            let d = dir(for: account)
+            let target = d.appending(path: "\(Self.safe(song.id)).q\(rate).mp3")
+            if FileManager.default.fileExists(atPath: target.path) {
+                try? FileManager.default.setAttributes([.modificationDate: Date()], ofItemAtPath: target.path)
+                return target
+            }
+            try await Self.fetch(client.streamRequest(id: song.id, format: "mp3", maxBitRate: rate), client: client, to: target)
+            guard Self.canOpen(target) else { try? FileManager.default.removeItem(at: target); throw CocoaError(.fileReadCorruptFile) }
+            trim(account: account)
+            return target
+        }
         if let u = cachedFile(for: song, account: account) {
             try? FileManager.default.setAttributes([.modificationDate: Date()], ofItemAtPath: u.path)
             return u
@@ -100,11 +117,11 @@ actor TrackCache {
     }
 
     func clear() {
-        try? FileManager.default.removeItem(at: URL.cachesDirectory.appending(path: "Tracks"))
+        try? FileManager.default.removeItem(at: AppPaths.caches.appending(path: "Tracks"))
     }
 
     func sizeBytes() -> Int64 {
-        let root = URL.cachesDirectory.appending(path: "Tracks")
+        let root = AppPaths.caches.appending(path: "Tracks")
         guard let e = FileManager.default.enumerator(at: root, includingPropertiesForKeys: [.fileSizeKey]) else { return 0 }
         var total: Int64 = 0
         for case let u as URL in e { total += Int64((try? u.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0) }

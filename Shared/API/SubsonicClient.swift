@@ -296,6 +296,20 @@ final class SubsonicClient: Sendable {
         return r
     }
 
+    /// Umgewandelter Stream mit Höchst-Datenrate (Einstellung „Streaming-Qualität“ am Mac)
+    func streamRequest(id: String, format: String, maxBitRate: Int) -> URLRequest {
+        var r = request("stream", [("id", id), ("format", format), ("maxBitRate", String(maxBitRate))])
+        r.timeoutInterval = 120
+        return r
+    }
+
+    /// Öffentlicher Link (OpenSubsonic/Navidrome `createShare`, muss am Server erlaubt sein)
+    func createShare(ids: [String]) async throws -> URL? {
+        struct R: Decodable { struct B: Decodable { struct S: Decodable { let url: String? }; let share: [S]? }; let shares: B? }
+        let r = try await call("createShare", ids.map { ("id", $0) }, as: R.self)
+        return r.shares?.share?.first?.url.flatMap(URL.init(string:))
+    }
+
     func downloadRequest(id: String) -> URLRequest {
         var r = request("download", [("id", id)])
         r.timeoutInterval = 300

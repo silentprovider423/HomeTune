@@ -3,6 +3,7 @@ options:
   bundleIdPrefix: org.homeroll
   deploymentTarget:
     iOS: "26.0"
+    macOS: "15.0"
   createIntermediateGroups: true
   developmentLanguage: de
 settings:
@@ -20,9 +21,11 @@ targets:
     platform: iOS
     sources:
       - path: App
+      # Gemeinsamer Kern (iPhone + Mac)
+      - path: Shared
         excludes: ["Audio/PitchShift/*.mm"]
       # Tonhöhe (signalsmith-stretch, C++): auch im Debug-Build optimiert, sonst reicht die Rechenzeit nicht
-      - path: App/Audio/PitchShift/HTPitchShiftUnit.mm
+      - path: Shared/Audio/PitchShift/HTPitchShiftUnit.mm
         compilerFlags: ["-O3", "-DNDEBUG", "-DSIGNALSMITH_USE_ACCELERATE=1"]
       - path: Resources
         buildPhase: resources
@@ -64,7 +67,7 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        SWIFT_OBJC_BRIDGING_HEADER: App/HomeTune-Bridging-Header.h
+        SWIFT_OBJC_BRIDGING_HEADER: Shared/HomeTune-Bridging-Header.h
         CLANG_CXX_LANGUAGE_STANDARD: c++17
         HEADER_SEARCH_PATHS: ["$(SRCROOT)/Vendor/signalsmith-stretch/include", "$(SRCROOT)/Vendor/signalsmith-linear/include"]
   HomeTuneTests:
@@ -100,6 +103,106 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: org.homeroll.hometune.uitests
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: HomeTune
+  HomeTuneMac:
+    type: application
+    platform: macOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: Mac
+        excludes: ["Info.plist"]
+      - path: Shared
+        excludes: ["Audio/PitchShift/*.mm"]
+      - path: Shared/Audio/PitchShift/HTPitchShiftUnit.mm
+        compilerFlags: ["-O3", "-DNDEBUG", "-DSIGNALSMITH_USE_ACCELERATE=1"]
+      - path: Resources/Localizable.xcstrings
+      - path: Vendor
+        buildPhase: none
+    dependencies:
+      - sdk: Accelerate.framework
+    info:
+      path: Mac/Info.plist
+      properties:
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDisplayName: HomeTune
+        CFBundleName: $(PRODUCT_NAME)
+        CFBundleDevelopmentRegion: en
+        CFBundleLocalizations: [en, de]
+        LSApplicationCategoryType: public.app-category.music
+        LSMinimumSystemVersion: $(MACOSX_DEPLOYMENT_TARGET)
+        NSHumanReadableCopyright: ""
+        NSLocalNetworkUsageDescription: "Verbindung zu deinem Musikserver im Heimnetz."
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+          NSAllowsLocalNetworking: true
+        # Ziehen innerhalb der App (Titel/Alben auf Playlists und in die Warteliste)
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: org.homeroll.hometune.items
+            UTTypeDescription: HomeTune Items
+            UTTypeConformsTo: [public.data]
+            UTTypeTagSpecification: {}
+        # „Öffnen mit HomeTune“ → Auf diesem Mac
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Audio
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes: [public.audio, public.mp3, public.mpeg-4-audio, org.xiph.flac, com.microsoft.waveform-audio, public.aiff-audio, public.aifc-audio, com.apple.coreaudio-format, org.xiph.ogg-audio, org.xiph.opus]
+          - CFBundleTypeName: Playlist
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes: [public.m3u-playlist, public.pls-playlist, public.playlist]
+    settings:
+      base:
+        # Mac startet als 1.2.0 (eigener Versionsstand), das iPhone bleibt bei 1.1.1
+        MARKETING_VERSION: "1.2.0"
+        CURRENT_PROJECT_VERSION: "1"
+        PRODUCT_BUNDLE_IDENTIFIER: org.homeroll.hometune.mac
+        PRODUCT_NAME: HomeTune
+        MACOSX_DEPLOYMENT_TARGET: "15.0"
+        # ad hoc signiert: keine Entwickler-Identität, kein Team (siehe build-mac.sh)
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+        DEVELOPMENT_TEAM: ""
+        ENABLE_HARDENED_RUNTIME: NO
+        GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        COMBINE_HIDPI_IMAGES: YES
+        SWIFT_OBJC_BRIDGING_HEADER: Shared/HomeTune-Bridging-Header.h
+        CLANG_CXX_LANGUAGE_STANDARD: c++17
+        HEADER_SEARCH_PATHS: ["$(SRCROOT)/Vendor/signalsmith-stretch/include", "$(SRCROOT)/Vendor/signalsmith-linear/include"]
+      configs:
+        Debug:
+          PRODUCT_BUNDLE_IDENTIFIER: org.homeroll.hometune.mac.debug
+          PRODUCT_NAME: HomeTune Test
+  HomeTuneMacTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "15.0"
+    # Ohne Gast-App: der gemeinsame Kern wird direkt mitgebaut (kein Fenster, keine Maus/Tastatur)
+    sources:
+      - path: Tests
+        excludes: ["Fixtures/**"]
+      - path: Tests/Fixtures
+        type: folder
+        buildPhase: resources
+      - path: Shared
+        excludes: ["Audio/PitchShift/*.mm"]
+      - path: Shared/Audio/PitchShift/HTPitchShiftUnit.mm
+        compilerFlags: ["-O3", "-DNDEBUG", "-DSIGNALSMITH_USE_ACCELERATE=1"]
+    dependencies:
+      - sdk: Accelerate.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.homeroll.hometune.mac.tests
+        GENERATE_INFOPLIST_FILE: YES
+        MACOSX_DEPLOYMENT_TARGET: "15.0"
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+        DEVELOPMENT_TEAM: ""
+        SWIFT_OBJC_BRIDGING_HEADER: Shared/HomeTune-Bridging-Header.h
+        CLANG_CXX_LANGUAGE_STANDARD: c++17
+        HEADER_SEARCH_PATHS: ["$(SRCROOT)/Vendor/signalsmith-stretch/include", "$(SRCROOT)/Vendor/signalsmith-linear/include"]
 schemes:
   HomeTune:
     build:
@@ -109,3 +212,10 @@ schemes:
         HomeTuneUITests: [test]
     test:
       targets: [HomeTuneTests, HomeTuneUITests]
+  HomeTuneMac:
+    build:
+      targets:
+        HomeTuneMac: all
+        HomeTuneMacTests: [test]
+    test:
+      targets: [HomeTuneMacTests]

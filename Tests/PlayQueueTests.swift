@@ -1,5 +1,7 @@
 import XCTest
+#if os(iOS)
 @testable import HomeTune
+#endif
 
 /// Warteliste nach Apples Modell: Als Nächstes / Zuletzt / Quelle / Verlauf / Zufall / Wiederholen.
 final class PlayQueueTests: XCTestCase {

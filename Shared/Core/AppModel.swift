@@ -97,8 +97,10 @@ final class AppModel {
     var importRequest: LocalImportKind?
     /// Titel aus dem HomeTune-Ordner, für die gefragt wird, ob auch die Datei gelöscht werden soll
     var pendingLocalRemoval: [Song]?
+    #if os(iOS)
     /// Signatur-Profil gilt für eine andere App-ID (dann übergibt der Dateien-Dialog nichts) – erwartete ID
     let signingMismatch: String? = SigningCheck.currentMismatch()
+    #endif
     /// „Ohne Server fortfahren“: Mediathek nur mit Musik auf diesem iPhone (Server kann später dazukommen)
     var localMode: Bool {
         didSet { UserDefaults.standard.set(localMode, forKey: "localMode") }
@@ -304,6 +306,9 @@ enum DebugLogin {
         let env = ProcessInfo.processInfo.environment
         guard let s = env["HOMETUNE_SERVER"], let url = AccountStore.normalize(s),
               let user = env["HOMETUNE_USER"], let pw = env["HOMETUNE_PASSWORD"] else { return }
+        #if os(macOS)
+        Keychain.memoryOnly = [:]
+        #endif
         if let existing = store.accounts.first(where: { $0.server == url && $0.username == user }) {
             Keychain.set(pw, for: existing.id)
             store.select(existing.id)

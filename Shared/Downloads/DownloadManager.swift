@@ -1,5 +1,7 @@
 import Foundation
+#if os(iOS)
 import UIKit
+#endif
 
 /// Offline-Downloads („Geladen“): Originaldateien (`download`) im App-Speicher, je Konto getrennt.
 @MainActor @Observable
@@ -22,7 +24,7 @@ final class DownloadManager {
 
     private var folder: URL? {
         guard let id = client?.account.id else { return nil }
-        let d = URL.applicationSupportDirectory.appending(path: "Downloads/\(id)", directoryHint: .isDirectory)
+        let d = AppPaths.applicationSupport.appending(path: "Downloads/\(id)", directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: d, withIntermediateDirectories: true)
         return d
     }
@@ -89,8 +91,14 @@ final class DownloadManager {
             running += 1
             active[song.id] = 0
             Task {
+                #if os(iOS)
                 let bg = UIApplication.shared.beginBackgroundTask(withName: "download")
                 defer { UIApplication.shared.endBackgroundTask(bg) }
+                #else
+                // Mac: App Nap während des Ladens verhindern
+                let activity = ProcessInfo.processInfo.beginActivity(options: .userInitiated, reason: "download")
+                defer { ProcessInfo.processInfo.endActivity(activity) }
+                #endif
                 do {
                     let name = "\(TrackCache.safe(song.id)).\(TrackCache.ext(song))"
                     let target = f.appending(path: name)

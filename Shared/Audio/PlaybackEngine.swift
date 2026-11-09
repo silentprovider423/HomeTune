@@ -38,9 +38,18 @@ final class PlaybackEngine: @unchecked Sendable {
     private let playing = OSAllocatedUnfairLock(initialState: false)
 
     init() {
+        #if os(macOS)
+        // Mac: keine Audio-Sitzung – Abtastrate des aktuellen Ausgabegeräts
+        let rate = engine.outputNode.outputFormat(forBus: 0).sampleRate
+        #else
         let rate = AVAudioSession.sharedInstance().sampleRate
+        #endif
         format = AVAudioFormat(standardFormatWithSampleRate: rate > 0 ? rate : 48000, channels: 2)!
         chain.attach(to: engine, player: player, format: format)
+        #if os(macOS)
+        // Unit-Tests auf dem Mac spielen echt ab – dabei nichts aus den Lautsprechern
+        if AppPaths.isTesting { engine.mainMixerNode.outputVolume = 0 }
+        #endif
         engine.prepare()
         NotificationCenter.default.addObserver(forName: .AVAudioEngineConfigurationChange, object: engine, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.handleConfigurationChange() }

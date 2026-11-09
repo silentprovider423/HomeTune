@@ -1,6 +1,8 @@
 import XCTest
 import AVFoundation
+#if os(iOS)
 @testable import HomeTune
+#endif
 
 /// Live-Wiedergabe im Simulator: lückenloser Übergang zum vorgeladenen Titel, Ende der Warteliste,
 /// Position, Springen – und eine echte FLAC-Datei vom Testserver.

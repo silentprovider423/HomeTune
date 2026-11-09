@@ -1,6 +1,8 @@
 import XCTest
 import AVFoundation
+#if os(iOS)
 @testable import HomeTune
+#endif
 
 /// „Musik auf diesem iPhone“: Tags lokal lesen, Ordner per Bookmark merken und wiederfinden, neu einlesen,
 /// in die Mediathek einreihen, entfernen ohne Originale zu löschen – und die Stimmung (432 Hz) auch für lokale FLAC-Dateien.
@@ -49,7 +51,7 @@ final class LocalMusicTests: XCTestCase {
         XCTAssertEqual(flac.sampleRate, 48000)
         XCTAssertEqual(flac.bitDepth, 16)
         XCTAssertEqual(flac.duration, 3, accuracy: 0.01)
-        XCTAssertNotNil(flac.artwork.flatMap(UIImage.init(data:)), "Cover aus dem FLAC-PICTURE-Block")
+        XCTAssertNotNil(flac.artwork.flatMap(PlatformImage.init(data:)), "Cover aus dem FLAC-PICTURE-Block")
 
         let mp3 = try await XCTUnwrapAsync(await TagReader.read(dir.appending(path: "Morning Set/02 - Glass Harbor.mp3")))
         XCTAssertEqual(mp3.title, "Glass Harbor")
@@ -63,7 +65,7 @@ final class LocalMusicTests: XCTestCase {
         XCTAssertNil(mp3.bitDepth)
         XCTAssertEqual(mp3.duration, 2, accuracy: 0.15)
         XCTAssertEqual(Double(mp3.bitRate ?? 0), 96, accuracy: 30)
-        XCTAssertNotNil(mp3.artwork.flatMap(UIImage.init(data:)), "Cover aus ID3 APIC")
+        XCTAssertNotNil(mp3.artwork.flatMap(PlatformImage.init(data:)), "Cover aus ID3 APIC")
 
         let aac = try await XCTUnwrapAsync(await TagReader.read(dir.appending(path: "Night Drive/01 - Neon Rain.m4a")))
         XCTAssertEqual(aac.title, "Neon Rain")
@@ -74,7 +76,7 @@ final class LocalMusicTests: XCTestCase {
         XCTAssertEqual(aac.discNumber, 1)
         XCTAssertEqual(aac.year, 2019)
         XCTAssertEqual(aac.genre, "Synthwave")
-        XCTAssertNotNil(aac.artwork.flatMap(UIImage.init(data:)), "Cover aus iTunes covr")
+        XCTAssertNotNil(aac.artwork.flatMap(PlatformImage.init(data:)), "Cover aus iTunes covr")
 
         let alac = try await XCTUnwrapAsync(await TagReader.read(dir.appending(path: "Night Drive/02 - Tunnel Lights.m4a")))
         XCTAssertEqual(alac.title, "Tunnel Lights")

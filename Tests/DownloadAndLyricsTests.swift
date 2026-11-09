@@ -1,5 +1,7 @@
 import XCTest
+#if os(iOS)
 @testable import HomeTune
+#endif
 
 @MainActor
 final class DownloadAndLyricsTests: XCTestCase {

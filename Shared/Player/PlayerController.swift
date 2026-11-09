@@ -43,6 +43,9 @@ final class PlayerController {
         engine.onQueueEnded = { [weak self] token in self?.engineEnded(token) }
         engine.onError = { [weak self] token, error in self?.engineFailed(token, error) }
         setupRemoteCommands()
+        #if os(macOS)
+        engine.engine.mainMixerNode.outputVolume = volume
+        #else
         NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification, object: nil, queue: .main) { [weak self] n in
             let type = (n.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt).flatMap(AVAudioSession.InterruptionType.init)
             let opts = (n.userInfo?[AVAudioSessionInterruptionOptionKey] as? UInt).map(AVAudioSession.InterruptionOptions.init) ?? []
@@ -58,6 +61,7 @@ final class PlayerController {
                 if reason == .oldDeviceUnavailable { self?.pause() }
             }
         }
+        #endif
     }
 
     private var client: SubsonicClient? { app?.client }
@@ -65,6 +69,7 @@ final class PlayerController {
     // MARK: Audio-Sitzung
 
     private func activateSession() {
+        #if os(iOS)
         guard !sessionReady else { return }
         let s = AVAudioSession.sharedInstance()
         do {
@@ -74,14 +79,39 @@ final class PlayerController {
         } catch {
             lastError = error.localizedDescription
         }
+        #endif
     }
+
+    #if os(macOS)
+    // MARK: Mac: Lautstärke der App, App Nap
+
+    /// App-eigene Lautstärke (nicht die des Systems), 0…1, gemerkt
+    var volume: Float = UserDefaults.standard.object(forKey: "volume") as? Float ?? 1 {
+        didSet {
+            volume = min(1, max(0, volume))
+            engine.engine.mainMixerNode.outputVolume = volume
+            UserDefaults.standard.set(volume, forKey: "volume")
+        }
+    }
+    /// Hält macOS davon ab, die App während der Wiedergabe zu drosseln (Puffer-Zubringer)
+    @ObservationIgnored private var playActivity: NSObjectProtocol?
+
+    private func syncActivity() {
+        if isPlaying, playActivity == nil {
+            playActivity = ProcessInfo.processInfo.beginActivity(options: .userInitiatedAllowingIdleSystemSleep, reason: "playback")
+        } else if !isPlaying, let a = playActivity {
+            ProcessInfo.processInfo.endActivity(a)
+            playActivity = nil
+        }
+    }
+    #endif
 
     // MARK: Öffentliche Steuerung
 
     /// Spielt eine Titelliste ab (Album, Playlist …). `startAt` nil + Zufall = zufälliger Start.
-    func play(_ songs: [Song], startAt: Int? = nil, name: String? = nil, shuffle: Bool = false) {
+    func play(_ songs: [Song], startAt: Int? = nil, name: String? = nil, shuffle: Bool = false, clearUpNext: Bool = false) {
         guard !songs.isEmpty else { return }
-        queue.play(songs, startAt: startAt, name: name, shuffle: shuffle)
+        queue.play(songs, startAt: startAt, name: name, shuffle: shuffle, clearUpNext: clearUpNext)
         startCurrent(autoplay: true)
     }
 
@@ -180,6 +210,15 @@ final class PlayerController {
     func moveSource(from: IndexSet, to: Int) { queue.moveSource(from: from, to: to); queueChanged() }
     func clearUpcoming() { queue.clearUpcoming(); queueChanged() }
     func clearHistory() { queue.clearHistory(); saveQueue() }
+    func removeFromHistory(_ entry: PlayQueue.Entry) { queue.removeHistory(id: entry.id); saveQueue() }
+
+    /// Titel an einer Stelle der Warteliste „Als Nächstes“ einfügen (Ziehen in die Warteliste)
+    func insertUpNext(_ songs: [Song], at index: Int) {
+        guard !songs.isEmpty else { return }
+        let wasEmpty = queue.current == nil
+        queue.insertUpNext(songs, at: index)
+        if wasEmpty { startCurrent(autoplay: true) } else { queueChanged() }
+    }
 
     func updateSong(_ song: Song) { queue.updateSong(song) }
 
@@ -192,6 +231,10 @@ final class PlayerController {
         currentToken = -1
         ticker?.cancel()
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+        #if os(macOS)
+        MPNowPlayingInfoCenter.default().playbackState = .stopped
+        syncActivity()
+        #endif
         app?.local.keepAccess(for: [])
     }
 
@@ -354,6 +397,11 @@ final class PlayerController {
     // MARK: Sperrbildschirm / Kontrollzentrum
 
     private func updateNowPlaying() {
+        #if os(macOS)
+        // Mac: ohne playbackState erscheint die App nicht unter „Jetzt läuft“ und die Medientasten gehen woanders hin
+        MPNowPlayingInfoCenter.default().playbackState = queue.current == nil ? .stopped : isPlaying ? .playing : .paused
+        syncActivity()
+        #endif
         guard let song = queue.current?.song else {
             MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
             return
@@ -387,7 +435,7 @@ final class PlayerController {
     }
 
     /// Außerhalb des MainActors gebaut: iOS ruft den Block auf einem Hintergrund-Thread auf.
-    nonisolated private static func makeArtwork(_ img: UIImage) -> MPMediaItemArtwork {
+    nonisolated private static func makeArtwork(_ img: PlatformImage) -> MPMediaItemArtwork {
         MPMediaItemArtwork(boundsSize: img.size) { _ in img }
     }
 

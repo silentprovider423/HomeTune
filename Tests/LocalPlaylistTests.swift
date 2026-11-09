@@ -1,6 +1,8 @@
 import XCTest
 import AVFoundation
+#if os(iOS)
 @testable import HomeTune
+#endif
 
 /// Neu in 1.1: Ogg/Opus-Tags, eigene Playlists (anlegen, umbenennen, umsortieren, entfernen, löschen), Import von
 /// .m3u/.m3u8/.pls mit Zuordnung über Dateinamen/#EXTINF, der HomeTune-Ordner (Documents/) mit Umzug und
@@ -53,7 +55,7 @@ final class LocalPlaylistTests: XCTestCase {
         XCTAssertEqual(opus.year, 2025)
         XCTAssertEqual(opus.genre, "Chamber Pop")
         XCTAssertEqual(opus.duration, 2, accuracy: 0.1)
-        XCTAssertNotNil(opus.artwork.flatMap(UIImage.init(data:)), "Cover aus METADATA_BLOCK_PICTURE")
+        XCTAssertNotNil(opus.artwork.flatMap(PlatformImage.init(data:)), "Cover aus METADATA_BLOCK_PICTURE")
 
         // Ogg Vorbis: Tags werden gelesen; ob iOS den Ton dekodiert, hängt vom System ab
         var vorbis = LocalTags()

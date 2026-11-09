@@ -168,6 +168,20 @@ struct PlayQueue: Codable, Sendable {
 
     mutating func clearHistory() { history.removeAll() }
 
+    /// Einzelnen Eintrag aus dem Verlauf nehmen (Mac: „Aus Verlauf entfernen“)
+    mutating func removeHistory(id: UUID) { history.removeAll { $0.id == id } }
+
+    /// Titel an einer Stelle von „Als Nächstes“ einreihen (Mac: Ablegen in der Warteliste)
+    mutating func insertUpNext(_ songs: [Song], at index: Int) {
+        let entries = songs.map { Entry(song: $0, origin: .user) }
+        if current == nil, let first = entries.first {
+            current = first
+            upNext.insert(contentsOf: entries.dropFirst(), at: 0)
+        } else {
+            upNext.insert(contentsOf: entries, at: min(max(0, index), upNext.count))
+        }
+    }
+
     mutating func remove(id: UUID) {
         upNext.removeAll { $0.id == id }
         source.removeAll { $0.id == id }

@@ -39,7 +39,7 @@ final class LibraryStore {
     }
 
     private func cacheURL(_ account: String) -> URL {
-        let d = URL.applicationSupportDirectory.appending(path: "Library", directoryHint: .isDirectory)
+        let d = AppPaths.applicationSupport.appending(path: "Library", directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: d, withIntermediateDirectories: true)
         return d.appending(path: "\(account).json")
     }

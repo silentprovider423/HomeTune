@@ -1,7 +1,9 @@
 import XCTest
 import AVFoundation
 import Accelerate
+#if os(iOS)
 @testable import HomeTune
+#endif
 
 /// Klangprüfung der Stimmungs-Kette: Sinus durch genau dieselbe Kette wie in der App rendern (offline) und
 /// per FFT messen. 440 Hz muss bei 432 Hz ≈ 432,0 Hz, bei „528 Hz“ (A4 = 444) ≈ 444,0 Hz und bei 440 Hz

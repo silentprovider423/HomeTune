@@ -1,6 +1,8 @@
 import XCTest
 import AVFoundation
+#if os(iOS)
 @testable import HomeTune
+#endif
 
 /// Tests gegen ein Test-Navidrome. Zugang nur über die Umgebung (nie im Repo):
 /// HOMETUNE_SERVER, HOMETUNE_USER, HOMETUNE_PASSWORD (sieht alle Bibliotheken),
@@ -145,7 +147,7 @@ final class SubsonicClientTests: XCTestCase {
         let album = try await c.allAlbums()[0]
         let (data, resp) = try await c.session.data(for: c.coverArtRequest(id: album.coverArt ?? album.id, size: 300))
         XCTAssertEqual((resp as? HTTPURLResponse)?.statusCode, 200)
-        XCTAssertNotNil(UIImage(data: data))
+        XCTAssertNotNil(PlatformImage(data: data))
     }
 
     /// Verlustfreie FLAC-Datei aus der privaten Bibliothek als Original laden und dekodieren.

@@ -5,7 +5,16 @@ import Security
 enum Keychain {
     private static let service = "org.homeroll.hometune.password"
 
+    #if os(macOS) && DEBUG
+    /// Nur Debug am Mac: Anmeldung über die Startumgebung bleibt im Speicher – kein Schlüsselbund-Eintrag und
+    /// keine Schlüsselbund-Rückfrage bei jedem neu gebauten (ad hoc signierten) Testprogramm.
+    nonisolated(unsafe) static var memoryOnly: [String: String]?
+    #endif
+
     static func set(_ value: String, for account: String) {
+        #if os(macOS) && DEBUG
+        if memoryOnly != nil { memoryOnly?[account] = value; return }
+        #endif
         let base: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                    kSecAttrService as String: service,
                                    kSecAttrAccount as String: account]
@@ -17,6 +26,9 @@ enum Keychain {
     }
 
     static func get(_ account: String) -> String? {
+        #if os(macOS) && DEBUG
+        if let m = memoryOnly { return m[account] }
+        #endif
         let q: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                 kSecAttrService as String: service,
                                 kSecAttrAccount as String: account,
@@ -28,6 +40,9 @@ enum Keychain {
     }
 
     static func delete(_ account: String) {
+        #if os(macOS) && DEBUG
+        if memoryOnly != nil { memoryOnly?[account] = nil; return }
+        #endif
         let q: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                 kSecAttrService as String: service,
                                 kSecAttrAccount as String: account]

@@ -1,51 +1,6 @@
 import SwiftUI
 import UIKit
 
-/// Cover vom Server (`getCoverArt`), im Speicher und auf der Platte zwischengespeichert.
-actor ArtworkCache {
-    static let shared = ArtworkCache()
-    private let memory = NSCache<NSString, UIImage>()
-    private var inflight: [String: Task<UIImage?, Never>] = [:]
-
-    init() { memory.countLimit = 400 }
-
-    private func diskURL(_ key: String) -> URL {
-        let d = URL.cachesDirectory.appending(path: "Covers", directoryHint: .isDirectory)
-        try? FileManager.default.createDirectory(at: d, withIntermediateDirectories: true)
-        return d.appending(path: key.replacingOccurrences(of: "/", with: "_") + ".jpg")
-    }
-
-    func image(id: String, size: Int, client: SubsonicClient) async -> UIImage? {
-        // Größe auf Stufen runden, damit wenige Varianten im Cache liegen
-        let step = size <= 120 ? 120 : size <= 300 ? 300 : 600
-        let key = "\(client.account.id)-\(id)-\(step)"
-        if let m = memory.object(forKey: key as NSString) { return m }
-        if let t = inflight[key] { return await t.value }
-        let url = diskURL(key)
-        let task = Task<UIImage?, Never> {
-            if let d = try? Data(contentsOf: url), let img = UIImage(data: d) { return img }
-            guard let (data, resp) = try? await client.session.data(for: client.coverArtRequest(id: id, size: step)),
-                  (resp as? HTTPURLResponse)?.statusCode == 200, let img = UIImage(data: data) else { return nil }
-            try? data.write(to: url)
-            return img
-        }
-        inflight[key] = task
-        let img = await task.value
-        inflight[key] = nil
-        if let img { memory.setObject(img, forKey: key as NSString) }
-        return img
-    }
-}
-
-/// Cover vom Server oder von Musik auf diesem iPhone (dann ohne Server, auch offline).
-enum Artwork {
-    static func image(id: String, size: Int, client: SubsonicClient?) async -> UIImage? {
-        if id.isLocalID { return await LocalCovers.shared.image(id: id, size: size) }
-        guard let client else { return nil }
-        return await ArtworkCache.shared.image(id: id, size: size, client: client)
-    }
-}
-
 /// Coverbild mit Platzhalter (Note auf grauem Grund wie bei Apple).
 struct CoverArt: View {
     @Environment(AppModel.self) private var app
