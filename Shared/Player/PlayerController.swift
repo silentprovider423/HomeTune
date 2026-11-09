@@ -88,7 +88,9 @@ final class PlayerController {
     /// App-eigene Lautstärke (nicht die des Systems), 0…1, gemerkt
     var volume: Float = UserDefaults.standard.object(forKey: "volume") as? Float ?? 1 {
         didSet {
-            volume = min(1, max(0, volume))
+            // Nur zuweisen, wenn wirklich begrenzt werden muss – sonst ruft @Observable didSet endlos erneut auf
+            let clamped = min(1, max(0, volume))
+            if clamped != volume { volume = clamped; return }
             engine.engine.mainMixerNode.outputVolume = volume
             UserDefaults.standard.set(volume, forKey: "volume")
         }

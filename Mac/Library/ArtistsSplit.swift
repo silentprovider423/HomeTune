@@ -59,16 +59,20 @@ struct ArtistDetail: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 28) {
                 HStack(alignment: .center, spacing: 16) {
-                    if let a = artist { ArtistAvatar(artist: a, size: 64) }
-                    Text(artist?.name ?? "").font(.system(size: 28, weight: .bold)).lineLimit(1)
-                    Spacer()
-                    if let a = artist {
-                        PlayShuffleButtons(play: { Task { mac.play(await app.songs(of: a), name: a.name) } },
-                                           shuffle: { Task { mac.play(await app.songs(of: a), name: a.name, shuffle: true) } })
-                            .controlSize(.regular)
-                        Menu { ArtistContextMenu(artist: a) } label: { Image(systemName: "ellipsis.circle") }
-                            .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+                    if let a = artist { ArtistAvatar(artist: a, size: 72) }
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(verbatim: artist?.name ?? "").font(.system(size: 28, weight: .bold)).lineLimit(1)
+                        if let a = artist {
+                            HStack(spacing: 10) {
+                                PlayShuffleButtons(play: { Task { mac.play(await app.songs(of: a), name: a.name) } },
+                                                   shuffle: { Task { mac.play(await app.songs(of: a), name: a.name, shuffle: true) } })
+                                    .controlSize(.regular)
+                                Menu { ArtistContextMenu(artist: a) } label: { Image(systemName: "ellipsis.circle") }
+                                    .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+                            }
+                        }
                     }
+                    Spacer(minLength: 0)
                 }
                 ForEach(albums.filter { mac.matches($0.name) }) { al in
                     ArtistAlbumBlock(album: al, songs: (songsByAlbum[al.id] ?? []).filter { mac.matches($0.title, al.name) },

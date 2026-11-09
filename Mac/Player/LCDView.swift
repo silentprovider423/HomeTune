@@ -6,6 +6,9 @@ struct LCDView: View {
     @Environment(MacModel.self) private var mac
     @State private var hover = false
     @State private var hoverCover = false
+    /// Erst nach dem ersten Layout Inhalte zeigen: Ist beim Start schon ein Titel geladen (gemerkte Warteliste),
+    /// verwirft die Symbolleiste das Element sonst beim ersten Ausmessen.
+    @State private var ready = false
 
     var body: some View {
         let p = app.player
@@ -13,7 +16,7 @@ struct LCDView: View {
             RoundedRectangle(cornerRadius: 6, style: .continuous)
                 .fill(Color.primary.opacity(0.055))
                 .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(.primary.opacity(0.08), lineWidth: 0.5))
-            if let song = p.currentSong {
+            if ready, let song = p.currentSong {
                 HStack(spacing: 0) {
                     Button { withAnimation(.easeInOut(duration: 0.3)) { mac.fullScreenPlayer = true } } label: {
                         CoverArt(id: song.coverArt, size: 44, corner: 3)
@@ -69,6 +72,7 @@ struct LCDView: View {
         .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
         .animation(.easeInOut(duration: 0.3), value: p.currentSong?.id)
         .onHover { h in withAnimation(.easeInOut(duration: 0.15)) { hover = h } }
+        .task { try? await Task.sleep(for: .milliseconds(50)); ready = true }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("lcd")
     }

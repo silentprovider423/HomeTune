@@ -8,7 +8,7 @@ struct PlayerToolbar: ToolbarContent {
         }
         ToolbarItem(placement: .principal) {
             LCDView()
-                .frame(minWidth: 320, idealWidth: 520, maxWidth: 680)
+                .frame(minWidth: 200, idealWidth: 480, maxWidth: 680)
         }
         ToolbarItemGroup(placement: .primaryAction) {
             VolumeControl()
@@ -56,6 +56,7 @@ struct TransportControls: View {
         }
         .buttonStyle(.borderless)
         .labelStyle(.iconOnly)
+        .tint(.primary)
     }
 
     private func repeatHelp(_ m: PlayQueue.RepeatMode) -> LocalizedStringKey {
@@ -72,7 +73,7 @@ struct ToggleGlyph: View {
             Image(systemName: name).font(.system(size: 13, weight: .medium))
             Circle().frame(width: 3, height: 3).opacity(on ? 1 : 0)
         }
-        .foregroundStyle(on ? AnyShapeStyle(.accent) : AnyShapeStyle(.secondary))
+        .foregroundStyle(on ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(.secondary))
         .frame(width: 26, height: 26)
     }
 }
@@ -130,7 +131,7 @@ struct VolumeControl: View {
                 .onTapGesture { player.volume = player.volume > 0 ? 0 : 0.8 }
             Slider(value: Binding(get: { Double(player.volume) }, set: { player.volume = Float($0) }), in: 0...1)
                 .controlSize(.mini)
-                .frame(width: 90)
+                .frame(width: 72)
                 .accessibilityIdentifier("player.volume")
             OutputDeviceMenu()
         }
@@ -148,17 +149,18 @@ struct PanelButtons: View {
         HStack(spacing: 2) {
             Button { mac.toggleInspector(.lyrics) } label: {
                 Image(systemName: mac.inspector == .lyrics ? "quote.bubble.fill" : "quote.bubble")
-                    .foregroundStyle(mac.inspector == .lyrics ? AnyShapeStyle(.accent) : AnyShapeStyle(.secondary))
+                    .foregroundStyle(mac.inspector == .lyrics ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(.secondary))
             }
             .help(Text("Liedtext"))
             .accessibilityIdentifier("player.lyrics")
             Button { mac.toggleInspector(.queue) } label: {
                 Image(systemName: "list.bullet")
-                    .foregroundStyle(mac.inspector == .queue ? AnyShapeStyle(.accent) : AnyShapeStyle(.secondary))
+                    .foregroundStyle(mac.inspector == .queue ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(.secondary))
             }
             .help(Text("Nächster Titel"))
             .accessibilityIdentifier("player.queue")
         }
         .buttonStyle(.borderless)
+        .tint(.primary)
     }
 }

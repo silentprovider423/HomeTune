@@ -102,7 +102,7 @@ struct QueuePanel: View {
                 }
             }
         }
-        .listStyle(.sidebar)
+        .listStyle(.plain)
         .overlay {
             if q.isEmpty {
                 EmptyState(title: "Diese Warteliste enthält keine Musik.", systemImage: "list.bullet")
@@ -133,7 +133,7 @@ struct QueuePanel: View {
                 Button("Weiteren Verlauf einblenden") { showAllHistory = true }.buttonStyle(.link).selectionDisabled()
             }
         }
-        .listStyle(.sidebar)
+        .listStyle(.plain)
         .overlay {
             if all.isEmpty { EmptyState(title: "Kein Verlauf", systemImage: "clock").allowsHitTesting(false) }
         }

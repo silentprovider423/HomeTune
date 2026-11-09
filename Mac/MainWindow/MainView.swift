@@ -5,6 +5,7 @@ struct MainView: View {
     @Environment(AppModel.self) private var app
     @Environment(MacModel.self) private var mac
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.openSettings) private var openSettings
     @FocusState private var searchFocus: Bool
     @State private var keepQueueDontAsk = false
 
@@ -75,6 +76,7 @@ struct MainView: View {
         .onAppear {
             mac.openMainWindow = { openWindow(id: "main") }
             mac.openWindow = { openWindow(id: $0) }
+            mac.openSettings = { openSettings() }
             if app.showsLogin && app.accounts.accounts.isEmpty && !app.localMode { mac.showLogin = true }
         }
         .task(id: mac.autoplay) { await autoplayLoop() }

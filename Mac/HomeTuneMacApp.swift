@@ -16,6 +16,9 @@ struct HomeTuneMacApp: App {
         _app = State(initialValue: a)
         _mac = State(initialValue: m)
         MacAppDelegate.shared = (a, m)
+        #if DEBUG
+        DebugControl.start(app: a, mac: m)
+        #endif
     }
 
     var body: some Scene {
@@ -25,7 +28,7 @@ struct HomeTuneMacApp: App {
                 .environment(mac)
                 .tint(.accent)
         }
-        .defaultSize(width: 1180, height: 760)
+        .defaultSize(width: 1280, height: 800)
         .windowToolbarStyle(.unified(showsTitle: false))
         .commands { MacCommands(app: app, mac: mac) }
 

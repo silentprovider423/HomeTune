@@ -119,6 +119,8 @@ final class MacModel {
     /// Öffnet das Hauptfenster wieder (vom Fenster gesetzt)
     @ObservationIgnored var openMainWindow: (() -> Void)?
     @ObservationIgnored var openWindow: ((String) -> Void)?
+    /// Öffnet die Einstellungen (vom Fenster gesetzt)
+    @ObservationIgnored var openSettings: (() -> Void)?
 
     var selection: SidebarItem? = .library(.albums) {
         didSet {

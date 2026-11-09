@@ -4,13 +4,15 @@ import AppKit
 /// Einstellungen (⌘,): Tabs Allgemein · Konten · Wiedergabe · Downloads · Erweitert.
 /// Raster wie bei Apple: Beschriftungen rechtsbündig in einer 156 pt breiten Spalte.
 struct MacSettingsView: View {
+    /// Zuletzt gewählter Tab (wird gemerkt)
+    @AppStorage("mac.settingsTab") private var tab = 0
     var body: some View {
-        TabView {
-            GeneralSettings().tabItem { Label("Allgemein", systemImage: "gearshape") }
-            AccountsSettings().tabItem { Label("Konten", systemImage: "person.crop.circle") }
-            PlaybackSettings().tabItem { Label("Wiedergabe", systemImage: "play.circle") }
-            DownloadSettings().tabItem { Label("Downloads", systemImage: "arrow.down.circle") }
-            AdvancedSettings().tabItem { Label("Erweitert", systemImage: "gearshape.2") }
+        TabView(selection: $tab) {
+            GeneralSettings().tabItem { Label("Allgemein", systemImage: "gearshape") }.tag(0)
+            AccountsSettings().tabItem { Label("Konten", systemImage: "person.crop.circle") }.tag(1)
+            PlaybackSettings().tabItem { Label("Wiedergabe", systemImage: "play.circle") }.tag(2)
+            DownloadSettings().tabItem { Label("Downloads", systemImage: "arrow.down.circle") }.tag(3)
+            AdvancedSettings().tabItem { Label("Erweitert", systemImage: "gearshape.2") }.tag(4)
         }
         .frame(width: 630)
         .fixedSize(horizontal: false, vertical: true)
