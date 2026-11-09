@@ -122,7 +122,11 @@ struct PlaylistSidebarRow: View {
                     .onAppear { name = playlist.name; editing = true }
                     .onChange(of: editing) { _, e in if !e { commit() } }
             } else {
-                Text(playlist.name)
+                HStack(spacing: 4) {
+                    Text(playlist.name).lineLimit(1)
+                    Spacer(minLength: 2)
+                    if playlist.id.isLocalPlaylistID { SourceBadge(id: playlist.id) }
+                }
             }
         } icon: {
             Image(systemName: playlist.id.isLocalPlaylistID ? "music.note.list" : (isSmart ? "gearshape" : "music.note.list"))

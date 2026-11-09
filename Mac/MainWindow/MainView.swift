@@ -159,19 +159,23 @@ struct DetailRoot: View {
             } else if !mac.search.isEmpty || mac.searchFocused {
                 SearchResultsView()
             } else {
-                NavigationStack(path: $mac.path) {
-                    root
-                        .navigationDestination(for: MacRoute.self) { route in
-                            switch route {
-                            case .album(let id): AlbumPage(albumID: id)
-                            case .artist(let id): ArtistDetail(artistID: id)
-                            case .playlist(let id): PlaylistPage(playlistID: id)
-                            case .genre(let g): ListPage(title: Text(g), context: "genre", songs: app.library.songs(ofGenre: g))
-                            case .composer(let c): ListPage(title: Text(c), context: "composer", songs: app.library.songs(ofComposer: c))
+                // Umschalter über dem Stapel statt als Einschub: die geteilten Ansichten (HSplitView) kennen keinen Einschub
+                VStack(spacing: 0) {
+                    if showsSourceBar { SourceBar() }
+                    NavigationStack(path: $mac.path) {
+                        root
+                            .navigationDestination(for: MacRoute.self) { route in
+                                switch route {
+                                case .album(let id): AlbumPage(albumID: id)
+                                case .artist(let id): ArtistDetail(artistID: id)
+                                case .playlist(let id): PlaylistPage(playlistID: id)
+                                case .genre(let g): ListPage(title: Text(g), context: "genre", songs: app.library.songs(ofGenre: g))
+                                case .composer(let c): ListPage(title: Text(c), context: "composer", songs: app.library.songs(ofComposer: c))
+                                }
                             }
-                        }
+                    }
+                    .id(mac.selection)
                 }
-                .id(mac.selection)
             }
         }
         .safeAreaInset(edge: .top, spacing: 0) {
@@ -182,6 +186,13 @@ struct DetailRoot: View {
         }
     }
 
+    /// Umschalter nur über den gemischten Listen der Mediathek, und nur wenn es beide Quellen gibt
+    private var showsSourceBar: Bool {
+        guard mac.hasBothSources, mac.path.isEmpty, mac.search.isEmpty, !mac.searchFocused, !app.showsLogin,
+              case .library(let s) = mac.selection else { return false }
+        return s != .downloaded && s != .onThisMac
+    }
+
     @ViewBuilder private var root: some View {
         switch mac.selection {
         case .home: HomePage()
@@ -190,11 +201,11 @@ struct DetailRoot: View {
         case .playlist(let id): PlaylistPage(playlistID: id)
         case .library(let s):
             switch s {
-            case .recentlyAdded: AlbumGridPage(title: Text("Zuletzt hinzugefügt"), albums: recentlyAdded, sortable: false)
-            case .albums: AlbumGridPage(title: Text("Alben"), albums: app.library.albums, sortable: true)
-            case .compilations: AlbumGridPage(title: Text("Compilations"), albums: app.library.albums.filter { $0.isCompilation == true }, sortable: true)
+            case .recentlyAdded: AlbumGridPage(title: Text("Zuletzt hinzugefügt"), albums: mac.inSource(recentlyAdded), sortable: false)
+            case .albums: AlbumGridPage(title: Text("Alben"), albums: mac.inSource(app.library.albums), sortable: true)
+            case .compilations: AlbumGridPage(title: Text("Compilations"), albums: mac.inSource(app.library.albums.filter { $0.isCompilation == true }), sortable: true)
             case .artists: ArtistsSplit()
-            case .songs: ListPage(title: Text("Titel"), context: "songs", songs: app.library.songs)
+            case .songs: ListPage(title: Text("Titel"), context: "songs", songs: mac.inSource(app.library.songs))
             case .genres: GenresSplit()
             case .composers: ComposersSplit()
             case .downloaded: ListPage(title: Text("Geladen"), context: "downloaded", songs: app.downloads.downloadedSongs)
@@ -212,6 +223,29 @@ struct DetailRoot: View {
             : app.library.recentlyAdded
         let local = app.local.albums.sorted { ($0.created ?? "") > ($1.created ?? "") }
         return server + local
+    }
+}
+
+/// Umschalter „Alle · Server · Auf diesem Mac“ über den Listen der Mediathek
+struct SourceBar: View {
+    @MacEnv private var mac
+    var body: some View {
+        @Bindable var mac = mac
+        HStack {
+            Spacer()
+            Picker(selection: $mac.source) {
+                ForEach(MusicSource.allCases) { s in
+                    Label(s.title, systemImage: s.icon).labelStyle(.titleAndIcon).tag(s)
+                }
+            } label: { EmptyView() }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .fixedSize()
+            .help(Text("Zeigt alle Musik, nur die vom Server oder nur die auf diesem Mac."))
+            .accessibilityIdentifier("source.picker")
+            Spacer()
+        }
+        .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 6)
     }
 }
 

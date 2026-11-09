@@ -55,6 +55,11 @@ struct MacCommands: Commands {
                 Text("Nur geladene Musik").tag(true)
             }
             .pickerStyle(.inline)
+            Picker("Quelle", selection: Binding(get: { mac.activeSource }, set: { mac.source = $0 })) {
+                ForEach(MusicSource.allCases) { s in Text(s.menuTitle).tag(s) }
+            }
+            .pickerStyle(.inline)
+            .disabled(!mac.hasBothSources)
             Divider()
             Menu("Sortieren nach") {
                 ForEach(AlbumSort.allCases) { s in

@@ -569,6 +569,16 @@
         }
       }
     },
+    "Auf dem Server – wird gestreamt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On the server – streamed"
+          }
+        }
+      }
+    },
     "Auf diesem Mac": {
       "localizations": {
         "en": {
@@ -1241,6 +1251,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Download Removed"
+          }
+        }
+      }
+    },
+    "Download fehlgeschlagen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download failed"
           }
         }
       }
@@ -2525,6 +2545,16 @@
         }
       }
     },
+    "Musik von Server und Mac": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Music from Server and Mac"
+          }
+        }
+      }
+    },
     "Möchtest du diese Playlist wirklich löschen?": {
       "localizations": {
         "en": {
@@ -2695,12 +2725,32 @@
         }
       }
     },
+    "Nur Musik auf diesem Mac": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only Music on This Mac"
+          }
+        }
+      }
+    },
     "Nur Musik auf diesem iPhone. Einen Server kannst du später in den Einstellungen hinzufügen.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Only music on this iPhone. You can add a server later in Settings."
+          }
+        }
+      }
+    },
+    "Nur Musik vom Server": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only Music from the Server"
           }
         }
       }
@@ -2971,6 +3021,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Playlists"
+          }
+        }
+      }
+    },
+    "Quelle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source"
           }
         }
       }
@@ -3511,6 +3571,16 @@
         }
       }
     },
+    "Vom Server geladen – auch ohne Verbindung abspielbar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloaded from the server – plays without a connection"
+          }
+        }
+      }
+    },
     "Von %@": {
       "localizations": {
         "en": {
@@ -3607,6 +3677,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Waiting"
+          }
+        }
+      }
+    },
+    "Wartet auf den Download": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting to download"
           }
         }
       }
@@ -3793,6 +3873,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Choose a section on the left."
+          }
+        }
+      }
+    },
+    "Zeigt alle Musik, nur die vom Server oder nur die auf diesem Mac.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows all music, only music from the server, or only music on this Mac."
           }
         }
       }

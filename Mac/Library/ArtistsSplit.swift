@@ -9,7 +9,7 @@ struct ArtistsSplit: View {
     var body: some View {
         @Bindable var mac = mac
         let list = mac.available(app.library.albums).isEmpty && mac.onlyDownloaded ? [] :
-            app.library.artists.filter { mac.matches($0.name) }
+            mac.inSource(app.library.artists).filter { mac.matches($0.name) }
                 .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         HSplitView {
             List(selection: $mac.artistSelection) {
@@ -17,6 +17,8 @@ struct ArtistsSplit: View {
                     HStack(spacing: 10) {
                         ArtistAvatar(artist: a, size: 30)
                         Text(a.name).lineLimit(1)
+                        Spacer(minLength: 4)
+                        SourceBadge(id: a.id)
                     }
                     .padding(.vertical, 2)
                     .tag(a.id)
@@ -88,7 +90,7 @@ struct ArtistDetail: View {
         selected = nil
         var list = app.library.albums(ofArtist: artistID)
         if list.isEmpty, !artistID.isLocalID, let a = try? await app.client?.artist(id: artistID) { list = a.album ?? [] }
-        list = mac.available(list).sorted { ($0.year ?? 0, $0.name) > ($1.year ?? 0, $1.name) }
+        list = mac.available(mac.inSource(list)).sorted { ($0.year ?? 0, $0.name) > ($1.year ?? 0, $1.name) }
         albums = list
         var map: [String: [Song]] = [:]
         for al in list {
@@ -184,7 +186,7 @@ struct GenresSplit: View {
         @Bindable var mac = mac
         ItemSplit(names: app.library.genres.map(\.value).filter { mac.matches($0) }
                     .sorted { $0.localizedStandardCompare($1) == .orderedAscending },
-                  context: "genre", songsFor: { app.library.songs(ofGenre: $0) },
+                  context: "genre", songsFor: { mac.inSource(app.library.songs(ofGenre: $0)) },
                   selection: $mac.genreSelection, emptyTitle: "Keine Genres", icon: "guitars")
     }
 }
@@ -196,7 +198,7 @@ struct ComposersSplit: View {
         @Bindable var mac = mac
         ItemSplit(names: app.library.composers.map(\.name).filter { mac.matches($0) }
                     .sorted { $0.localizedStandardCompare($1) == .orderedAscending },
-                  context: "composer", songsFor: { app.library.songs(ofComposer: $0) },
+                  context: "composer", songsFor: { mac.inSource(app.library.songs(ofComposer: $0)) },
                   selection: $mac.composerSelection, emptyTitle: "Keine Komponist:innen", icon: "music.quarternote.3")
     }
 }

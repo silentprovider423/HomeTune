@@ -84,7 +84,17 @@ struct PlaylistPage: View {
                         Text("Regeln werden auf dem Server festgelegt.").font(.caption).foregroundStyle(.secondary)
                     }
                 }
-                Text("\(songs.count) Titel, \(Fmt.total(total))").font(.callout).foregroundStyle(.secondary)
+                HStack(spacing: 5) {
+                    if p.id.isLocalPlaylistID {
+                        Label("Auf diesem Mac", systemImage: "desktopcomputer").labelStyle(.titleAndIcon)
+                        Text(verbatim: "·")
+                    } else if mac.hasBothSources {
+                        Label("Auf dem Server", systemImage: "cloud").labelStyle(.titleAndIcon)
+                        Text(verbatim: "·")
+                    }
+                    Text("\(songs.count) Titel, \(Fmt.total(total))")
+                }
+                .font(.callout).foregroundStyle(.secondary)
                 Spacer().frame(height: 6)
                 HStack(spacing: 10) {
                     if editing {

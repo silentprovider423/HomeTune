@@ -39,6 +39,9 @@ enum DebugControl {
             if let a = app.library.artists.first(where: { $0.name == arg }) { mac.showArtist(a.id) }
         case "search":
             mac.search = arg
+        case "source":
+            // „source local“ = Umschalter Alle/Server/Auf diesem Mac
+            mac.source = MusicSource(rawValue: arg) ?? .all
         case "inspector":
             mac.inspector = InspectorPanel(rawValue: arg)
         case "queueTab":

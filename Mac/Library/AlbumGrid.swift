@@ -42,9 +42,12 @@ struct AlbumTile: View {
                     }
                 }
             Text(album.name).font(.system(size: 13, weight: .semibold)).lineLimit(1)
-            Text(album.artist ?? "").font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(1)
+            HStack(spacing: 4) {
+                SourceBadge(id: album.id)
+                Text(album.artist ?? "").font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(1)
+            }
         }
-        .frame(width: size)
+        .frame(width: size, alignment: .leading)
         .contentShape(.rect)
         .onHover { h in withAnimation(.easeInOut(duration: 0.12)) { hover = h } }
         .onTapGesture { mac.open(.album(album.id)) }
@@ -220,9 +223,12 @@ struct PlaylistTile: View {
                     }
                 }
             Text(playlist.name).font(.system(size: 13, weight: .semibold)).lineLimit(1)
-            Text("\(playlist.songCount ?? 0) Titel").font(.system(size: 12)).foregroundStyle(.secondary)
+            HStack(spacing: 4) {
+                SourceBadge(id: playlist.id)
+                Text("\(playlist.songCount ?? 0) Titel").font(.system(size: 12)).foregroundStyle(.secondary)
+            }
         }
-        .frame(width: size)
+        .frame(width: size, alignment: .leading)
         .contentShape(.rect)
         .onHover { h in withAnimation(.easeInOut(duration: 0.12)) { hover = h } }
         .onTapGesture { mac.showPlaylist(playlist.id) }
@@ -267,6 +273,12 @@ struct HomePage: View {
                 }
                 Shelf(title: "Zuletzt hinzugefügt", albums: lib.recentlyAdded.isEmpty ? Array(app.local.albums.prefix(20)) : lib.recentlyAdded) {
                     mac.visibleSections.insert(.recentlyAdded); mac.go(.library(.recentlyAdded))
+                }
+                if app.client != nil {
+                    // wie „Auf diesem iPhone“: eigenes Regal, solange daneben ein Server läuft
+                    Shelf(title: "Auf diesem Mac", albums: Array(app.local.albums.sorted { ($0.created ?? "") > ($1.created ?? "") }.prefix(20))) {
+                        mac.go(.library(.onThisMac))
+                    }
                 }
                 Shelf(title: "Zuletzt gespielt", albums: lib.recentlyPlayed)
                 Shelf(title: "Häufig gespielt", albums: lib.frequent)

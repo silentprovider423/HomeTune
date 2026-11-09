@@ -24,6 +24,8 @@ struct SongRow: Identifiable, Hashable {
     var sampleRate: Int { song.samplingRate ?? 0 }
     var kind: String { Fmt.kind(song) }
     var size: Int { song.size ?? 0 }
+    /// Sortierung der Quellen-Spalte: erst dieser Mac, dann Server
+    var source: Int { song.isLocal ? 0 : 1 }
 }
 
 /// Art der Tabelle: bestimmt Standardsortierung und welche Spalten ab Werk sichtbar sind
@@ -241,8 +243,8 @@ struct SongTable: View {
         .width(min: 170, ideal: 200)
         .customizationID("name")
         .disabledCustomizationBehavior(.visibility)
-        TableColumn("") { r in DownloadCell(song: r.song) }
-            .width(min: 22, ideal: 22, max: 22)
+        TableColumn(Text(Image(systemName: "cloud")), value: \.source) { r in DownloadCell(song: r.song) }
+            .width(min: 26, ideal: 26, max: 26)
             .customizationID("cloud")
         TableColumn("Dauer", value: \.duration) { r in Text(verbatim: Fmt.time(r.song.duration)).monospacedDigit() }
             .width(min: 44, ideal: 59)
@@ -426,26 +428,47 @@ private struct StatusCell: View {
     }
 }
 
-/// Download-Zustand: leer / lädt / geladen
+/// Woher der Titel kommt: dieser Mac / Server (wird gestreamt) / vom Server geladen (lädt, wartet, Fehler)
 struct DownloadCell: View {
     @AppEnv private var app
     let song: Song
     var body: some View {
         Group {
             if song.isLocal {
-                Image(systemName: "desktopcomputer").foregroundStyle(.tertiary)
+                Image(systemName: "desktopcomputer").foregroundStyle(.secondary)
+                    .help(Text("Auf diesem Mac"))
             } else {
                 switch app.downloads.state(song.id) {
-                case .done: Image(systemName: "arrow.down.circle.fill").foregroundStyle(.secondary)
+                case .done:
+                    Image(systemName: "arrow.down.circle.fill").foregroundStyle(.accent)
+                        .help(Text("Vom Server geladen – auch ohne Verbindung abspielbar"))
                 case .downloading(let p): ProgressView(value: p).progressViewStyle(.circular).controlSize(.mini)
-                case .waiting: Image(systemName: "clock").foregroundStyle(.tertiary)
-                case .failed: Image(systemName: "exclamationmark.circle").foregroundStyle(.red)
-                case .none: EmptyView()
+                case .waiting: Image(systemName: "clock").foregroundStyle(.tertiary).help(Text("Wartet auf den Download"))
+                case .failed: Image(systemName: "exclamationmark.circle").foregroundStyle(.red).help(Text("Download fehlgeschlagen"))
+                case .none:
+                    Image(systemName: "cloud").foregroundStyle(.tertiary)
+                        .help(Text("Auf dem Server – wird gestreamt"))
                 }
             }
         }
-        .font(.system(size: 10))
+        .font(.system(size: 11))
         .frame(maxWidth: .infinity)
+    }
+}
+
+/// Kleines Zeichen an Alben, Künstler:innen und Playlists, sobald es Server und Musik auf diesem Mac zugleich gibt
+struct SourceBadge: View {
+    @MacEnv private var mac
+    let id: String
+    var body: some View {
+        if mac.hasBothSources {
+            let local = id.isLocalID || id.isLocalPlaylistID
+            Image(systemName: local ? "desktopcomputer" : "cloud")
+                .font(.system(size: 10))
+                .foregroundStyle(local ? .secondary : .tertiary)
+                .help(local ? Text("Auf diesem Mac") : Text("Auf dem Server"))
+                .accessibilityLabel(local ? Text("Auf diesem Mac") : Text("Auf dem Server"))
+        }
     }
 }
 

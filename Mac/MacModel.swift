@@ -8,6 +8,37 @@ enum SidebarItem: Hashable, Codable {
     case playlist(String)
 }
 
+/// Woher die Musik der Mediathek kommt (Umschalter über den Listen, Menü „Darstellung“)
+enum MusicSource: String, CaseIterable, Identifiable {
+    case all, server, local
+    var id: String { rawValue }
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .all: "Alle"
+        case .server: "Server"
+        case .local: "Auf diesem Mac"
+        }
+    }
+
+    /// Im Menü „Darstellung“ ausgeschrieben
+    var menuTitle: LocalizedStringKey {
+        switch self {
+        case .all: "Musik von Server und Mac"
+        case .server: "Nur Musik vom Server"
+        case .local: "Nur Musik auf diesem Mac"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .all: "music.note"
+        case .server: "cloud"
+        case .local: "desktopcomputer"
+        }
+    }
+}
+
 /// Mediathek-Einträge der Seitenleiste (Apple: einzeln ein-/ausblendbar über „Bearbeiten“)
 enum MacSection: String, CaseIterable, Codable, Identifiable, Hashable {
     case recentlyAdded, artists, albums, songs, genres, composers, compilations, downloaded, onThisMac
@@ -165,6 +196,10 @@ final class MacModel {
     var onlyDownloaded: Bool {
         didSet { d.set(onlyDownloaded, forKey: "mac.onlyDownloaded") }
     }
+    /// Gewählte Quelle; wirkt nur, solange es Server und Musik auf diesem Mac zugleich gibt (siehe `activeSource`)
+    var source: MusicSource {
+        didSet { d.set(source.rawValue, forKey: "mac.source") }
+    }
     var albumSort: AlbumSort {
         didSet { d.set(albumSort.rawValue, forKey: "mac.albumSort") }
     }
@@ -205,6 +240,7 @@ final class MacModel {
         listSize = ListSize(rawValue: d.string(forKey: "mac.listSize") ?? "") ?? .medium
         showFavoritesColumn = d.object(forKey: "mac.showFavorites") as? Bool ?? true
         onlyDownloaded = d.bool(forKey: "mac.onlyDownloaded")
+        source = MusicSource(rawValue: d.string(forKey: "mac.source") ?? "") ?? .all
         albumSort = AlbumSort(rawValue: d.string(forKey: "mac.albumSort") ?? "") ?? .title
         albumSortAscending = d.object(forKey: "mac.albumSortAsc") as? Bool ?? true
     }
@@ -457,6 +493,27 @@ final class MacModel {
         let ids = Set(app.downloads.downloadedSongs.compactMap(\.albumId))
         return albums.filter { $0.id.isLocalID || ids.contains($0.id) }
     }
+
+    /// Server und Musik auf diesem Mac zugleich vorhanden: nur dann gibt es etwas zu unterscheiden
+    var hasBothSources: Bool {
+        guard let app else { return false }
+        return app.client != nil && !app.local.songs.isEmpty
+    }
+
+    var activeSource: MusicSource { hasBothSources ? source : .all }
+
+    /// Umschalter „Alle · Server · Auf diesem Mac“ (IDs mit „local“-Vorsatz liegen auf diesem Mac)
+    func inSource(_ id: String) -> Bool {
+        switch activeSource {
+        case .all: true
+        case .server: !id.isLocalID
+        case .local: id.isLocalID
+        }
+    }
+
+    func inSource(_ songs: [Song]) -> [Song] { activeSource == .all ? songs : songs.filter { inSource($0.id) } }
+    func inSource(_ albums: [Album]) -> [Album] { activeSource == .all ? albums : albums.filter { inSource($0.id) } }
+    func inSource(_ artists: [Artist]) -> [Artist] { activeSource == .all ? artists : artists.filter { inSource($0.id) } }
 
     func sorted(_ albums: [Album]) -> [Album] {
         let asc = albumSortAscending
