@@ -115,6 +115,7 @@ final class MacAppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         MacAppDelegate.shared?.app.player.saveQueue()
+        MacAppDelegate.shared?.app.stats.flush()
     }
 
     func application(_ application: NSApplication, open urls: [URL]) {

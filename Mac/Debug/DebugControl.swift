@@ -27,6 +27,7 @@ enum DebugControl {
             mac.search = ""
             switch arg {
             case "home": mac.go(.home)
+            case "stats": mac.go(.stats)
             case "playlists": mac.go(.allPlaylists)
             case "favorites": mac.go(.favorites)
             default:
@@ -42,6 +43,11 @@ enum DebugControl {
         case "source":
             // „source local“ = Umschalter Alle/Server/Auf diesem Mac
             mac.source = MusicSource(rawValue: arg) ?? .all
+        case "sleeptimer":
+            // „sleeptimer 15“ = Schlaf-Timer in Minuten, „sleeptimer track“ = Ende des Titels, „sleeptimer off“
+            if let m = Int(arg) { app.player.setSleepTimer(minutes: m) }
+            else if arg == "track" { app.player.setSleepTimerEndOfTrack() }
+            else { app.player.cancelSleepTimer() }
         case "local":
             // „local albums“ = Darstellung von „Auf diesem Mac“ (playlists, albums, artists, songs)
             mac.localView = LocalView(rawValue: arg)
@@ -101,6 +107,8 @@ enum DebugControl {
                     out += "\(i.itemIdentifier.rawValue) visible=\(tb.visibleItems?.contains(i) ?? false) view=\(i.view.map { "\($0.frame) hidden=\($0.isHidden)" } ?? "-")\n"
                 }
             }
+            let p = app.player
+            out += "player playing=\(p.isPlaying) title=\(p.currentSong?.title ?? "-") position=\(p.position) sleep=\(p.sleepTimer)\n"
             try? out.write(toFile: arg, atomically: true, encoding: .utf8)
         case "scroll":
             // „scroll 0.5“ = längste Liste im Hauptfenster an diese Stelle (0…1) rollen

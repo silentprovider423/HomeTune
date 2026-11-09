@@ -14,6 +14,8 @@ struct Sidebar: View {
             Section("HomeTune") {
                 Label("Startseite", systemImage: "house").tag(SidebarItem.home)
                     .accessibilityIdentifier("sidebar.home")
+                Label("Hör-Statistik", systemImage: "chart.bar").tag(SidebarItem.stats)
+                    .accessibilityIdentifier("sidebar.stats")
             }
             Section(isExpanded: $libraryExpanded) {
                 if mac.editingSections {

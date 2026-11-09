@@ -213,6 +213,9 @@ private struct ControlsMenu: View {
             Toggle("Alle", isOn: Binding(get: { p.repeatMode == .all }, set: { if $0 { p.setRepeat(.all) } }))
             Toggle("Eins", isOn: Binding(get: { p.repeatMode == .one }, set: { if $0 { p.setRepeat(.one) } }))
         }
+        Menu("Schlaf-Timer") {
+            SleepTimerMenuItems(player: p)
+        }
         Divider()
         Button("Zurück") { mac.back() }
             .keyboardShortcut("[")

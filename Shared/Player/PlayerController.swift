@@ -28,6 +28,9 @@ final class PlayerController {
     @ObservationIgnored private var loadTask: Task<Void, Never>?
     @ObservationIgnored private var ticker: Task<Void, Never>?
     @ObservationIgnored private var scrobbledToken = -1
+    @ObservationIgnored private var lastTick: ContinuousClock.Instant?
+    /// Schlaf-Timer: hält die Wiedergabe zur gesetzten Zeit bzw. am Ende des laufenden Titels an
+    private(set) var sleepTimer: SleepTimer = .off
     @ObservationIgnored private var sessionReady = false
     @ObservationIgnored private var artworkFor: String?
     @ObservationIgnored private var nowPlayingArtwork: MPMediaItemArtwork?
@@ -154,6 +157,7 @@ final class PlayerController {
         position = engine.currentTime
         updateNowPlaying()
         saveQueue()
+        app?.stats.flush()
     }
 
     func next() {
@@ -338,6 +342,7 @@ final class PlayerController {
     private func engineAdvanced(to token: Int) {
         guard let entryID = preloaded[token] else { return }
         preloaded.removeAll()
+        let sleep = sleepTimer == .endOfTrack
         if entryID == queue.current?.id && queue.repeatMode == .one {
             // gleicher Titel noch einmal
         } else if entryID == PlayQueue.wrapID {
@@ -350,14 +355,19 @@ final class PlayerController {
         currentToken = token
         position = 0
         trackDidStart()
+        // Schlaf-Timer „Ende des Titels“: der nächste Titel ist nahtlos schon angelaufen → an seinem Anfang anhalten
+        if sleep { sleepTimer = .off; pause(); seek(to: 0) }
     }
 
     private func engineEnded(_ token: Int) {
         guard token == currentToken else { return }
         if queue.peekNext() != nil {
+            let sleep = sleepTimer == .endOfTrack
+            if sleep { sleepTimer = .off; isPlaying = false; ticker?.cancel() }
             queue.advance(auto: true)
-            startCurrent(autoplay: true)
+            startCurrent(autoplay: !sleep)
         } else {
+            sleepTimer = .off
             // Ende der Warteliste: auf dem letzten Titel anhalten (Apple: PausedAtQueueEnd)
             isPlaying = false
             position = 0
@@ -371,16 +381,28 @@ final class PlayerController {
         else { preloaded[token] = nil }
     }
 
-    // MARK: Fortschritt, Scrobbeln
+    // MARK: Fortschritt, Scrobbeln, Statistik
 
     private func startTicker() {
         ticker?.cancel()
+        lastTick = nil
         ticker = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .milliseconds(250))
-                guard let self, self.isPlaying else { continue }
+                guard let self else { return }
+                self.checkSleepTimer()
+                guard self.isPlaying else { self.lastTick = nil; continue }
+                let now = ContinuousClock.now
                 if self.engine.currentToken == self.currentToken {
                     self.position = self.engine.currentTime
+                    // Hörzeit: echte Zeit seit dem letzten Takt, solange dieser Titel wirklich läuft
+                    if let last = self.lastTick, let song = self.queue.current?.song {
+                        let d = last.duration(to: now)
+                        self.app?.stats.addListening(Double(d.components.seconds) + Double(d.components.attoseconds) / 1e18, song: song)
+                    }
+                    self.lastTick = now
+                } else {
+                    self.lastTick = nil
                 }
                 self.checkScrobble()
             }
@@ -392,7 +414,34 @@ final class PlayerController {
         guard scrobbledToken != currentToken, let song = queue.current?.song, duration > 0 else { return }
         if position >= min(duration / 2, 240) {
             scrobbledToken = currentToken
+            app?.stats.notePlay(song)
             if !song.isLocal, let client { Task { try? await client.scrobble(id: song.id, submission: true) } }
+        }
+    }
+
+    // MARK: Schlaf-Timer
+
+    /// Wiedergabe in so vielen Minuten anhalten (die letzten Sekunden werden leiser).
+    func setSleepTimer(minutes: Int) {
+        sleepTimer = .at(Date().addingTimeInterval(Double(minutes) * 60))
+    }
+
+    func setSleepTimerEndOfTrack() { sleepTimer = .endOfTrack }
+
+    func cancelSleepTimer() {
+        sleepTimer = .off
+        engine.engine.mainMixerNode.outputVolume = volume
+    }
+
+    private func checkSleepTimer() {
+        guard case .at(let end) = sleepTimer else { return }
+        let left = end.timeIntervalSinceNow
+        if left <= 0 {
+            sleepTimer = .off
+            if isPlaying { pause() }
+            engine.engine.mainMixerNode.outputVolume = volume
+        } else if left < SleepTimer.fade, isPlaying {
+            engine.engine.mainMixerNode.outputVolume = volume * Float(left / SleepTimer.fade)
         }
     }
 

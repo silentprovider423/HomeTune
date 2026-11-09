@@ -82,6 +82,7 @@ final class AppModel {
     let local = LocalLibrary()
     let downloads = DownloadManager()
     let notice = NoticeCenter()
+    let stats = ListeningStats()
     let player: PlayerController
     private(set) var client: SubsonicClient?
 
@@ -148,6 +149,7 @@ final class AppModel {
     func resignedActive() {
         folderPoll?.cancel()
         folderPoll = nil
+        stats.flush()
     }
 
     private func refreshAppFolder() {

@@ -113,10 +113,17 @@ struct SongTable: View {
     /// Gefiltert (Filterfeld, „Nur geladene Musik“) und sortiert
     private var rows: [SongRow] {
         let starred = app.library
+        let stats = app.stats
         var out: [SongRow] = []
         out.reserveCapacity(songs.count)
         for (i, s) in songs.enumerated() where mac.matches(s.title, s.artist, s.album) {
             if mac.onlyDownloaded, !s.isLocal, !app.downloads.isDownloaded(s.id) { continue }
+            // Musik auf diesem Mac kennt kein Server: Wiedergaben und „Zuletzt gespielt“ aus der eigenen Statistik
+            var s = s
+            if s.isLocal, stats.plays(of: s.id) > 0 {
+                s.playCount = stats.plays(of: s.id)
+                s.played = stats.lastPlayed(of: s.id)?.formatted(.iso8601)
+            }
             out.append(SongRow(id: "\(i)|\(s.id)", index: i, song: s, fav: starred.isStarred(song: s.id) ? 1 : 0))
         }
         guard !sortOrder.isEmpty else { return out }

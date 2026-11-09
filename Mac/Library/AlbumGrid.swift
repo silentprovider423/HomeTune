@@ -294,8 +294,9 @@ struct HomePage: View {
                         mac.go(.library(.onThisMac))
                     }
                 }
-                Shelf(title: "Zuletzt gespielt", albums: lib.recentlyPlayed)
-                Shelf(title: "Häufig gespielt", albums: lib.frequent)
+                // ohne Server-Listen: aus der eigenen Hör-Statistik
+                Shelf(title: "Zuletzt gespielt", albums: lib.recentlyPlayed.isEmpty ? app.stats.recentAlbumIDs().compactMap(lib.album) : lib.recentlyPlayed)
+                Shelf(title: "Häufig gespielt", albums: lib.frequent.isEmpty ? app.stats.frequentAlbumIDs().compactMap(lib.album) : lib.frequent)
                 Shelf(title: "Favoriten", albums: favorites)
                 Shelf(title: "Zufällig", albums: lib.randomAlbums, trailing: AnyView(
                     Button { Task { await app.library.shuffleRandomAlbums() } } label: { Image(systemName: "arrow.clockwise") }

@@ -196,6 +196,7 @@ struct DetailRoot: View {
     @ViewBuilder private var root: some View {
         switch mac.selection {
         case .home: HomePage()
+        case .stats: StatsPage()
         case .allPlaylists: AllPlaylistsPage()
         case .favorites: FavoritesPage()
         case .playlist(let id): PlaylistPage(playlistID: id)

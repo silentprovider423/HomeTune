@@ -57,6 +57,16 @@
         }
       }
     },
+    "%lld Minuten": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Minutes"
+          }
+        }
+      }
+    },
     "%lld Playlists importiert": {
       "localizations": {
         "en": {
@@ -229,6 +239,26 @@
         }
       }
     },
+    "12 Monate": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "12 Months"
+          }
+        }
+      }
+    },
+    "30 Tage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 Days"
+          }
+        }
+      }
+    },
     "432 Hz": {
       "localizations": {
         "en": {
@@ -255,6 +285,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "528 Hz"
+          }
+        }
+      }
+    },
+    "7 Tage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 Days"
           }
         }
       }
@@ -445,6 +485,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "See All"
+          }
+        }
+      }
+    },
+    "Alle gezählten Wiedergaben und Hörzeiten werden gelöscht. Deine Musik bleibt unberührt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All counted plays and listening times will be deleted. Your music is not touched."
           }
         }
       }
@@ -1175,6 +1225,16 @@
         }
       }
     },
+    "Die Statistik bleibt auf diesem Mac und wird nirgendwohin übertragen.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your stats stay on this Mac and are never sent anywhere."
+          }
+        }
+      }
+    },
     "Die Wiedergabe beginnt danach von vorn.": {
       "localizations": {
         "en": {
@@ -1371,6 +1431,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Received Files"
+          }
+        }
+      }
+    },
+    "Ende des Titels": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "End of Track"
           }
         }
       }
@@ -1595,6 +1665,26 @@
         }
       }
     },
+    "Gesamt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Time"
+          }
+        }
+      }
+    },
+    "Gezählt seit %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Counting since %@"
+          }
+        }
+      }
+    },
     "Gilt für neu geladene Titel. Geladene Titel bleiben im Original. Lückenlose Wiedergabe ist immer an.": {
       "localizations": {
         "en": {
@@ -1725,12 +1815,62 @@
         }
       }
     },
+    "Hält am Ende des Titels an": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stops at the end of the track"
+          }
+        }
+      }
+    },
+    "Hält um %@ an": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stops at %@"
+          }
+        }
+      }
+    },
     "Häufig gespielt": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Heavy Rotation"
+          }
+        }
+      }
+    },
+    "Hör-Serie (Tage)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Streak (Days)"
+          }
+        }
+      }
+    },
+    "Hör-Statistik": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listening Stats"
+          }
+        }
+      }
+    },
+    "Hörzeit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listening Time"
           }
         }
       }
@@ -1791,6 +1931,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "No results for “%@” in your library."
+          }
+        }
+      }
+    },
+    "In diesem Zeitraum wurde nichts gezählt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing was counted in this period."
           }
         }
       }
@@ -2235,6 +2385,26 @@
         }
       }
     },
+    "Letzte 30 Tage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last 30 Days"
+          }
+        }
+      }
+    },
+    "Letzte 7 Tage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last 7 Days"
+          }
+        }
+      }
+    },
     "Letzte Sucheinträge": {
       "localizations": {
         "en": {
@@ -2335,6 +2505,16 @@
         }
       }
     },
+    "Längste Serie: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longest streak: %lld"
+          }
+        }
+      }
+    },
     "Löschen": {
       "localizations": {
         "en": {
@@ -2425,6 +2605,36 @@
         }
       }
     },
+    "Meistgespielte Alben": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top Albums"
+          }
+        }
+      }
+    },
+    "Meistgespielte Künstler:innen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top Artists"
+          }
+        }
+      }
+    },
+    "Meistgespielte Titel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top Songs"
+          }
+        }
+      }
+    },
     "Mini-Player, Wiedergabesteuerung": {
       "localizations": {
         "en": {
@@ -2461,6 +2671,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "MiniPlayer:"
+          }
+        }
+      }
+    },
+    "Minuten": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minutes"
           }
         }
       }
@@ -2731,6 +2951,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "No Music Yet"
+          }
+        }
+      }
+    },
+    "Noch keine Statistik": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Stats Yet"
           }
         }
       }
@@ -3095,6 +3325,26 @@
         }
       }
     },
+    "Schlaf-Timer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep Timer"
+          }
+        }
+      }
+    },
+    "Schlaf-Timer beenden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn Off Sleep Timer"
+          }
+        }
+      }
+    },
     "Schließen": {
       "localizations": {
         "en": {
@@ -3195,6 +3445,16 @@
         }
       }
     },
+    "Sobald du Musik hörst, erscheint hier deine Auswertung. Sie bleibt auf diesem Mac.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Once you listen to music, your stats appear here. They stay on this Mac."
+          }
+        }
+      }
+    },
     "Sonst wird die Playlist auf dem Server angelegt.": {
       "localizations": {
         "en": {
@@ -3271,6 +3531,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Home"
+          }
+        }
+      }
+    },
+    "Statistik zurücksetzen …": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset Stats…"
+          }
+        }
+      }
+    },
+    "Statistik zurücksetzen?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset stats?"
           }
         }
       }
@@ -3365,6 +3645,16 @@
         }
       }
     },
+    "Tag": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Day"
+          }
+        }
+      }
+    },
     "Teilen ist am Server nicht aktiviert": {
       "localizations": {
         "en": {
@@ -3441,6 +3731,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Top Results"
+          }
+        }
+      }
+    },
+    "Uhrzeit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time of Day"
           }
         }
       }
@@ -3537,6 +3837,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Various Artists"
+          }
+        }
+      }
+    },
+    "Verschiedene Titel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Different Songs"
           }
         }
       }
@@ -3913,6 +4223,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shows all music, only music from the server, or only music on this Mac."
+          }
+        }
+      }
+    },
+    "Zeitraum": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Period"
           }
         }
       }

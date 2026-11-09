@@ -3,7 +3,7 @@ import AppKit
 
 /// Einträge der Seitenleiste
 enum SidebarItem: Hashable, Codable {
-    case home, allPlaylists, favorites
+    case home, stats, allPlaylists, favorites
     case library(MacSection)
     case playlist(String)
 }

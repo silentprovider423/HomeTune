@@ -147,6 +147,7 @@ struct PanelButtons: View {
     @MacEnv private var mac
     var body: some View {
         HStack(spacing: 2) {
+            SleepTimerButton()
             Button { mac.toggleInspector(.lyrics) } label: {
                 Image(systemName: mac.inspector == .lyrics ? "quote.bubble.fill" : "quote.bubble")
                     .foregroundStyle(mac.inspector == .lyrics ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(.secondary))
@@ -162,5 +163,50 @@ struct PanelButtons: View {
         }
         .buttonStyle(.borderless)
         .tint(.primary)
+    }
+}
+
+/// Schlaf-Timer in der Symbolleiste: Mond, in Akzentfarbe solange er läuft
+struct SleepTimerButton: View {
+    @AppEnv private var app
+
+    var body: some View {
+        let on = app.player.sleepTimer.isOn
+        Menu {
+            SleepTimerMenuItems(player: app.player)
+        } label: {
+            Image(systemName: on ? "moon.zzz.fill" : "moon.zzz")
+                .foregroundStyle(on ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(.secondary))
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help(Text("Schlaf-Timer"))
+        .accessibilityIdentifier("player.sleep")
+    }
+}
+
+/// Einträge des Schlaf-Timers (Symbolleiste und Menü „Steuerungen“)
+struct SleepTimerMenuItems: View {
+    let player: PlayerController
+
+    var body: some View {
+        switch player.sleepTimer {
+        case .off:
+            EmptyView()
+        case .at(let end):
+            Text("Hält um \(end.formatted(date: .omitted, time: .shortened)) an")
+            Button("Schlaf-Timer beenden") { player.cancelSleepTimer() }
+            Divider()
+        case .endOfTrack:
+            Text("Hält am Ende des Titels an")
+            Button("Schlaf-Timer beenden") { player.cancelSleepTimer() }
+            Divider()
+        }
+        ForEach(SleepTimer.presets, id: \.self) { m in
+            Button("\(m) Minuten") { player.setSleepTimer(minutes: m) }
+        }
+        Button("Ende des Titels") { player.setSleepTimerEndOfTrack() }
+            .disabled(!player.hasItem)
     }
 }
