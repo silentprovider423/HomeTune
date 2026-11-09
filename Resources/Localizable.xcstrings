@@ -79,6 +79,16 @@
         }
       }
     },
+    "A = 432 Hz": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A = 432 Hz"
+          }
+        }
+      }
+    },
     "A = 444 Hz (C = 528 Hz)": {
       "localizations": {
         "en": {
@@ -1425,16 +1435,6 @@
         }
       }
     },
-    "Original · keine Bearbeitung": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Original · no processing"
-          }
-        }
-      }
-    },
     "Passwort": {
       "localizations": {
         "en": {
@@ -1635,12 +1635,12 @@
         }
       }
     },
-    "Standard · A = 432 Hz": {
+    "Standard · Original, keine Bearbeitung": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Default · A = 432 Hz"
+            "value": "Default · original, no processing"
           }
         }
       }

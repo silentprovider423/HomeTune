@@ -19,16 +19,16 @@ final class TuningTests: XCTestCase {
         XCTAssertEqual(Tuning.hz528.a4, 444)
         XCTAssertEqual(Tuning.hz528.cents, 15.667, accuracy: 0.001)
         XCTAssertEqual(Tuning.hz528.semitones, 12 * log2(444.0 / 440.0), accuracy: 1e-12)
-        XCTAssertEqual(Tuning.standard, .hz432)
+        XCTAssertEqual(Tuning.standard, .hz440)
         // C5 in 444er-Stimmung ≈ 528 Hz
         XCTAssertEqual(444 * pow(2, 3.0 / 12), 528, accuracy: 0.1)
     }
 
-    func testSavedTuningDefaultsTo432() {
+    func testSavedTuningDefaultsToOriginal() {
         let old = UserDefaults.standard.string(forKey: Tuning.storageKey)
         defer { UserDefaults.standard.set(old, forKey: Tuning.storageKey) }
         UserDefaults.standard.removeObject(forKey: Tuning.storageKey)
-        XCTAssertEqual(Tuning.saved, .hz432)
+        XCTAssertEqual(Tuning.saved, .hz440)
         Tuning.saved = .hz528
         XCTAssertEqual(Tuning.saved, .hz528)
         XCTAssertEqual(PitchChain(tuning: .hz528).tuning, .hz528)

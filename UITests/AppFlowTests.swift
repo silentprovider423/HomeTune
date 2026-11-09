@@ -16,7 +16,7 @@ final class AppFlowTests: XCTestCase {
         app.launchEnvironment = ["HOMETUNE_SERVER": server, "HOMETUNE_USER": user, "HOMETUNE_PASSWORD": pw]
         if english { app.launchArguments += ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"] }
         // Jeder Test startet in der Standard-Stimmung (Argument-Domäne geht der gespeicherten Auswahl vor)
-        app.launchArguments += ["-tuning", "432"]
+        app.launchArguments += ["-tuning", "440"]
         app.launch()
     }
 
@@ -112,7 +112,7 @@ final class AppFlowTests: XCTestCase {
         XCTAssertEqual(hz.count, 0, "kein Hz-Hinweis: \(hz.allElementsBoundByIndex.map { $0.label })", file: file, line: line)
     }
 
-    /// Einstellungen → Stimmung: zwischen 432/528/440 Hz umschalten, Player und Albumkopf zeigen keinen Hz-Hinweis.
+    /// Einstellungen → Stimmung: Standard 440 Hz, zwischen 528/432/440 Hz umschalten, Player und Albumkopf zeigen keinen Hz-Hinweis.
     func testTuningSettingAndNoHzInPlayer() throws {
         tapTab(t("Mediathek", "Library"))
         let account = app.buttons[t("Konto und Einstellungen", "Account and Settings")].firstMatch
@@ -124,9 +124,8 @@ final class AppFlowTests: XCTestCase {
         XCTAssertTrue(t528.isHittable, "Abschnitt „Stimmung“")
         XCTAssertTrue(t440.exists && t432.exists)
         XCTAssertTrue(app.staticTexts[t("Stimmung", "Tuning")].exists || app.staticTexts[t("STIMMUNG", "TUNING")].exists)
-        // Standard 432 Hz für das Bildschirmfoto
-        t432.tap()
-        XCTAssertTrue(t432.isSelected)
+        // Standard 440 Hz (Original) für das Bildschirmfoto
+        XCTAssertTrue(t440.isSelected, "Standard ist 440 Hz")
         sleep(1)
         shot("10-settings-tuning")
         t528.tap()

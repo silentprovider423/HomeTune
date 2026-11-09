@@ -117,8 +117,8 @@ extension Tuning {
     /// Zweite Zeile in den Einstellungen
     var subtitle: LocalizedStringKey {
         switch self {
-        case .hz432: "Standard · A = 432 Hz"
-        case .hz440: "Original · keine Bearbeitung"
+        case .hz440: "Standard · Original, keine Bearbeitung"
+        case .hz432: "A = 432 Hz"
         case .hz528: "A = 444 Hz (C = 528 Hz)"
         }
     }

@@ -1,24 +1,24 @@
 import AVFoundation
 
 /// Stimmung der Wiedergabe (Einstellungen → Stimmung). Musik ist (fast immer) auf A4 = 440 Hz gestimmt.
-/// - 432 Hz (Standard): A4 = 432 Hz, 12·log2(432/440) ≈ −0,3177 Halbtöne (−31,77 Cent)
-/// - 440 Hz: Original, keine Bearbeitung (bit-genau durchgereicht)
+/// - 440 Hz (Standard): Original, keine Bearbeitung (bit-genau durchgereicht)
+/// - 432 Hz: A4 = 432 Hz, 12·log2(432/440) ≈ −0,3177 Halbtöne (−31,77 Cent)
 /// - 528 Hz: konventionell die Stimmung A4 = 444 Hz (dann liegt C5 bei 528 Hz), +15,67 Cent –
 ///   NICHT A4 = 528 Hz (das wären +3,15 Halbtöne). Wie die Frequenz-App: toA4Tuning(528) = 444.
 /// Das Tempo bleibt immer exakt gleich (rate = 1).
 enum Tuning: String, CaseIterable, Identifiable, Sendable {
-    case hz432 = "432"
     case hz440 = "440"
+    case hz432 = "432"
     case hz528 = "528"
 
     static let storageKey = "tuning"
-    static let standard = Tuning.hz432
+    static let standard = Tuning.hz440
     /// Kammerton der Aufnahmen
     static let sourceA4 = 440.0
 
     var id: String { rawValue }
 
-    /// Angezeigte Frequenz (432, 440, 528)
+    /// Angezeigte Frequenz (440, 432, 528)
     var hz: Int { Int(rawValue)! }
 
     /// Kammerton A4 der Zielstimmung
@@ -36,7 +36,7 @@ enum Tuning: String, CaseIterable, Identifiable, Sendable {
     var cents: Double { 100 * semitones }
     var isOriginal: Bool { self == .hz440 }
 
-    /// Gespeicherte Auswahl (Standard 432 Hz)
+    /// Gespeicherte Auswahl (Standard 440 Hz = Original)
     static var saved: Tuning {
         get { UserDefaults.standard.string(forKey: storageKey).flatMap(Tuning.init(rawValue:)) ?? standard }
         set { UserDefaults.standard.set(newValue.rawValue, forKey: storageKey) }

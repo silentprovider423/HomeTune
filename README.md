@@ -1,12 +1,10 @@
 # HomeTune
 
-**A native iOS music app for your own [Navidrome](https://www.navidrome.org) server – the look and feel of the Library in Apple's Music app, playing in 432 Hz by default (440 Hz and 528 Hz selectable in Settings).**
+**A native iOS music app for your own [Navidrome](https://www.navidrome.org) server – the look and feel of the Library in Apple's Music app: lossless FLAC up to 24/96, gapless playback, offline downloads, synced lyrics and music stored on the iPhone itself.**
 
 HomeTune is an independent iPhone client for self-hosted Navidrome (or any Subsonic/OpenSubsonic server). It aims to feel like the Music app on iOS 26 (library sections, album and artist pages, mini player, full-screen player, "Playing Next" queue, lyrics …) while your music stays on hardware you own.
 
-> **Tuning: 432 Hz by default, 440 Hz and 528 Hz selectable in Settings.** At 432 Hz every track is pitched down by 1200·log2(432/440) ≈ **−31.77 cents** (A4 = 432 Hz instead of 440 Hz) on the device, with the tempo unchanged. *528 Hz* means the conventional A4 = 444 Hz tuning (C5 = 528 Hz, +15.67 cents) – not A4 = 528 Hz. *440 Hz* plays the file untouched. The choice only appears in *Settings → Tuning*; the player and album pages show the file format, like Apple's Lossless badge.
->
-> **Status:** version 1.1, tested against Navidrome 0.64 with MP3, AAC/ALAC and FLAC (up to 24 bit/96 kHz). UI in **English and German** (follows the iPhone language). Code comments are in German.
+> **Status:** version 1.1.1, tested against Navidrome 0.64 with MP3, AAC/ALAC and FLAC (up to 24 bit/96 kHz). UI in **English and German** (follows the iPhone language). Code comments are in German.
 >
 > Built with help from [Claude Code](https://claude.com/claude-code): Apple's Music app was analysed (names and texts only, see the HomeRoll series), the design decisions and testing are mine, a lot of the Swift was written together with it.
 >
@@ -42,7 +40,7 @@ HomeTune is an independent iPhone client for self-hosted Navidrome (or any Subso
 
 **Playback**
 - Original files (`stream?format=raw`), so FLAC and ALAC stay lossless; formats iOS can't read are fetched as FLAC from the server
-- **Tuning** (*Settings → Tuning*): 432 Hz (default), 440 Hz (original, no processing at all – samples pass through bit-exact) or 528 Hz (A4 = 444 Hz). Switching works instantly, also in the middle of a song, without a click
+- Files play untouched by default (bit-exact). Optional in *Settings → Tuning*: pitch-shift on the device to A = 432 Hz or A = 444 Hz ("528 Hz") with the tempo unchanged, switchable mid-song without a click – details and measurements in [docs/TUNING.md](docs/TUNING.md)
 - `AVAudioEngine` → own Audio Unit with [signalsmith-stretch](https://github.com/Signalsmith-Audio/signalsmith-stretch) (time-stretch, tempo-preserving) + band-limited resampling (exact pitch ratio, tempo exactly 100 %) → look-ahead peak limiter; ≈ 0.12 s fixed latency
 - **Gapless**: the next song is preloaded and scheduled sample-exactly behind the current one
 - Queue modelled after Apple's: *Play Next*, *Play Last*, *Continue Playing from …*, history, drag to reorder, swipe to remove, *Clear*; shuffle and repeat (off/all/one); the queue survives a restart
@@ -77,23 +75,6 @@ HomeTune also works without a server. On the sign-in screen tap **Continue Witho
 - **Not supported** (iOS can't decode them): WMA, WavPack, APE, DSD – and Ogg **Vorbis** (iOS 26.3 opens Ogg Opus, but not Ogg Vorbis). From a Navidrome server these formats still play, because HomeTune fetches them as FLAC.
 - *Remove from Library* never touches files outside the HomeTune folder. For files in the HomeTune folder you are asked whether the file should be deleted too (default: no). Files received via *Open in* from Mail/AirDrop are copies owned by the app.
 - Favorites of local songs stay on the device; local songs can only be in playlists on this iPhone and are not scrobbled.
-
-### How good is the pitch shifting?
-
-The test suite renders sine tones through exactly the same audio chain as the app and measures them with an FFT (simulator, 48 kHz). For comparison the same measurement with Apple's `AVAudioUnitTimePitch` (overlap 32), which HomeTune 1.0 used:
-
-| Tuning | Input | Output | Expected | Signal-to-noise (1.0 → 1.1) |
-|---|---|---|---|---|
-| 432 Hz | 440 Hz | 431.99 Hz | 432.00 Hz | 75.8 → 65.3 dB |
-| 432 Hz | 110 Hz | 108.01 Hz | 108.00 Hz | 69.1 → 59.0 dB |
-| 432 Hz | 1000 Hz | 981.82 Hz | 981.82 Hz | 70.4 → 60.6 dB |
-| 432 Hz | C-E-G chord | exact | – | 54.0 → 58.0 dB |
-| 528 Hz (A4 = 444) | 440 Hz | 444.01 Hz | 444.00 Hz | 70.9 → 74.4 dB |
-| 528 Hz (A4 = 444) | C-E-G chord | exact | – | 63.8 → 66.0 dB |
-| 440 Hz | noise + tones | bit-exact | bit-exact | – |
-| all | 2.000 s tone burst | 2.005 s | 2.000 s (tempo unchanged) | – |
-
-Switching 432 → 528 → 440 → 432 in the middle of a tone keeps the level within 0.61–1.07× without gaps, and the largest sample step stays at the level of the input (no click). CPU load in the simulator (Mac, one core): 1.2 % for the pitch shifter, 0.03 % at 440 Hz, 1.6 % for TimePitch. The chain uses signalsmith-stretch only for time-stretching and does the pitch change by resampling, because its built-in semitone mode shifted pure low tones by only ~12 instead of 32 cents (100 Hz → 99.3 Hz instead of 98.2 Hz) in our tests.
 
 ## Requirements
 
@@ -200,6 +181,6 @@ All apps: [github.com/silentprovider423](https://github.com/silentprovider423)
 
 ## Deutsch
 
-**HomeTune** ist eine eigene iPhone-Musik-App für deinen selbst betriebenen Navidrome-Server. Sie sieht aus und bedient sich wie die Mediathek von Apples Musik-App unter iOS 26 – und spielt standardmäßig in 432 Hz (−31,77 Cent, Tempo unverändert, verlustfrei vom Original); 440 Hz (Original, unbearbeitet) und 528 Hz (A4 = 444 Hz) sind in den Einstellungen wählbar. Die Oberfläche gibt es auf Deutsch und Englisch, je nach Sprache des iPhones. Funktionen, Voraussetzungen und Installation stehen oben.
+**HomeTune** ist eine eigene iPhone-Musik-App für deinen selbst betriebenen Navidrome-Server. Sie sieht aus und bedient sich wie die Mediathek von Apples Musik-App unter iOS 26 – verlustfrei (FLAC bis 24/96), lückenlos, offline und mit mitlaufenden Songtexten. Die Dateien laufen standardmäßig unverändert; wer möchte, kann in den Einstellungen eine andere Stimmung wählen (432 Hz oder 528 Hz, Tempo bleibt gleich). Die Oberfläche gibt es auf Deutsch und Englisch, je nach Sprache des iPhones. Funktionen, Voraussetzungen und Installation stehen oben.
 
 **Musik auf diesem iPhone:** Auch ohne Server nutzbar („Ohne Server fortfahren“). Über *Ordner hinzufügen …* / *Dateien hinzufügen …* wählst du Musik in der Dateien-App (FLAC, MP3, AAC, ALAC, WAV, AIFF). HomeTune kopiert nichts, sondern merkt sich per Bookmark, wo die Dateien liegen, liest die Tags auf dem Gerät und spielt sie in der gewählten Stimmung – offline, mit Warteliste und Sperrbildschirm. Noch einfacher: Musik in der Dateien-App nach *Auf meinem iPhone › HomeTune* verschieben, sie erscheint automatisch. Eigene Playlists gibt es auch ohne Server, .m3u/.m3u8/.pls lassen sich importieren.
